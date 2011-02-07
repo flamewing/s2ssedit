@@ -42,11 +42,6 @@ size_t sslevels::size() const
 	return sz;
 }
 
-size_t sslevels::count() const
-{
-	return segments.size();
-}
-
 void sslevels::print() const
 {
 	for (std::vector<sssegments>::const_iterator it = segments.begin();

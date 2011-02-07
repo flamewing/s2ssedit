@@ -25,20 +25,20 @@
 
 void sssegments::read(std::istream& in, std::istream& lay)
 {
-	geometry = Read1(lay);
-	flip = (geometry & 0x80) != 0;
-	geometry &= 0x7f;
+	unsigned char geom = Read1(lay);
+	flip = (geom & 0x80) != 0;
+	geometry = (SegmentGeometry)(geom & 0x7f);
 
 	while (in.good())
 	{
 		size_t type = Read1(in), pos, angle;
 		switch (type)
 		{
-			case 0xfd:			// Emerald
-			case 0xfc:			// Checkpoint
-			case 0xfe:			// Message
-			case 0xff:			// End of segment
-				terminator = type;
+			case eChaosEmerald:			// Emerald
+			case eCheckpoint:			// Checkpoint
+			case eRingsMessage:			// Message
+			case eNormalSegment:		// End of segment
+				terminator = (SegmentTypes)type;
 				return;
 			default:			// Ring, bomb
 				pos = (type & 0x3f);
@@ -100,7 +100,7 @@ void sssegments::print() const
 	for (size_t i = 0; i < 0x40; i++)
 	{
 		std::memset(buf + 1, ' ', sizeof(buf)-3);
-		std::map<size_t,std::map<size_t,size_t> >::const_iterator it0 = objects.find(i);
+		segobjs::const_iterator it0 = objects.find(i);
 		if (it0 != objects.end())
 		{
 			std::map<size_t,size_t> const& posobjs = it0->second;
@@ -125,7 +125,7 @@ void sssegments::print() const
 
 void sssegments::write(std::ostream& out, std::ostream& lay) const
 {
-	for (std::map<size_t,std::map<size_t,size_t> >::const_iterator it = objects.begin();
+	for (segobjs::const_iterator it = objects.begin();
 	     it != objects.end(); ++it)
 	{
 		std::map<size_t,size_t> const& posobjs = it->second;

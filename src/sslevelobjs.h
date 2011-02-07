@@ -31,12 +31,47 @@ class sslevels
 protected:
 	std::vector<sssegments> segments;
 public:
+	size_t size() const;
+
+	void print() const;
+
 	void read(std::istream& in, std::istream& lay, size_t const term,
 	          size_t const term2);
-	size_t size() const;
-	size_t count() const;
-	void print() const;
 	void write(std::ostream& out, std::ostream& lay) const;
+
+
+	size_t num_segments() const
+	{	return segments.size();	}
+	sssegments *get_segment(size_t s)
+	{	return &(segments[s]);	}
+	sssegments *insert(sssegments const& lvl, size_t s)
+	{	return &*(segments.insert(segments.begin() + s, lvl));	}
+	sssegments *append(sssegments const& lvl)
+	{
+		segments.push_back(lvl);
+		return &segments.back();
+	}
+	sssegments *remove(size_t s)
+	{
+		std::vector<sssegments>::iterator it = segments.erase(segments.begin() + s);
+		if (it == segments.end())
+			return &segments.back();
+		return &*it;
+	}
+	sssegments *move_left(size_t s)
+	{
+		if (s == 0)
+			return &segments.front();
+		std::swap(segments[s - 1], segments[s]);
+		return &segments[s - 1];
+	}
+	sssegments *move_right(size_t s)
+	{
+		if (s >= segments.size() - 1)
+			return &segments.back();
+		std::swap(segments[s], segments[s + 1]);
+		return &segments[s + 1];
+	}
 };
 
 #endif // _SSLEVELOBJS_H_

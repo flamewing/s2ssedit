@@ -20,22 +20,76 @@
 #ifndef _SSOBJFILE_H_
 #define _SSOBJFILE_H_
 
+#include <algorithm>
 #include <vector>
 #include <istream>
 #include <ostream>
+#include <string>
 
 #include "sslevelobjs.h"
 
+#define SS_OBJECT_FILE "Special stage object location lists (Kosinski compression).bin"
+#define SS_LAYOUT_FILE "Special stage level layouts (Nemesis compression).bin"
+
 class ssobj_file
 {
+private:
+	ssobj_file();
+	void read_internal(std::istream& objfile, std::istream& layfile);
+	void write_internal(std::ostream& objfile, std::ostream& layfile) const;
 protected:
 	std::vector<sslevels> stages;
+	std::string layoutfile, objectfile;
+	bool error;
 public:
-	void read(std::istream& in, std::istream& lay);
+	ssobj_file(std::string dir);
 	size_t size() const;
+	
 	void print() const;
 	void print(size_t i) const;
-	void write(std::ostream& out, std::ostream& lay) const;
+
+	void read();
+	void read_backup(int i);
+	void read_snapshot(int i);
+	void write() const;
+	void write_backup() const;
+	void write_snapshot(int i) const;
+
+	size_t num_stages() const
+	{	return stages.size();	}
+	sslevels *get_stage(size_t s)
+	{	return &(stages[s]);	}
+	sslevels *insert(sslevels const& lvl, size_t s)
+	{	return &*(stages.insert(stages.begin() + s, lvl));	}
+	sslevels *append(sslevels const& lvl)
+	{
+		stages.push_back(lvl);
+		return &stages.back();
+	}
+	sslevels *remove(size_t s)
+	{
+		std::vector<sslevels>::iterator it = stages.erase(stages.begin() + s);
+		if (it == stages.end())
+			return &stages.back();
+		return &*it;
+	}
+	sslevels *move_left(size_t s)
+	{
+		if (s == 0)
+			return &stages.front();
+		std::swap(stages[s - 1], stages[s]);
+		return &stages[s - 1];
+	}
+	sslevels *move_right(size_t s)
+	{
+		if (s >= stages.size() - 1)
+			return &stages.back();
+		std::swap(stages[s], stages[s + 1]);
+		return &stages[s + 1];
+	}
+
+	bool good() const
+	{	return !error;	}
 };
 
 #endif // _SSOBJFILE_H_

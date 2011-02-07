@@ -20,69 +20,76 @@
 #ifndef _SSEDITOR_H_
 #define _SSEDITOR_H_
 
+class ssobj_file;
+
 class sseditor
 {
 private:
 	static sseditor *instance;
+	bool update_in_progress;
+	bool dragging, drop_enabled, can_drag;
+
+	// State variables.
+	ssobj_file *specialstages;
+	int currstage, currsegment;
+	int first_line;
+	int draw_width, draw_height;
+	int mouse_x, mouse_y;
+	enum EditModes
+	{
+		eSelectMode = 0,
+		eInsertRingMode,
+		eInsertBombMode,
+		eDeleteMode,
+		eNumModes
+	} mode;
+	int selseg, selx, sely, seltype;
+	int hotseg, hotx, hoty, hottype;
+
+	// GUI variables.
 	Gtk::Window *main_win;
 	Gtk::Main *kit;
 	Gtk::AboutDialog *aboutdlg;
 	Gtk::FileChooserDialog *filedlg;
 	Glib::RefPtr<Gtk::Builder> builder;
+	Glib::RefPtr<Gdk::Pixbuf> ringimg, bombimg;
 
 	Glib::RefPtr<Gtk::FileFilter> pfilefilter;
+	Gtk::DrawingArea *pspecialstageobjs;
+	Gtk::Ruler *phruler;
 	// Labels
-	Gtk::Label *plabelcurrentstage;
-	Gtk::Label *plabeltotalstages;
-	Gtk::Label *plabelcurrentsegment;
-	Gtk::Label *plabeltotalsegments;
+	Gtk::Label *plabelcurrentstage, *plabeltotalstages, *plabelcurrentsegment, *plabeltotalsegments;
 	// Scrollbar
 	Gtk::VScrollbar *pvscrollbar;
 	// Main toolbar
-	Gtk::ToolButton *popenfilebutton;
-	Gtk::ToolButton *psavefilebutton;
-	Gtk::ToolButton *prevertfilebutton;
-	Gtk::RadioToolButton *pselectmodebutton;
-	Gtk::RadioToolButton *pinsertmodebutton;
-	Gtk::RadioToolButton *pdeletemodebutton;
-	Gtk::ToolButton *paboutbutton;
-	Gtk::ToolButton *pquitbutton;
+	Gtk::ToolButton *popenfilebutton, *psavefilebutton, *prevertfilebutton, *paboutbutton, *pquitbutton;
+	Gtk::RadioToolButton *pselectmodebutton, *pinsertringbutton, *pinsertbombbutton,
+	    *pdeletemodebutton;
 	// Special stage toolbar
-	Gtk::ToolButton *pfirst_stage_button;
-	Gtk::ToolButton *pprevious_stage_button;
-	Gtk::ToolButton *pnext_stage_button;
-	Gtk::ToolButton *plast_stage_button;
-	Gtk::ToolButton *pinsert_stage_before_button;
-	Gtk::ToolButton *pappend_stage_button;
-	Gtk::ToolButton *pdelete_stage_button;
-	Gtk::ToolButton *pswap_stage_prev_button;
-	Gtk::ToolButton *pswap_stage_next_button;
+	Gtk::Toolbar	*pstage_toolbar;
+	Gtk::ToolButton *pfirst_stage_button, *pprevious_stage_button, *pnext_stage_button,
+		*plast_stage_button, *pinsert_stage_before_button, *pappend_stage_button,
+		*pdelete_stage_button, *pswap_stage_prev_button, *pswap_stage_next_button;
 	// Segment toolbar
-	Gtk::ToolButton *pfirst_segment_button;
-	Gtk::ToolButton *pprevious_segment_button;
-	Gtk::ToolButton *pnext_segment_button;
-	Gtk::ToolButton *plast_segment_button;
-	Gtk::ToolButton *pinsert_segment_before_button;
-	Gtk::ToolButton *pappend_segment_button;
-	Gtk::ToolButton *pdelete_segment_button;
-	Gtk::ToolButton *pswap_segment_prev_button;
-	Gtk::ToolButton *pswap_segment_next_button;
+	Gtk::Toolbar	*psegment_toolbar;
+	Gtk::ToolButton *pfirst_segment_button, *pprevious_segment_button, *pnext_segment_button,
+		*plast_segment_button, *pinsert_segment_before_button, *pappend_segment_button,
+		*pdelete_segment_button, *pswap_segment_prev_button, *pswap_segment_next_button;
 	// Segment flags
-	Gtk::RadioButton *pnormal_segment;
-	Gtk::RadioButton *pring_message;
-	Gtk::RadioButton *pcheckpoint;
-	Gtk::RadioButton *pchaos_emerald;
-	Gtk::RadioButton *psegment_turnthenrise;
-	Gtk::RadioButton *psegment_turnthendrop;
-	Gtk::RadioButton *psegment_turnthenstraight;
-	Gtk::RadioButton *psegment_straight;
-	Gtk::RadioButton *psegment_straightthenturn;
-	Gtk::RadioButton *psegment_right;
-	Gtk::RadioButton *psegment_left;
-
+	Gtk::Expander	*psegment_expander;
+	Gtk::RadioButton *pnormal_segment, *pring_message, *pcheckpoint, *pchaos_emerald,
+		*psegment_turnthenrise, *psegment_turnthendrop,* psegment_turnthenstraight,
+		*psegment_straight, *psegment_straightthenturn, *psegment_right, *psegment_left;
+	// Object flags
+	Gtk::Expander	*pobject_expander;
+	Gtk::Button		*pmoveup, *pmovedown, *pmoveleft, *pmoveright;
+	Gtk::RadioButton *pringtype, *pbombtype;
+	
 	sseditor();
 	sseditor(sseditor const& other);
 	sseditor(int argc, char *argv[], char const *uifile);
+
+	bool move_object(int dx, int dy);
 public:
 	static sseditor * create_instance(int argc, char *argv[], char const *uifile)
 	{
@@ -91,20 +98,35 @@ public:
 		return instance;
 	}
 	static sseditor * get_instance()
-	{
-		return instance;
-	}
+	{	return instance;	}
 	void run();
 
+	bool on_specialstageobjs_configure_event(GdkEventConfigure *event);
+	void on_specialstageobjs_drag_data_received(Glib::RefPtr<Gdk::DragContext> const& context,
+	                                            int x, int y,
+	                                            Gtk::SelectionData const& selection_data,
+	                                            guint info, guint time);
+	bool on_specialstageobjs_expose_event(GdkEventExpose *event);
+	bool on_specialstageobjs_key_press_event(GdkEventKey *event);
+	bool on_specialstageobjs_button_press_event(GdkEventButton *event);
+	bool on_specialstageobjs_button_release_event(GdkEventButton *event);
+	bool on_specialstageobjs_scroll_event(GdkEventScroll *event);
+	void on_specialstageobjs_drag_begin(Glib::RefPtr<Gdk::DragContext> const& targets);
+	bool on_specialstageobjs_motion_notify_event(GdkEventMotion *event);
+	void on_specialstageobjs_drag_data_get(Glib::RefPtr<Gdk::DragContext> const& targets,
+	                                       Gtk::SelectionData& selection_data,
+	                                       guint info, guint time);
+	bool on_specialstageobjs_selection_clear_event(GdkEventSelection *event);
 	// Scrollbar
-	void on_vscrollbar1_value_changed();
+	void on_vscrollbar_value_changed();
 	// Main toolbar
 	void on_filedialog_response(int response_id);
 	void on_openfilebutton_clicked();
 	void on_savefilebutton_clicked();
 	void on_revertfilebutton_clicked();
 	void on_selectmodebutton_toggled();
-	void on_insertmodebutton_toggled();
+	void on_insertringbutton_toggled();
+	void on_insertbombbutton_toggled();
 	void on_deletemodebutton_toggled();
 	void on_aboutdialog_response(int response_id);
 	void on_aboutbutton_clicked();
@@ -141,8 +163,15 @@ public:
 	void on_segment_straightthenturn_toggled();
 	void on_segment_right_toggled();
 	void on_segment_left_toggled();
+	// Object flags
+	void on_moveup_clicked();
+	void on_movedown_clicked();
+	void on_moveleft_clicked();
+	void on_moveright_clicked();
+	void on_ringtype_toggled();
+	void on_bombtype_toggled();
 protected:
-
+	void update();
 };
 
 #endif // _SSEDITOR_H_

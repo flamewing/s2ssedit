@@ -26,15 +26,103 @@
 
 class sssegments
 {
-protected:
-	//  pos        angle  type
-	std::map<size_t,std::map<size_t,size_t> > objects;
-	bool flip;
-	unsigned char terminator, geometry;
 public:
-	void read(std::istream& in, std::istream& lay);
+	enum SegmentTypes
+	{
+		eNormalSegment = 0xff,
+		eRingsMessage = 0xfc,
+		eCheckpoint = 0xfe,
+		eChaosEmerald = 0xfd
+	};
+	enum SegmentGeometry
+	{
+		eTurnThenRise = 0,
+		eTurnThenDrop,
+		eTurnThenStraight,
+		eStraight,
+		eStraightThenTurn
+	};
+protected:
+	//               pos             angle  type
+	typedef std::map<size_t,std::map<size_t,size_t> > segobjs;
+	segobjs objects;
+	bool flip;
+	SegmentTypes terminator;
+	SegmentGeometry geometry;
+public:
+	sssegments() : flip(false), terminator(eNormalSegment), geometry(eStraight) {		}
 	size_t size() const;
+
 	void print() const;
+
+	SegmentTypes get_type() const
+	{	return terminator;	}
+	SegmentGeometry get_geometry() const
+	{	return geometry;	}
+	bool get_direction() const
+	{	return flip;	}
+	void set_type(SegmentTypes t)
+	{	terminator = t;	}
+	void set_geometry(SegmentGeometry g)
+	{	geometry = g;	}
+	void set_direction(bool tf)
+	{	flip = tf;	}
+	std::map<size_t,size_t> const& get_row(size_t row)
+	{	return objects[row];	}
+	bool exists(size_t row, size_t angle, size_t& type) const
+	{
+		segobjs::const_iterator it = objects.find(row);
+		if (it == objects.end())
+			return false;
+
+		std::map<size_t,size_t> const& t = it->second;
+		std::map<size_t,size_t>::const_iterator it2 = t.find(angle);
+		if (it2 == t.end())
+			return false;
+
+		type = it2->second;
+		return true;
+	}
+	void update(size_t row, size_t angle, size_t type, bool insert)
+	{
+		segobjs::iterator it = objects.find(row);
+		if (it == objects.end())
+		{
+			if (!insert)
+				return;
+			std::map<size_t,size_t> t;
+			t[angle] = type;
+			objects[row] = t;
+		}
+		else
+		{
+			std::map<size_t,size_t>& t = it->second;
+			std::map<size_t,size_t>::iterator it2 = t.find(angle);
+			if (it2 == t.end())
+			{
+				if (!insert)
+					return;
+				t[angle] = type;
+			}
+			else
+				it2->second = size_t(type);
+		}
+	}
+	void remove(size_t row, size_t angle)
+	{
+		segobjs::iterator it = objects.find(row);
+		if (it == objects.end())
+			return;
+
+		std::map<size_t,size_t>& t = it->second;
+		std::map<size_t,size_t>::iterator it2 = t.find(angle);
+		if (it2 == t.end())
+			return;
+
+		t.erase(it2);
+	}
+
+	void read(std::istream& in, std::istream& lay);
 	void write(std::ostream& out, std::ostream& lay) const;
 };
 

@@ -25,7 +25,7 @@
 #include <fstream>
 
 /* For testing propose use the local (not installed) ui file */
-#define DEBUG 1
+//#define DEBUG 1
 #ifdef DEBUG
 #define UI_FILE "src/s2ssedit.ui"
 #else
@@ -34,16 +34,15 @@
 
 int main(int argc, char *argv[])
 {
-	sseditor *Editor;
 	try
 	{
-		Editor = sseditor::create_instance(argc, argv, UI_FILE);
+		sseditor *Editor = sseditor::create_instance(argc, argv, UI_FILE);
+		Editor->run();
 	}
 	catch (const Glib::FileError & ex)
 	{
 		std::cerr << ex.what() << std::endl;
 		return 1;
 	}
-	Editor->run();
 	return 0;
 }
