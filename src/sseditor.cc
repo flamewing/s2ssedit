@@ -33,12 +33,17 @@
 #include "bigendian_io.h"
 
 //#define DEBUG 1
-#ifdef DEBUG
-#define RINGFILE "src/ring.png"
-#define BOMBFILE "src/bomb.png"
+#ifdef WIN32
+#	define RINGFILE "./ring.png"
+#	define BOMBFILE "./bomb.png"
 #else
-#define RINGFILE PACKAGE_DATA_DIR"/s2ssedit/ui/ring.png"
-#define BOMBFILE PACKAGE_DATA_DIR"/s2ssedit/ui/bomb.png"
+#	ifdef DEBUG
+#		define RINGFILE "src/ring.png"
+#		define BOMBFILE "src/bomb.png"
+#	else
+#		define RINGFILE PACKAGE_DATA_DIR"/s2ssedit/ui/ring.png"
+#		define BOMBFILE PACKAGE_DATA_DIR"/s2ssedit/ui/bomb.png"
+#	endif
 #endif
 
 #define IMAGE_SIZE 16

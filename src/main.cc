@@ -26,10 +26,14 @@
 
 /* For testing propose use the local (not installed) ui file */
 //#define DEBUG 1
-#ifdef DEBUG
-#define UI_FILE "src/s2ssedit.ui"
+#ifdef WIN32
+#	define UI_FILE "./s2ssedit.ui"
 #else
-#define UI_FILE PACKAGE_DATA_DIR"/s2ssedit/ui/s2ssedit.ui"
+#	ifdef DEBUG
+#		define UI_FILE "src/s2ssedit.ui"
+#	else
+#		define UI_FILE PACKAGE_DATA_DIR"/s2ssedit/ui/s2ssedit.ui"
+#	endif
 #endif
 
 int main(int argc, char *argv[])
