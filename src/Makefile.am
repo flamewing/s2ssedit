@@ -40,7 +40,10 @@ EXTRA_DIST = $(ui_DATA) \
 	bomb.png\
 	ring.png\
 	ring.svg\
-	bomb.svg
+	bomb.svg\
+	bomb-22.png\
+	ring-22.png \
+	s2ssedit.png
 
 SUBDIRS = lib
 
