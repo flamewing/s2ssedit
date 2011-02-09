@@ -224,7 +224,7 @@
                 <child>
                   <object class="GtkImage" id="image1">
                     <property name="visible">True</property>
-                    <property name="icon_name">zoom-best-fit</property>
+                    <property name="stock">gtk-zoom-fit</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -342,7 +342,7 @@
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Insert new Special Stage</property>
                                     <property name="use_underline">True</property>
-                                    <property name="stock_id">gtk-sort-ascending</property>
+                                    <property name="stock_id">gtk-index</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -581,7 +581,7 @@
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Insert new segment</property>
                                     <property name="use_underline">True</property>
-                                    <property name="stock_id">gtk-sort-ascending</property>
+                                    <property name="stock_id">gtk-index</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -1615,10 +1615,10 @@ Library.
   <object class="GtkFileFilter" id="filefilter"/>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
-    <property name="pixbuf">bomb.svg</property>
+    <property name="pixbuf">bomb-22.png</property>
   </object>
   <object class="GtkImage" id="image3">
     <property name="visible">True</property>
-    <property name="pixbuf">ring.svg</property>
+    <property name="pixbuf">ring-22.png</property>
   </object>
 </interface>
