@@ -32,7 +32,7 @@
 #include "ssobjfile.h"
 #include "bigendian_io.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 #ifdef WIN32
 #	define RINGFILE "./ring.png"
 #	define BOMBFILE "./bomb.png"
@@ -882,7 +882,8 @@ bool sseditor::move_object(int dx, int dy)
 		currseg->remove(sely, selx);
 		currseg->update(newy, newx, seltype, true);
 
-		int pos = (newy * IMAGE_SIZE), loc = pvscrollbar->get_value();
+		int pos = (newy * IMAGE_SIZE + selseg * SEGMENT_PIXELS),
+		    loc = pvscrollbar->get_value();
 		if (pos < loc || pos >= loc + draw_height)
 			pvscrollbar->set_value(pos);
 
@@ -945,8 +946,7 @@ bool sseditor::on_specialstageobjs_configure_event(GdkEventConfigure *event)
 		drop_enabled = true;
 		std::vector<Gtk::TargetEntry> vec;
 		vec.push_back(Gtk::TargetEntry("SpecialStageObjects", Gtk::TargetFlags(0), 1));
-		pspecialstageobjs->drag_dest_set(vec, Gtk::DEST_DEFAULT_ALL,
-		                                 Gdk::ACTION_COPY|Gdk::ACTION_MOVE);
+		pspecialstageobjs->drag_dest_set(vec, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_MOVE);
 		pspecialstageobjs->signal_drag_data_received().connect(
 			sigc::mem_fun(this, &sseditor::on_specialstageobjs_drag_data_received));
 	}
@@ -1448,8 +1448,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion *event)
 	std::vector<Gtk::TargetEntry> vec;
 	vec.push_back(Gtk::TargetEntry("SpecialStageObjects", Gtk::TargetFlags(0), 1));
 	Glib::RefPtr<Gtk::TargetList> lst = Gtk::TargetList::create(vec);
-	pspecialstageobjs->drag_begin(lst, Gdk::ACTION_COPY|Gdk::ACTION_MOVE,
-	                              1, (GdkEvent *)event);
+	pspecialstageobjs->drag_begin(lst, Gdk::ACTION_MOVE, 1, (GdkEvent *)event);
 	return true;
 }
 

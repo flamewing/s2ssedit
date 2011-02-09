@@ -4,6 +4,7 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="main_window">
     <property name="title" translatable="yes" comments="'Sonic' is a character name and should not be translated">Sonic 2 Special Stage Editor</property>
+    <property name="icon">s2ssedit.png</property>
     <signal name="destroy_event" handler="gtk_main_quit"/>
     <child>
       <object class="GtkVBox" id="vbox1">
