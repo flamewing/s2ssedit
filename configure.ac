@@ -15,6 +15,7 @@ AM_MAINTAINER_MODE
 dnl ***************************************************************************
 dnl Host system settings
 dnl ***************************************************************************
+EXTRA_FLAGS=""
 ICON_FILE=""
 # determine windowing system from 'host'
 AC_MSG_CHECKING([windowing system])
@@ -25,7 +26,8 @@ case "$host_os" in
 		;;
 	mingw32* )
 		WINDOWING_SYSTEM="-DWIN32"
-		ICON_FILE="s2ssedit.ico.o"
+		ICON_FILE="s2sseditico.o"
+		EXTRA_FLAGS=" -lmingw32 -mwindows "
 		AC_MSG_RESULT([Win32 (mingw32)])
 		;;
 	*)
@@ -65,6 +67,7 @@ AM_PROG_LIBTOOL
 
 PKG_CHECK_MODULES(S2SSEDIT, [gtkmm-2.4 >= 2.12    ])
 
+AC_SUBST(EXTRA_FLAGS)
 AC_SUBST(ICON_FILE)
 
 AC_OUTPUT([

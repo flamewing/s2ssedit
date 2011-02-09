@@ -30,16 +30,16 @@ s2ssedit_SOURCES = \
 	ssobjfile.cc   
 
 s2ssedit_CXXFLAGS = \
-	-I$(srcdir)/lib
+	-I$(srcdir)/lib $(EXTRA_FLAGS)
 
 s2ssedit_LDFLAGS = -lkosinski -lnemesis
 
 if BUILD_ICON
-	s2ssedit_DEPENDENCIES = $(builddir)/$(ICON_FILE)
-	s2ssedit_LDADD = $(S2SSEDIT_LIBS) $(builddir)/$(ICON_FILE)
+s2ssedit_DEPENDENCIES = $(builddir)/$(ICON_FILE)
+s2ssedit_LDADD = $(S2SSEDIT_LIBS) $(builddir)/$(ICON_FILE)
 else !BUILD_ICON
-	s2ssedit_DEPENDENCIES = $(ICON_FILE)
-	s2ssedit_LDADD = $(S2SSEDIT_LIBS)
+s2ssedit_DEPENDENCIES = $(ICON_FILE)
+s2ssedit_LDADD = $(S2SSEDIT_LIBS)
 endif
 
 EXTRA_DIST = $(ui_DATA) \
@@ -55,8 +55,8 @@ SUBDIRS = lib
 
 AM_CXXFLAGS = 
 
-$(builddir)/s2ssedit.ico.o: $(srcdir)/ssedit.rc $(srcdir)/ssedit.ico
-	windres $(srcdir)/ssedit.rc $(builddir)/s2ssedit.ico.o
+$(builddir)/s2sseditico.o: $(srcdir)/ssedit.rc $(srcdir)/s2ssedit.ico
+	windres --include-dir $(srcdir) $(srcdir)/ssedit.rc $(builddir)/s2sseditico.o
 
 # Remove ui directory on uninstall
 uninstall-local:
