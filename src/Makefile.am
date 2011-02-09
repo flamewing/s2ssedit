@@ -34,7 +34,13 @@ s2ssedit_CXXFLAGS = \
 
 s2ssedit_LDFLAGS = -lkosinski -lnemesis
 
-s2ssedit_LDADD = $(S2SSEDIT_LIBS)
+if BUILD_ICON
+	s2ssedit_DEPENDENCIES = $(builddir)/$(ICON_FILE)
+	s2ssedit_LDADD = $(S2SSEDIT_LIBS) $(builddir)/$(ICON_FILE)
+else !BUILD_ICON
+	s2ssedit_DEPENDENCIES = $(ICON_FILE)
+	s2ssedit_LDADD = $(S2SSEDIT_LIBS)
+endif
 
 EXTRA_DIST = $(ui_DATA) \
 	bomb.png\
@@ -48,6 +54,9 @@ EXTRA_DIST = $(ui_DATA) \
 SUBDIRS = lib
 
 AM_CXXFLAGS = 
+
+$(builddir)/s2ssedit.ico.o: $(srcdir)/ssedit.rc $(srcdir)/ssedit.ico
+	windres $(srcdir)/ssedit.rc $(builddir)/s2ssedit.ico.o
 
 # Remove ui directory on uninstall
 uninstall-local:
