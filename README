@@ -15,10 +15,12 @@ In Select mode:
 	
 In Ring insertion mode:
 	Left click: Add new ring.
+	Ctrl+Left click: Add new ring constrained in position.
 	Right click: Delete highlighted object.
 
 In Bomb insertion mode:
 	Left click: Add new bomb.
+	Ctrl+Left click: Add new bomb constrained in position.
 	Right click: Delete highlighted object.
 
 In Delete mode:

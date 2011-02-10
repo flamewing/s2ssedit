@@ -1349,7 +1349,7 @@
     <property name="transient_for">main_window</property>
     <property name="has_separator">True</property>
     <property name="program_name">Sonic 2 Special Stage Editor</property>
-    <property name="version">0.01</property>
+    <property name="version">0.01.1</property>
     <property name="copyright" translatable="yes">Copyright © 2011 by Flamewing</property>
     <property name="comments" translatable="yes" comments="&quot;Sonic the Hedgehog 2&quot; is a game name and should not be translated.">This program allows you to view and edit the position of objects (rings, bombs) and segments of a Special Stage track from Sonic the Hedgehog 2.
 You can also use this program to create brand new Special Stages.</property>

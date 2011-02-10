@@ -390,7 +390,7 @@ void sseditor::update()
 			}
 			else
 			{
-				pvscrollbar->set_range(0.0, SEGMENT_PIXELS * numsegments);
+				pvscrollbar->set_range(0.0, SEGMENT_PIXELS * numsegments - draw_height);
 				pvscrollbar->set_increments(IMAGE_SIZE * 4, IMAGE_SIZE * 2 * numsegments);
 
 				psegment_expander->set_sensitive(true);
@@ -997,6 +997,11 @@ void sseditor::on_specialstageobjs_drag_data_received(Glib::RefPtr<Gdk::DragCont
 	}
 }
 
+static inline int angle_to_draw(int angle)
+{
+	return ((angle + 0x40) & 0xff) * 2 + 4;
+}
+
 bool sseditor::on_specialstageobjs_expose_event(GdkEventExpose *event)
 {
 	Glib::RefPtr<Gdk::Window> window = pspecialstageobjs->get_window();
@@ -1006,9 +1011,8 @@ bool sseditor::on_specialstageobjs_expose_event(GdkEventExpose *event)
 	
 	Glib::RefPtr<Gdk::GC> gc = pspecialstageobjs->get_style()->get_black_gc();
 	Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
-    cr->set_source_rgba(0.337, 0.612, 0.117, 0.9);   // green
+    cr->set_source_rgba(0.0, 180.0 / 256.0, 216.0 / 256.0, 0.9);   // green
     cr->paint();
-	
 	if (!specialstages)
 		return true;
 
@@ -1021,6 +1025,34 @@ bool sseditor::on_specialstageobjs_expose_event(GdkEventExpose *event)
 	int last_seg = -1;
 	hotseg = -1;
 	hotx = hoty = hottype = 0;
+
+	cr->set_source_rgb(36.0 / 256.0, 108.0 / 256.0, 144.0 / 256.0);
+	cr->move_to(0.0, 0.0);
+	cr->line_to(angle_to_draw(0x00), 0.0);
+	cr->line_to(angle_to_draw(0x00), draw_height);
+	cr->line_to(0.0, draw_height);
+	cr->line_to(0.0, 0.0);
+	cr->fill();
+	cr->move_to(angle_to_draw(0x80), 0.0);
+	cr->line_to(draw_width, 0.0);
+	cr->line_to(draw_width, draw_height);
+	cr->line_to(angle_to_draw(0x80), draw_height);
+	cr->line_to(angle_to_draw(0x80), 0.0);
+	cr->fill();
+	
+	cr->set_line_width(8.0);
+	cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
+	cr->move_to(angle_to_draw(0x00 - 2), 0.0);
+	cr->line_to(angle_to_draw(0x00 - 2), draw_height);
+	cr->move_to(angle_to_draw(0x80 + 2), 0.0);
+	cr->line_to(angle_to_draw(0x80 + 2), draw_height);
+	cr->stroke();
+	cr->set_line_width(16.0);
+	cr->move_to(angle_to_draw(0x30 - 4), 0.0);
+	cr->line_to(angle_to_draw(0x30 - 4), draw_height);
+	cr->move_to(angle_to_draw(0x50 + 4), 0.0);
+	cr->line_to(angle_to_draw(0x50 + 4), draw_height);
+	cr->stroke();
 
 	for (int i = start; i <= end; i++)
 	{
@@ -1038,14 +1070,109 @@ bool sseditor::on_specialstageobjs_expose_event(GdkEventExpose *event)
 			cr->line_to(draw_width, ty);
 			cr->stroke();
 		}
+
+		if (((i % SEGMENT_SIZE) - 7) % 4 == 0)
+		{
+			cr->set_line_width(IMAGE_SIZE / 2);
+			cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
+			// Horizontal beams.
+			int ty = i * IMAGE_SIZE - pvscrollbar->get_value();
+			cr->move_to(angle_to_draw(0x00), ty);
+			cr->line_to(angle_to_draw(0x80), ty);
+			cr->stroke();
+			// Terminating balls in high yellow beams.
+			cr->set_source_rgb(180.0 / 256.0, 108.0 / 256.0, 36.0 / 256.0);
+			cr->arc(angle_to_draw(0x00 - 5), ty - 3 * IMAGE_SIZE - IMAGE_SIZE / 8,
+			        IMAGE_SIZE / 4, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x00 - 5), ty - IMAGE_SIZE + IMAGE_SIZE / 8,
+			        IMAGE_SIZE / 4, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x80 + 5), ty - 3 * IMAGE_SIZE - IMAGE_SIZE / 8,
+			        IMAGE_SIZE / 4, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x80 + 5), ty - IMAGE_SIZE + IMAGE_SIZE / 8,
+			        IMAGE_SIZE / 4, 0.0, 2.0 * M_PI);
+			cr->fill();
+			cr->set_source_rgb(216.0 / 256.0, 144.0 / 256.0, 36.0 / 256.00);
+			cr->arc(angle_to_draw(0x00 - 5), ty - 3 * IMAGE_SIZE - IMAGE_SIZE / 8 + 0.5,
+			        IMAGE_SIZE / 4 - 1, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x00 - 5), ty - IMAGE_SIZE + IMAGE_SIZE / 8 - 0.5,
+			        IMAGE_SIZE / 4 - 1, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x80 + 5), ty - 3 * IMAGE_SIZE - IMAGE_SIZE / 8 + 0.5,
+			        IMAGE_SIZE / 4 - 1, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x80 + 5), ty - IMAGE_SIZE + IMAGE_SIZE / 8 - 0.5,
+			        IMAGE_SIZE / 4 - 1, 0.0, 2.0 * M_PI);
+			cr->fill();
+				cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
+			cr->arc(angle_to_draw(0x00 - 5), ty - 3 * IMAGE_SIZE - IMAGE_SIZE / 8 + 1.5,
+			        IMAGE_SIZE / 4 - 2, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x00 - 5), ty - IMAGE_SIZE + IMAGE_SIZE / 8 - 1.5,
+			        IMAGE_SIZE / 4 - 2, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x80 + 5), ty - 3 * IMAGE_SIZE - IMAGE_SIZE / 8 + 1.5,
+			        IMAGE_SIZE / 4 - 2, 0.0, 2.0 * M_PI);
+			cr->begin_new_sub_path();
+			cr->arc(angle_to_draw(0x80 + 5), ty - IMAGE_SIZE + IMAGE_SIZE / 8 - 1.5,
+			        IMAGE_SIZE / 4 - 2, 0.0, 2.0 * M_PI);
+			cr->fill();
+			// Horizontal balls.
+			for (double angle = 0.0; angle < 48.0; angle += 64.0 / 3.0)
+			{
+				cr->set_source_rgb(180.0 / 256.0, 108.0 / 256.0, 36.0 / 256.0);
+				cr->arc(angle_to_draw(angle + 0x80) + IMAGE_SIZE / 2, ty,
+					    IMAGE_SIZE / 2, 0.0, 2.0 * M_PI);
+				cr->begin_new_sub_path();
+				cr->arc(angle_to_draw(0x00 - angle) - IMAGE_SIZE / 2, ty,
+					    IMAGE_SIZE / 2, 0.0, 2.0 * M_PI);
+				cr->fill();
+				cr->set_source_rgb(216.0 / 256.0, 144.0 / 256.0, 36.0 / 256.00);
+				cr->arc(angle_to_draw(angle + 0x80) + IMAGE_SIZE / 2, ty - 1.5,
+					    IMAGE_SIZE / 2 - 2, 0.0, 2.0 * M_PI);
+				cr->begin_new_sub_path();
+				cr->arc(angle_to_draw(0x00 - angle) - IMAGE_SIZE / 2, ty - 1.5,
+					    IMAGE_SIZE / 2 - 2, 0.0, 2.0 * M_PI);
+				cr->fill();
+				cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
+				cr->arc(angle_to_draw(angle + 0x80) + IMAGE_SIZE / 2, ty - 3.0,
+					    IMAGE_SIZE / 2 - 4, 0.0, 2.0 * M_PI);
+				cr->begin_new_sub_path();
+				cr->arc(angle_to_draw(0x00 - angle) - IMAGE_SIZE / 2, ty - 3.0,
+					    IMAGE_SIZE / 2 - 4, 0.0, 2.0 * M_PI);
+				cr->fill();
+			}
+			// Yellow beams.
+			cr->set_line_width(IMAGE_SIZE / 4);
+			cr->set_source_rgb(1.0, 1.0, 0.0);
+			cr->move_to(angle_to_draw(0x30 - 4), ty - IMAGE_SIZE);
+			cr->line_to(angle_to_draw(0x30 - 4), ty + IMAGE_SIZE);
+			cr->move_to(angle_to_draw(0x50 + 4), ty - IMAGE_SIZE);
+			cr->line_to(angle_to_draw(0x50 + 4), ty + IMAGE_SIZE);
+			cr->move_to(angle_to_draw(0x00 - 5), ty - 3 * IMAGE_SIZE);
+			cr->line_to(angle_to_draw(0x00 - 5), ty - IMAGE_SIZE);
+			cr->move_to(angle_to_draw(0x80 + 5), ty - 3 * IMAGE_SIZE);
+			cr->line_to(angle_to_draw(0x80 + 5), ty - IMAGE_SIZE);
+			cr->stroke();
+		}
+	}
 		
+	for (int i = start; i <= end; i++)
+	{
+		size_t seg = i / SEGMENT_SIZE;
+		if (seg >= numsegments)
+			break;
+
 		sssegments *currseg = currlvl->get_segment(seg);
 		std::map<size_t,size_t> const& row = currseg->get_row(i % SEGMENT_SIZE);
 		for (std::map<size_t,size_t>::const_iterator it = row.begin();
 		     it != row.end(); ++it)
 		{
 			size_t pos = (i * IMAGE_SIZE) - pvscrollbar->get_value(),
-			       angle = ((it->first + 0x40) & 0xff) * 2 + 4;
+			       angle = angle_to_draw(it->first);
 
 			Glib::RefPtr<Gdk::Pixbuf> image = (it->second == 0x40) ? bombimg : ringimg;
 
@@ -1223,7 +1350,7 @@ bool sseditor::on_specialstageobjs_key_press_event(GdkEventKey *event)
 		{
 			sslevels *currlvl = specialstages->get_stage(currstage);
 			size_t numsegments = currlvl->num_segments();
-			pvscrollbar->set_value(SEGMENT_PIXELS * numsegments);
+			pvscrollbar->set_value(SEGMENT_PIXELS * numsegments - draw_height);
 		}
 			
 	}
@@ -1338,6 +1465,11 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton *event)
 			break;
 
 		case eInsertBombMode:
+			if (event->state & GDK_CONTROL_MASK)
+			{
+				pos = pos - (pos % IMAGE_SIZE);
+				angle = angle - (pos % IMAGE_SIZE);
+			}
 			if (event->button == 1)
 				currseg->update(pos, angle, 0x40, true);
 			else if (event->button == 3)
@@ -1345,6 +1477,8 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton *event)
 			break;
 			
 		case eInsertRingMode:
+			if (event->state & GDK_CONTROL_MASK)
+				angle = angle - (angle % (IMAGE_SIZE/2));
 			if (event->button == 1)
 				currseg->update(pos, angle, 0x00, true);
 			else if (event->button == 3)
