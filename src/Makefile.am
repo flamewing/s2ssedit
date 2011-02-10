@@ -4,7 +4,15 @@
 
 uidir = $(datadir)/s2ssedit/ui
 ui_DATA = s2ssedit.ui \
-	phoenix.png
+	phoenix.png \
+	bomb.png\
+	ring.png\
+	ring.svg\
+	bomb.svg\
+	bomb-22.png\
+	ring-22.png \
+	s2ssedit.png
+
 
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
@@ -42,14 +50,7 @@ s2ssedit_DEPENDENCIES = $(ICON_FILE)
 s2ssedit_LDADD = $(S2SSEDIT_LIBS)
 endif
 
-EXTRA_DIST = $(ui_DATA) \
-	bomb.png\
-	ring.png\
-	ring.svg\
-	bomb.svg\
-	bomb-22.png\
-	ring-22.png \
-	s2ssedit.png
+EXTRA_DIST = $(ui_DATA)
 
 SUBDIRS = lib
 

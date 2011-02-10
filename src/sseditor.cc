@@ -32,7 +32,7 @@
 #include "ssobjfile.h"
 #include "bigendian_io.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 #ifdef WIN32
 #	define RINGFILE "./ring.png"
 #	define BOMBFILE "./bomb.png"
