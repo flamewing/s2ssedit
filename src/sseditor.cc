@@ -26,10 +26,6 @@
 #include <sstream>
 #include <cstdlib>
 #include <gtkmm.h>
-#include <gtkmm.h>
-#ifdef ENABLE_NLS
-#  include <libintl.h>
-#endif
 
 #include "sseditor.h"
 
