@@ -11,7 +11,22 @@ ui_DATA = s2ssedit.ui \
 	bomb.svg\
 	bomb-22.png\
 	ring-22.png \
-	s2ssedit.png
+	s2ssedit.png \
+	ring-diamond.png \
+	ring-line.png \
+	ring-lozenge.png \
+	ring-star.png \
+	ring-triangle.png \
+	ring-zig.png \
+	bomb-diamond.png \
+	bomb-line.png \
+	bomb-lozenge.png \
+	bomb-star.png \
+	bomb-triangle.png \
+	bomb-zig.png \
+	bomb-loop.png \
+	ring-loop.png \
+	grid.png
 
 
 AM_CPPFLAGS = \
@@ -35,7 +50,9 @@ s2ssedit_SOURCES = \
 	sslevelobjs.h   \
 	sslevelobjs.cc   \
 	ssobjfile.h   \
-	ssobjfile.cc   
+	ssobjfile.cc   \
+	abstractaction.h   \
+	object.h   
 
 s2ssedit_CXXFLAGS = \
 	-I$(srcdir)/lib $(EXTRA_FLAGS)

@@ -31,6 +31,16 @@ class sslevels
 protected:
 	std::vector<sssegments> segments;
 public:
+	sslevels() {		}
+	sslevels(sslevels const& other) {	copy(other);	}
+	sslevels& operator=(sslevels const& other)
+	{
+		if (this != &other)
+			copy(other);
+		return *this;
+	}
+	void copy(sslevels const& other)
+	{	segments = other.segments;	}
 	size_t size() const;
 
 	void print() const;
@@ -39,6 +49,20 @@ public:
 	          size_t const term2);
 	void write(std::ostream& out, std::ostream& lay) const;
 
+	size_t fill_position_array(std::vector<size_t>& segpos) const
+	{
+		segpos.clear();
+		segpos.reserve(segments.size());
+		size_t tally = 0;
+		for (std::vector<sssegments>::const_iterator it = segments.begin();
+		     it != segments.end(); ++it)
+		{
+			segpos.push_back(tally);
+			tally += it->get_length();
+		}
+		// Total size.
+		return tally;
+	}
 
 	size_t num_segments() const
 	{	return segments.size();	}

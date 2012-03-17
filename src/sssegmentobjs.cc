@@ -25,13 +25,13 @@
 
 void sssegments::read(std::istream& in, std::istream& lay)
 {
-	unsigned char geom = Read1(lay);
+	unsigned char geom = Read1(lay);		
 	flip = (geom & 0x80) != 0;
 	geometry = (SegmentGeometry)(geom & 0x7f);
 
 	while (in.good())
 	{
-		size_t type = Read1(in), pos, angle;
+		unsigned char type = Read1(in), pos, angle;
 		switch (type)
 		{
 			case eChaosEmerald:			// Emerald
@@ -42,22 +42,30 @@ void sssegments::read(std::istream& in, std::istream& lay)
 				return;
 			default:			// Ring, bomb
 				pos = (type & 0x3f);
+				// Not yet:
+				//pos = (type & 0x3f) + get_length();
 				type &= 0x40;
 				angle = Read1(in);
 				break;
 		}
-		std::map<size_t,size_t>& posobjs = objects[pos];
-		posobjs.insert(std::pair<size_t,size_t>(angle,type));
+		segobjs::mapped_type& posobjs = objects[pos];
+		posobjs.insert(segobjs::mapped_type::value_type(angle,ObjectTypes(type)));
+		if ((angle & 0x80) == 0)
+			numshadows++;
+		if (ObjectTypes(type) == eRing)
+			numrings++;
+		else
+			numbombs++;
 	}
 }
 
 size_t sssegments::size() const
 {
 	size_t sz = 1;	// Terminator
-	for (std::map<size_t, std::map<size_t,size_t> >::const_iterator it = objects.begin();
+	for (segobjs::const_iterator it = objects.begin();
 	     it != objects.end(); ++it)
 	{
-		std::map<size_t,size_t> const& posobjs = it->second;
+		segobjs::mapped_type const& posobjs = it->second;
 		sz += (2 * posobjs.size());
 	}
 	return sz;
@@ -103,14 +111,14 @@ void sssegments::print() const
 		segobjs::const_iterator it0 = objects.find(i);
 		if (it0 != objects.end())
 		{
-			std::map<size_t,size_t> const& posobjs = it0->second;
-			for (std::map<size_t,size_t>::const_iterator it = posobjs.begin();
+			segobjs::mapped_type const& posobjs = it0->second;
+			for (segobjs::mapped_type::const_iterator it = posobjs.begin();
 				it != posobjs.end(); ++it)
 			{
 				size_t angle = ((it->first + 0x40) & 0xff);
 				switch ((it->second))
 				{
-					case 0x40:			// Bomb
+					case eBomb:			// Bomb
 						buf[1+angle] = '*';
 						break;
 					default:			// Ring
@@ -128,9 +136,9 @@ void sssegments::write(std::ostream& out, std::ostream& lay) const
 	for (segobjs::const_iterator it = objects.begin();
 	     it != objects.end(); ++it)
 	{
-		std::map<size_t,size_t> const& posobjs = it->second;
-		size_t pos = it->first;
-		for (std::map<size_t,size_t>::const_iterator it2 = posobjs.begin();
+		segobjs::mapped_type const& posobjs = it->second;
+		unsigned char pos = it->first;
+		for (segobjs::mapped_type::const_iterator it2 = posobjs.begin();
 		     it2 != posobjs.end(); ++it2)
 		{
 			Write1(out,((it2->second)|pos));
