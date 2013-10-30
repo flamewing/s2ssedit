@@ -1,18 +1,17 @@
 /* -*- Mode: C++; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
- * S2-SSEdit
- * Copyright (C) Flamewing 2011 <flamewing.sonic@gmail.com>
- * 
- * S2-SSEdit is free software: you can redistribute it and/or modify it
+ * Copyright (C) Flamewing 2011-2013 <flamewing.sonic@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
- * S2-SSEdit is distributed in the hope that it will be useful, but
+ *
+ * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -30,49 +29,41 @@
 
 #define IMAGE_SIZE 16
 
-static inline int angle_simple(int angle)
-{
+static inline int angle_simple(int angle) {
 	return ((angle + 0x40) & 0xff);
 }
 
-static inline int angle_normal(int angle)
-{
+static inline int angle_normal(int angle) {
 	return ((angle + 0xc0) & 0xff);
 }
 
-static inline int angle_to_x(int angle)
-{
+static inline int angle_to_x(int angle) {
 	return ((angle + 0x40) & 0xff) * 2 + 4;
 }
 
-static inline int x_to_angle(int x)
-{
-	return (((x + (x&1) - 4) / 2) + 0xc0) & 0xff;
+static inline int x_to_angle(int x) {
+	return (((x + (x & 1) - 4) / 2) + 0xc0) & 0xff;
 }
 
-static inline int x_to_angle_constrained(int x, int constr = 2)
-{
-	int angle = x + (x&1) - 4;
+static inline int x_to_angle_constrained(int x, int constr = 2) {
+	int angle = x + (x & 1) - 4;
 	angle -= (angle % (IMAGE_SIZE / constr));
 	return ((angle / 2) + 0xc0) & 0xff;
 }
 
-static inline int x_constrained(int x, int constr = 2)
-{
-	int pos = x + (x&1) - 4;
+static inline int x_constrained(int x, int constr = 2) {
+	int pos = x + (x & 1) - 4;
 	return pos - (pos % (IMAGE_SIZE / constr)) + 4;
 }
 
-static inline int y_constrained(int y, int off)
-{
+static inline int y_constrained(int y, int off) {
 	int ty = y + off;
 	ty -= (ty % IMAGE_SIZE);
 	ty -= off;
 	return ty;
 }
 
-class sseditor
-{
+class sseditor {
 private:
 	static sseditor *instance;
 	bool update_in_progress;
@@ -85,16 +76,14 @@ private:
 	int draw_width, draw_height;
 	int mouse_x, mouse_y;
 	guint state;
-	enum EditModes
-	{
+	enum EditModes {
 		eSelectMode = 0,
 		eInsertRingMode,
 		eInsertBombMode,
 		eDeleteMode,
 		eNumModes
 	} mode;
-	enum InsertModes
-	{
+	enum InsertModes {
 		eSingle = 0,
 		eLine,
 		eLoop,
@@ -108,8 +97,8 @@ private:
 	InsertModes ringmode, bombmode;
 	std::set<object> selection, hotstack, insertstack, sourcestack, copystack;
 	object hotspot, lastclick, selclear, boxcorner;
-	std::tr1::shared_ptr<sslevels> copylevel; 
-	std::tr1::shared_ptr<sssegments> copyseg; 
+	std::tr1::shared_ptr<sslevels> copylevel;
+	std::tr1::shared_ptr<sssegments> copyseg;
 	int copypos;
 	bool drawbox;
 	bool snaptogrid;
@@ -151,39 +140,37 @@ private:
 	// Insert bomb toolbar
 	Gtk::RadioToolButton *pbombmodebuttons[eNumInsertModes];
 	// Special stage toolbar
-	Gtk::Toolbar	*pstage_toolbar;
+	Gtk::Toolbar    *pstage_toolbar;
 	Gtk::ToolButton *pfirst_stage_button, *pprevious_stage_button, *pnext_stage_button,
-		*plast_stage_button, *pinsert_stage_before_button, *pappend_stage_button,
-		*pcut_stage_button, *pcopy_stage_button, *ppaste_stage_button,
-		*pdelete_stage_button, *pswap_stage_prev_button, *pswap_stage_next_button;
+	    *plast_stage_button, *pinsert_stage_before_button, *pappend_stage_button,
+	    *pcut_stage_button, *pcopy_stage_button, *ppaste_stage_button,
+	    *pdelete_stage_button, *pswap_stage_prev_button, *pswap_stage_next_button;
 	// Segment toolbar
-	Gtk::Toolbar	*psegment_toolbar;
+	Gtk::Toolbar    *psegment_toolbar;
 	Gtk::ToolButton *pfirst_segment_button, *pprevious_segment_button, *pnext_segment_button,
-		*plast_segment_button, *pinsert_segment_before_button, *pappend_segment_button,
-		*pcut_segment_button, *pcopy_segment_button, *ppaste_segment_button,
-		*pdelete_segment_button, *pswap_segment_prev_button, *pswap_segment_next_button;
+	    *plast_segment_button, *pinsert_segment_before_button, *pappend_segment_button,
+	    *pcut_segment_button, *pcopy_segment_button, *ppaste_segment_button,
+	    *pdelete_segment_button, *pswap_segment_prev_button, *pswap_segment_next_button;
 	// Segment flags
-	Gtk::Expander	*psegment_expander;
+	Gtk::Expander   *psegment_expander;
 	Gtk::RadioButton *pnormal_segment, *pring_message, *pcheckpoint, *pchaos_emerald,
-		*psegment_turnthenrise, *psegment_turnthendrop,* psegment_turnthenstraight,
-		*psegment_straight, *psegment_straightthenturn, *psegment_right, *psegment_left;
+	    *psegment_turnthenrise, *psegment_turnthendrop, * psegment_turnthenstraight,
+	    *psegment_straight, *psegment_straightthenturn, *psegment_right, *psegment_left;
 	// Object flags
-	Gtk::Expander	*pobject_expander;
-	Gtk::Button		*pmoveup, *pmovedown, *pmoveleft, *pmoveright;
+	Gtk::Expander   *pobject_expander;
+	Gtk::Button     *pmoveup, *pmovedown, *pmoveleft, *pmoveright;
 	Gtk::RadioButton *pringtype, *pbombtype;
-	
+
 	sseditor();
-	sseditor(sseditor const& other);
+	sseditor(sseditor const &other);
 	sseditor(int argc, char *argv[], char const *uifile);
 
 	bool move_object(int dx, int dy);
 	void render();
 	void show();
-	void draw_outlines(std::set<object>& col, Cairo::RefPtr<Cairo::Context> cr)
-	{
-		for (std::set<object>::iterator it = col.begin(); it != col.end(); ++it)
-		{
-			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE/2;
+	void draw_outlines(std::set<object>& col, Cairo::RefPtr<Cairo::Context> cr) {
+		for (std::set<object>::iterator it = col.begin(); it != col.end(); ++it) {
+			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
 			int ty = (segpos[it->get_segment()] +
 			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
 			cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
@@ -191,24 +178,20 @@ private:
 		}
 	}
 	void draw_outlines(std::set<object>& col1, std::set<object>& col2,
-	                   Cairo::RefPtr<Cairo::Context> cr)
-	{
-		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it)
-		{
+	                   Cairo::RefPtr<Cairo::Context> cr) {
+		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it) {
 			if (col2.find(*it) != col2.end())
 				continue;
-			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE/2;
+			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
 			int ty = (segpos[it->get_segment()] +
 			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
 			cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
 			cr->stroke();
 		}
 	}
-	void draw_x(std::set<object>& col1, Cairo::RefPtr<Cairo::Context> cr)
-	{
-		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it)
-		{
-			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE/2;
+	void draw_x(std::set<object>& col1, Cairo::RefPtr<Cairo::Context> cr) {
+		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it) {
+			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
 			int ty = (segpos[it->get_segment()] +
 			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
 			cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
@@ -219,13 +202,11 @@ private:
 			cr->stroke();
 		}
 	}
-	void draw_objects(std::set<object>& col, Cairo::RefPtr<Cairo::Context> cr)
-	{
-		for (std::set<object>::iterator it = col.begin(); it != col.end(); ++it)
-		{
+	void draw_objects(std::set<object>& col, Cairo::RefPtr<Cairo::Context> cr) {
+		for (std::set<object>::iterator it = col.begin(); it != col.end(); ++it) {
 			Glib::RefPtr<Gdk::Pixbuf> image = (it->get_type() == sssegments::eBomb)
-			                                   ? bombimg : ringimg;
-			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE/2;
+			                                  ? bombimg : ringimg;
+			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
 			int ty = (segpos[it->get_segment()] +
 			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
 			Gdk::Cairo::set_source_pixbuf(cr, image, tx, ty);
@@ -236,8 +217,7 @@ private:
 			cr->rectangle(tx, ty, image->get_width(), image->get_height());
 			cr->stroke();
 		}
-		if (col.size())
-		{
+		if (col.size()) {
 		}
 	}
 	void object_triangle(int x, int y, int dx, int dy, int h,
@@ -246,55 +226,51 @@ private:
 	void update_segment_positions(bool setpos);
 	size_t get_current_segment() const;
 	size_t get_segment(size_t pos) const;
-	void goto_segment(int seg)
-	{
+	void goto_segment(int seg) {
 		currsegment = seg;
 		pvscrollbar->set_value(segpos[seg]);
 	}
-	void do_action(std::tr1::shared_ptr<abstract_action> act)
-	{
+	void do_action(std::tr1::shared_ptr<abstract_action> act) {
 		redostack.clear();
 		abstract_action::MergeResult ret;
 		if (!undostack.size()
-		    || (ret = undostack.front()->merge(act)) == abstract_action::eNoMerge)
-		{
+		        || (ret = undostack.front()->merge(act)) == abstract_action::eNoMerge) {
 			if (undostack.size() == 100)
 				undostack.pop_back();
 			undostack.push_front(act);
-		}
-		else if (ret == abstract_action::eDeleteAction)
+		} else if (ret == abstract_action::eDeleteAction)
 			undostack.pop_front();
 		act->apply(specialstages, static_cast<std::set<object> *>(0));
 	}
 public:
-	static sseditor * create_instance(int argc, char *argv[], char const *uifile)
-	{
+	static sseditor *create_instance(int argc, char *argv[], char const *uifile) {
 		if (!instance)
 			instance = new sseditor(argc, argv, uifile);
 		return instance;
 	}
-	static sseditor * get_instance()
-	{	return instance;	}
+	static sseditor *get_instance() {
+		return instance;
+	}
 	void run();
 
 	bool on_specialstageobjs_configure_event(GdkEventConfigure *event);
-	void on_specialstageobjs_drag_data_received(Glib::RefPtr<Gdk::DragContext> const& context,
-	                                            int x, int y,
-	                                            Gtk::SelectionData const& selection_data,
-	                                            guint info, guint time);
+	void on_specialstageobjs_drag_data_received(Glib::RefPtr<Gdk::DragContext> const &context,
+	        int x, int y,
+	        Gtk::SelectionData const &selection_data,
+	        guint info, guint time);
 	bool on_specialstageobjs_expose_event(GdkEventExpose *event);
 	bool on_specialstageobjs_key_press_event(GdkEventKey *event);
 	bool on_specialstageobjs_button_press_event(GdkEventButton *event);
 	bool on_specialstageobjs_button_release_event(GdkEventButton *event);
 	bool on_specialstageobjs_scroll_event(GdkEventScroll *event);
-	void on_specialstageobjs_drag_begin(Glib::RefPtr<Gdk::DragContext> const& targets);
+	void on_specialstageobjs_drag_begin(Glib::RefPtr<Gdk::DragContext> const &targets);
 	bool on_specialstageobjs_motion_notify_event(GdkEventMotion *event);
-	void on_specialstageobjs_drag_data_get(Glib::RefPtr<Gdk::DragContext> const& targets,
-	                                       Gtk::SelectionData& selection_data,
+	void on_specialstageobjs_drag_data_get(Glib::RefPtr<Gdk::DragContext> const &targets,
+	                                       Gtk::SelectionData &selection_data,
 	                                       guint info, guint time);
-	void on_specialstageobjs_drag_data_delete(Glib::RefPtr<Gdk::DragContext> const& context);
-	void on_specialstageobjs_drag_end(Glib::RefPtr<Gdk::DragContext> const& context);
-	bool on_drag_motion(Glib::RefPtr<Gdk::DragContext> const& context,
+	void on_specialstageobjs_drag_data_delete(Glib::RefPtr<Gdk::DragContext> const &context);
+	void on_specialstageobjs_drag_end(Glib::RefPtr<Gdk::DragContext> const &context);
+	bool on_drag_motion(Glib::RefPtr<Gdk::DragContext> const &context,
 	                    int x, int y, guint time);
 	// Scrollbar
 	void on_vscrollbar_value_changed();
@@ -306,8 +282,7 @@ public:
 	void on_undobutton_clicked();
 	void on_redobutton_clicked();
 	template<EditModes N>
-	void on_modebutton_toggled()
-	{
+	void on_modebutton_toggled() {
 		pmodenotebook->set_current_page(int(N));
 		mode = N;
 		selection.clear();
@@ -316,8 +291,7 @@ public:
 		sourcestack.clear();
 		update();
 	}
-	void on_snapgridbutton_toggled()
-	{
+	void on_snapgridbutton_toggled() {
 		snaptogrid = psnapgridbutton->get_active();
 	}
 	void on_helpdialog_response(int response_id);
@@ -332,15 +306,13 @@ public:
 	void on_deletebutton_clicked();
 	// Insert ring toolbar
 	template <InsertModes N>
-	void on_ringmode_toggled()
-	{
+	void on_ringmode_toggled() {
 		ringmode = N;
 		update();
 	}
 	// Insert bomb toolbar
 	template <InsertModes N>
-	void on_bombmode_toggled()
-	{
+	void on_bombmode_toggled() {
 		bombmode = N;
 		update();
 	}
@@ -372,8 +344,7 @@ public:
 	void on_swap_segment_next_button_clicked();
 	// Segment flags
 	template <sssegments::SegmentTypes N, Gtk::RadioButton *sseditor::*btn>
-	void on_segmenttype_toggled()
-	{
+	void on_segmenttype_toggled() {
 		if (!specialstages || update_in_progress)
 			return;
 
@@ -385,14 +356,13 @@ public:
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
 		std::tr1::shared_ptr<abstract_action>
-			act(new alter_segment_action(currstage, currsegment, *currseg,
-			                      currseg->get_direction(), N,
-			                      currseg->get_geometry()));
+		act(new alter_segment_action(currstage, currsegment, *currseg,
+		                             currseg->get_direction(), N,
+		                             currseg->get_geometry()));
 		do_action(act);
 	}
 	template <sssegments::SegmentGeometry N, Gtk::RadioButton *sseditor::*btn>
-	void on_segment_segmentgeometry_toggled()
-	{
+	void on_segment_segmentgeometry_toggled() {
 		if (!specialstages || update_in_progress)
 			return;
 
@@ -404,15 +374,14 @@ public:
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
 		std::tr1::shared_ptr<abstract_action>
-			act(new alter_segment_action(currstage, currsegment, *currseg,
-			                      currseg->get_direction(), currseg->get_type(),
-			                      N));
+		act(new alter_segment_action(currstage, currsegment, *currseg,
+		                             currseg->get_direction(), currseg->get_type(),
+		                             N));
 		do_action(act);
 		update_segment_positions(false);
 	}
 	template <bool tf, Gtk::RadioButton *sseditor::*btn>
-	void on_segmentdirection_toggled()
-	{
+	void on_segmentdirection_toggled() {
 		if (!specialstages || update_in_progress)
 			return;
 
@@ -424,18 +393,18 @@ public:
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
 		std::tr1::shared_ptr<abstract_action>
-			act(new alter_segment_action(currstage, currsegment, *currseg,
-			                      tf, currseg->get_type(),
-			                      currseg->get_geometry()));
+		act(new alter_segment_action(currstage, currsegment, *currseg,
+		                             tf, currseg->get_type(),
+		                             currseg->get_geometry()));
 		do_action(act);
 	}
 	// Object flags
 	template <int dx, int dy>
-	void on_movebtn_clicked()
-	{	move_object(dx, dy);	}
+	void on_movebtn_clicked() {
+		move_object(dx, dy);
+	}
 	template <sssegments::ObjectTypes N, Gtk::RadioButton *sseditor::*btn>
-	void on_objecttype_toggled()
-	{
+	void on_objecttype_toggled() {
 		if (!specialstages || selection.empty() || update_in_progress)
 			return;
 
@@ -443,14 +412,13 @@ public:
 			return;
 
 		std::tr1::shared_ptr<abstract_action>
-			act(new alter_selection_action(currstage, N, selection));
+		act(new alter_selection_action(currstage, N, selection));
 		do_action(act);
 
 		std::set<object> temp;
 		sslevels *currlvl = specialstages->get_stage(currstage);
 		for (std::set<object>::iterator it = selection.begin();
-		     it != selection.end(); ++it)
-		{
+		        it != selection.end(); ++it) {
 			sssegments *currseg = currlvl->get_segment(it->get_segment());
 			temp.insert(object(it->get_segment(), it->get_angle(),
 			                   it->get_pos(), N));
