@@ -210,7 +210,7 @@ public:
 		if (!act)
 			return eNoMerge;
 
-		std::set<object>& list1 = to->objlist, list2 = act->from->objlist;
+		std::set<object> &list1 = to->objlist, list2 = act->from->objlist;
 		if (list1.size() != list2.size())
 			return eNoMerge;
 

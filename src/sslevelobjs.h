@@ -49,7 +49,7 @@ public:
 	          size_t const term2);
 	void write(std::ostream &out, std::ostream &lay) const;
 
-	size_t fill_position_array(std::vector<size_t>& segpos) const {
+	size_t fill_position_array(std::vector<size_t> &segpos) const {
 		segpos.clear();
 		segpos.reserve(segments.size());
 		size_t tally = 0;

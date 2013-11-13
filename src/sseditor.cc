@@ -1776,7 +1776,7 @@ bool sseditor::on_specialstageobjs_scroll_event(GdkEventScroll *event) {
 
 void sseditor::object_triangle(int x, int y, int dx, int dy, int h,
                                sssegments::ObjectTypes type, bool fill,
-                               std::set<object>& col) {
+                               std::set<object> &col) {
 	sslevels *currlvl = specialstages->get_stage(currstage);
 	size_t numsegments = segpos.size();
 	int angle = x;

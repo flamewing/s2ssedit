@@ -168,7 +168,7 @@ private:
 	bool move_object(int dx, int dy);
 	void render();
 	void show();
-	void draw_outlines(std::set<object>& col, Cairo::RefPtr<Cairo::Context> cr) {
+	void draw_outlines(std::set<object> &col, Cairo::RefPtr<Cairo::Context> cr) {
 		for (std::set<object>::iterator it = col.begin(); it != col.end(); ++it) {
 			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
 			int ty = (segpos[it->get_segment()] +
@@ -177,7 +177,7 @@ private:
 			cr->stroke();
 		}
 	}
-	void draw_outlines(std::set<object>& col1, std::set<object>& col2,
+	void draw_outlines(std::set<object> &col1, std::set<object> &col2,
 	                   Cairo::RefPtr<Cairo::Context> cr) {
 		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it) {
 			if (col2.find(*it) != col2.end())
@@ -189,7 +189,7 @@ private:
 			cr->stroke();
 		}
 	}
-	void draw_x(std::set<object>& col1, Cairo::RefPtr<Cairo::Context> cr) {
+	void draw_x(std::set<object> &col1, Cairo::RefPtr<Cairo::Context> cr) {
 		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it) {
 			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
 			int ty = (segpos[it->get_segment()] +
@@ -202,7 +202,7 @@ private:
 			cr->stroke();
 		}
 	}
-	void draw_objects(std::set<object>& col, Cairo::RefPtr<Cairo::Context> cr) {
+	void draw_objects(std::set<object> &col, Cairo::RefPtr<Cairo::Context> cr) {
 		for (std::set<object>::iterator it = col.begin(); it != col.end(); ++it) {
 			Glib::RefPtr<Gdk::Pixbuf> image = (it->get_type() == sssegments::eBomb)
 			                                  ? bombimg : ringimg;
@@ -222,7 +222,7 @@ private:
 	}
 	void object_triangle(int x, int y, int dx, int dy, int h,
 	                     sssegments::ObjectTypes type, bool fill,
-	                     std::set<object>& col);
+	                     std::set<object> &col);
 	void update_segment_positions(bool setpos);
 	size_t get_current_segment() const;
 	size_t get_segment(size_t pos) const;
