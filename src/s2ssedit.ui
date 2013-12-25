@@ -288,85 +288,10 @@ Library.
           </packing>
         </child>
         <child>
-          <object class="GtkGrid" id="grid1">
+          <object class="GtkBox" id="box2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="n_rows">2</property>
-            <property name="n_columns">2</property>
-            <child>
-              <object class="GtkFrame" id="frame5">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">none</property>
-                <child>
-                  <object class="GtkAlignment" id="alignment11">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
-                    <child>
-                      <object class="GtkDrawingArea" id="part0image">
-                        <property name="width_request">512</property>
-                        <property name="height_request">224</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkLabel" id="label23">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">&lt;b&gt;First half of PNT A&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFrame" id="frame7">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">none</property>
-                <child>
-                  <object class="GtkAlignment" id="alignment13">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
-                    <child>
-                      <object class="GtkDrawingArea" id="part1image">
-                        <property name="width_request">512</property>
-                        <property name="height_request">224</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkLabel" id="label25">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Second half of PNT A&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
+            <property name="orientation">vertical</property>
             <child>
               <object class="GtkFrame" id="frame10">
                 <property name="visible">True</property>
@@ -374,40 +299,33 @@ Library.
                 <property name="label_xalign">0</property>
                 <property name="shadow_type">none</property>
                 <child>
-                  <object class="GtkAlignment" id="alignment16">
+                  <object class="GtkBox" id="box4">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkBox" id="box2">
+                      <object class="GtkDrawingArea" id="drawpalette">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <child>
-                          <object class="GtkDrawingArea" id="drawpalette">
-                            <property name="width_request">256</property>
-                            <property name="height_request">224</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkScrollbar" id="scrollpalette">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="orientation">vertical</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScrollbar" id="scrollpalette">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="orientation">vertical</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                   </object>
                 </child>
@@ -415,11 +333,13 @@ Library.
                   <object class="GtkBox" id="box3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
                     <child>
                       <object class="GtkLabel" id="label28">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Drawing palette&lt;/b&gt;</property>
+                        <property name="hexpand">True</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Drawing palette — you select what to draw here&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
@@ -437,7 +357,6 @@ Library.
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -451,52 +370,72 @@ Library.
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkFrame" id="frame9">
+              <object class="GtkFrame" id="frame5">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label_xalign">0</property>
                 <property name="shadow_type">none</property>
                 <child>
-                  <object class="GtkAlignment" id="alignment15">
+                  <object class="GtkDrawingArea" id="part0image">
+                    <property name="width_request">1024</property>
+                    <property name="height_request">224</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
-                    <child>
-                      <object class="GtkDrawingArea" id="combinedimage">
-                        <property name="width_request">256</property>
-                        <property name="height_request">224</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                    </child>
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkLabel" id="label27">
+                  <object class="GtkLabel" id="label23">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Combined image&lt;/b&gt;</property>
+                    <property name="label" translatable="yes">&lt;b&gt;PNT A — you draw here&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFrame" id="frame7">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkDrawingArea" id="part1image">
+                    <property name="width_request">1024</property>
+                    <property name="height_request">224</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="label25">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Rendered image — you see what gets displayed here&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
@@ -517,6 +456,7 @@ Library.
       </object>
     </child>
   </object>
+  <object class="GtkFileFilter" id="filefilter"/>
   <object class="GtkFileChooserDialog" id="filechooserdialog">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -549,7 +489,6 @@ Library.
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -566,7 +505,6 @@ Library.
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -590,7 +528,6 @@ Library.
       <action-widget response="-5">fileokbutton</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkFileFilter" id="filefilter"/>
   <object class="GtkMessageDialog" id="helpdialog">
     <property name="width_request">900</property>
     <property name="height_request">600</property>
@@ -759,7 +696,6 @@ Library.
               <object class="GtkToolButton" id="openfilebutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Open</property>
                 <property name="use_underline">True</property>
@@ -775,7 +711,6 @@ Library.
               <object class="GtkToolButton" id="savefilebutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Save</property>
                 <property name="use_underline">True</property>
@@ -801,7 +736,6 @@ Library.
               <object class="GtkToolButton" id="revertfilebutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Revert</property>
                 <property name="use_underline">True</property>
@@ -827,7 +761,6 @@ Library.
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Undo</property>
                 <property name="use_underline">True</property>
@@ -844,7 +777,6 @@ Library.
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Redo</property>
                 <property name="use_underline">True</property>
@@ -870,7 +802,6 @@ Library.
               <object class="GtkRadioToolButton" id="selectmodebutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Select</property>
                 <property name="use_underline">True</property>
@@ -886,7 +817,6 @@ Library.
               <object class="GtkRadioToolButton" id="insertringbutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Rings</property>
                 <property name="use_underline">True</property>
@@ -903,7 +833,6 @@ Library.
               <object class="GtkRadioToolButton" id="insertbombbutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Bombs</property>
                 <property name="use_underline">True</property>
@@ -920,7 +849,6 @@ Library.
               <object class="GtkRadioToolButton" id="deletemodebutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Delete</property>
                 <property name="use_underline">True</property>
@@ -946,7 +874,6 @@ Library.
               <object class="GtkToggleToolButton" id="snapgridbutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Angular grid</property>
                 <property name="use_underline">True</property>
@@ -962,7 +889,6 @@ Library.
               <object class="GtkToolItem" id="toolbutton2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <child>
                   <placeholder/>
                 </child>
@@ -976,7 +902,6 @@ Library.
               <object class="GtkToolButton" id="aboutbutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">About</property>
                 <property name="use_underline">True</property>
@@ -991,7 +916,6 @@ Library.
               <object class="GtkToolButton" id="helpbutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Help</property>
                 <property name="use_underline">True</property>
@@ -1016,7 +940,6 @@ Library.
               <object class="GtkToolButton" id="quitbutton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="is_important">True</property>
                 <property name="label" translatable="yes">Quit</property>
                 <property name="use_underline">True</property>
@@ -1110,7 +1033,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Cut</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="is_important">True</property>
                                     <property name="label" translatable="yes">Cut</property>
                                     <property name="use_underline">True</property>
@@ -1128,7 +1050,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Copy</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="is_important">True</property>
                                     <property name="label" translatable="yes">Copy</property>
                                     <property name="use_underline">True</property>
@@ -1146,7 +1067,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Paste</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="is_important">True</property>
                                     <property name="label" translatable="yes">Paste</property>
                                     <property name="use_underline">True</property>
@@ -1164,7 +1084,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Delete</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="is_important">True</property>
                                     <property name="label" translatable="yes">Delete</property>
                                     <property name="use_underline">True</property>
@@ -1192,7 +1111,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Single ring</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Single</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image13</property>
@@ -1209,7 +1127,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Ring line</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Line</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image14</property>
@@ -1227,7 +1144,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Ring loop</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Loop</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image9</property>
@@ -1245,7 +1161,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Ring zig-zag line</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Zigzag</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image15</property>
@@ -1263,7 +1178,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Ring diamond</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Diamond</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image17</property>
@@ -1281,7 +1195,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Ring lozenge</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Lozenge</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image18</property>
@@ -1298,7 +1211,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Ring star</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Star</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image19</property>
@@ -1316,7 +1228,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Ring triangle</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Triangle</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image20</property>
@@ -1346,7 +1257,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Single bomb</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Single</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image21</property>
@@ -1363,7 +1273,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Bombline</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Line</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image22</property>
@@ -1381,7 +1290,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Bomb loop</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Loop</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image10</property>
@@ -1399,7 +1307,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Bomb zig-zag line</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Zigzag</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image23</property>
@@ -1417,7 +1324,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Bomb diamond</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Diamond</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image25</property>
@@ -1435,7 +1341,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Bomb lozenge</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Lozenge</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image26</property>
@@ -1452,7 +1357,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Bomb star</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Star</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image27</property>
@@ -1470,7 +1374,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Bomb triangle</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="label" translatable="yes">Triangle</property>
                                     <property name="use_underline">True</property>
                                     <property name="icon_widget">image28</property>
@@ -1549,7 +1452,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">First Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-goto-first</property>
                                     <accelerator key="Home" signal="clicked" modifiers="GDK_MOD1_MASK"/>
@@ -1565,7 +1467,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Previous Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-go-back</property>
                                     <accelerator key="Page_Up" signal="clicked" modifiers="GDK_MOD1_MASK"/>
@@ -1581,7 +1482,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Next Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-go-forward</property>
                                     <accelerator key="Page_Down" signal="clicked" modifiers="GDK_MOD1_MASK"/>
@@ -1597,7 +1497,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Last Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-goto-last</property>
                                     <accelerator key="End" signal="clicked" modifiers="GDK_MOD1_MASK"/>
@@ -1623,7 +1522,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Insert new Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-add</property>
                                   </object>
@@ -1638,7 +1536,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Append new Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-new</property>
                                   </object>
@@ -1663,7 +1560,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Cut current Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-cut</property>
                                     <accelerator key="x" signal="clicked" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
@@ -1679,7 +1575,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Copy current Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-copy</property>
                                     <accelerator key="c" signal="clicked" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
@@ -1695,7 +1590,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Paste copied Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-paste</property>
                                     <accelerator key="v" signal="clicked" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
@@ -1711,7 +1605,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Delete current Special Stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-remove</property>
                                     <accelerator key="Delete" signal="clicked" modifiers="GDK_MOD1_MASK"/>
@@ -1737,7 +1630,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Swap Special Stage with previous stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-media-rewind</property>
                                   </object>
@@ -1752,7 +1644,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Swap Special Stage with next stage</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-media-forward</property>
                                   </object>
@@ -1879,7 +1770,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">First segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-goto-first</property>
                                     <accelerator key="Home" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
@@ -1895,7 +1785,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Previous segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-go-back</property>
                                     <accelerator key="Page_Up" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
@@ -1911,7 +1800,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Next segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-go-forward</property>
                                     <accelerator key="Page_Down" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
@@ -1927,7 +1815,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Last segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-goto-last</property>
                                     <accelerator key="End" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
@@ -1953,7 +1840,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Insert new segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-add</property>
                                   </object>
@@ -1968,7 +1854,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Append new segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-new</property>
                                   </object>
@@ -1993,7 +1878,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Cut current segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-cut</property>
                                     <accelerator key="x" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
@@ -2009,7 +1893,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Copy current segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-copy</property>
                                     <accelerator key="c" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
@@ -2025,7 +1908,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Paste copied segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-paste</property>
                                     <accelerator key="v" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
@@ -2041,7 +1923,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Delete current segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-remove</property>
                                     <accelerator key="Delete" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
@@ -2067,7 +1948,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Swap segment with previous segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-media-rewind</property>
                                   </object>
@@ -2082,7 +1962,6 @@ Library.
                                     <property name="can_focus">False</property>
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_text" translatable="yes">Swap segment with next segment</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="use_underline">True</property>
                                     <property name="stock_id">gtk-media-forward</property>
                                   </object>
@@ -2415,8 +2294,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="active">True</property>
                                                 <property name="draw_indicator">True</property>
                                               </object>
@@ -2432,8 +2311,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="draw_indicator">True</property>
                                                 <property name="group">normal_segment</property>
                                               </object>
@@ -2449,8 +2328,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="draw_indicator">True</property>
                                                 <property name="group">normal_segment</property>
                                               </object>
@@ -2466,8 +2345,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="draw_indicator">True</property>
                                                 <property name="group">normal_segment</property>
                                               </object>
@@ -2517,8 +2396,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="active">True</property>
                                                 <property name="draw_indicator">True</property>
                                               </object>
@@ -2534,8 +2413,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="draw_indicator">True</property>
                                                 <property name="group">segment_turnthenrise</property>
                                               </object>
@@ -2551,8 +2430,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="draw_indicator">True</property>
                                                 <property name="group">segment_turnthenrise</property>
                                               </object>
@@ -2568,8 +2447,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="draw_indicator">True</property>
                                                 <property name="group">segment_turnthenrise</property>
                                               </object>
@@ -2585,8 +2464,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="draw_indicator">True</property>
                                                 <property name="group">segment_turnthenrise</property>
                                               </object>
@@ -2636,8 +2515,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="active">True</property>
                                                 <property name="draw_indicator">True</property>
                                               </object>
@@ -2653,8 +2532,8 @@ Library.
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="receives_default">False</property>
-                                                <property name="use_action_appearance">False</property>
                                                 <property name="focus_on_click">False</property>
+                                                <property name="xalign">0.5</property>
                                                 <property name="draw_indicator">True</property>
                                                 <property name="group">segment_right</property>
                                               </object>
@@ -2844,7 +2723,6 @@ Library.
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="receives_default">True</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="relief">none</property>
                                     <property name="focus_on_click">False</property>
                                     <child>
@@ -2868,7 +2746,6 @@ Library.
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="relief">none</property>
                                     <property name="focus_on_click">False</property>
                                     <child>
@@ -2892,7 +2769,6 @@ Library.
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="relief">none</property>
                                     <property name="focus_on_click">False</property>
                                     <child>
@@ -2918,7 +2794,6 @@ Library.
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <property name="use_action_appearance">False</property>
                                     <property name="relief">none</property>
                                     <property name="focus_on_click">False</property>
                                     <child>
@@ -2967,8 +2842,8 @@ Library.
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="receives_default">False</property>
-                                            <property name="use_action_appearance">False</property>
                                             <property name="focus_on_click">False</property>
+                                            <property name="xalign">0.5</property>
                                             <property name="active">True</property>
                                             <property name="draw_indicator">True</property>
                                           </object>
@@ -2984,8 +2859,8 @@ Library.
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="receives_default">False</property>
-                                            <property name="use_action_appearance">False</property>
                                             <property name="focus_on_click">False</property>
+                                            <property name="xalign">0.5</property>
                                             <property name="draw_indicator">True</property>
                                             <property name="group">ringtype</property>
                                           </object>
