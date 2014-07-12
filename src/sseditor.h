@@ -19,7 +19,7 @@
 #ifndef _SSEDITOR_H_
 #define _SSEDITOR_H_
 
-#include <tr1/memory>
+#include <memory>
 
 #include <deque>
 #include <set>
@@ -70,8 +70,8 @@ private:
 	bool dragging, drop_enabled;
 
 	// State variables.
-	std::tr1::shared_ptr<ssobj_file> specialstages;
-	int currstage, currsegment;
+	std::shared_ptr<ssobj_file> specialstages;
+	unsigned currstage, currsegment;
 	int first_line;
 	int draw_width, draw_height;
 	int mouse_x, mouse_y;
@@ -97,19 +97,19 @@ private:
 	InsertModes ringmode, bombmode;
 	std::set<object> selection, hotstack, insertstack, sourcestack, copystack;
 	object hotspot, lastclick, selclear, boxcorner;
-	std::tr1::shared_ptr<sslevels> copylevel;
-	std::tr1::shared_ptr<sssegments> copyseg;
+	std::shared_ptr<sslevels> copylevel;
+	std::shared_ptr<sssegments> copyseg;
 	int copypos;
 	bool drawbox;
 	bool snaptogrid;
 
-	std::deque<std::tr1::shared_ptr<abstract_action> > undostack, redostack;
+	std::deque<std::shared_ptr<abstract_action> > undostack, redostack;
 	std::vector<size_t> segpos;
 	size_t endpos;
 
 	// GUI variables.
 	Gtk::Window *main_win;
-	std::tr1::shared_ptr<Gtk::Main> kit;
+	std::shared_ptr<Gtk::Main> kit;
 	Gtk::MessageDialog *helpdlg;
 	Gtk::AboutDialog *aboutdlg;
 	Gtk::FileChooserDialog *filedlg;
@@ -226,11 +226,11 @@ private:
 	void update_segment_positions(bool setpos);
 	size_t get_current_segment() const;
 	size_t get_segment(size_t pos) const;
-	void goto_segment(int seg) {
+	void goto_segment(unsigned seg) {
 		currsegment = seg;
 		pvscrollbar->set_value(segpos[seg]);
 	}
-	void do_action(std::tr1::shared_ptr<abstract_action> act) {
+	void do_action(std::shared_ptr<abstract_action> act) {
 		redostack.clear();
 		abstract_action::MergeResult ret;
 		if (!undostack.size()
@@ -352,10 +352,10 @@ public:
 			return;
 
 		sslevels *currlvl = specialstages->get_stage(currstage);
-		size_t numsegments = currlvl->num_segments();
+		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
-		std::tr1::shared_ptr<abstract_action>
+		std::shared_ptr<abstract_action>
 		act(new alter_segment_action(currstage, currsegment, *currseg,
 		                             currseg->get_direction(), N,
 		                             currseg->get_geometry()));
@@ -370,10 +370,10 @@ public:
 			return;
 
 		sslevels *currlvl = specialstages->get_stage(currstage);
-		size_t numsegments = currlvl->num_segments();
+		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
-		std::tr1::shared_ptr<abstract_action>
+		std::shared_ptr<abstract_action>
 		act(new alter_segment_action(currstage, currsegment, *currseg,
 		                             currseg->get_direction(), currseg->get_type(),
 		                             N));
@@ -389,10 +389,10 @@ public:
 			return;
 
 		sslevels *currlvl = specialstages->get_stage(currstage);
-		size_t numsegments = currlvl->num_segments();
+		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
-		std::tr1::shared_ptr<abstract_action>
+		std::shared_ptr<abstract_action>
 		act(new alter_segment_action(currstage, currsegment, *currseg,
 		                             tf, currseg->get_type(),
 		                             currseg->get_geometry()));
@@ -411,15 +411,15 @@ public:
 		if (!(this->*btn)->get_active())
 			return;
 
-		std::tr1::shared_ptr<abstract_action>
+		std::shared_ptr<abstract_action>
 		act(new alter_selection_action(currstage, N, selection));
 		do_action(act);
 
 		std::set<object> temp;
-		sslevels *currlvl = specialstages->get_stage(currstage);
+		//sslevels *currlvl = specialstages->get_stage(currstage);
 		for (std::set<object>::iterator it = selection.begin();
 		        it != selection.end(); ++it) {
-			sssegments *currseg = currlvl->get_segment(it->get_segment());
+			//sssegments *currseg = currlvl->get_segment(it->get_segment());
 			temp.insert(object(it->get_segment(), it->get_angle(),
 			                   it->get_pos(), N));
 		}

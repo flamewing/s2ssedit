@@ -41,7 +41,14 @@ esac
 AM_CONDITIONAL(BUILD_ICON, test ! x$ICON_FILE = x)
 
 AC_PROG_CXX
+AC_LANG([C++])
+AX_CXX_COMPILE_STDCXX_11([],[mandatory])
 AC_HEADER_STDC
+
+CXXFLAGS="$CXXFLAGS -Wall -Wextra -pedantic -Wcast-qual -Wold-style-cast"
+CXXFLAGS="$CXXFLAGS -Wwrite-strings -Wredundant-decls -fcheck-new"
+CXXFLAGS="$CXXFLAGS -Wstrict-overflow -Wdisabled-optimization -Wctor-dtor-privacy"
+CXXFLAGS="$CXXFLAGS -Wnon-virtual-dtor -Woverloaded-virtual"
 
 AC_CHECK_HEADER(mdcomp/kosinski.h,break,[HAVE_KOSINSKI="no"])
 if test "$HAVE_KOSINSKI" = "no"; then

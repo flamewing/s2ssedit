@@ -16,7 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#pragma GCC diagnostic ignored "-Winline"
 #include <gtkmm.h>
+#pragma GCC diagnostic pop
+
 #include <iostream>
 
 #include "sseditor.h"
@@ -35,12 +41,14 @@
 #   endif
 #endif
 
+using namespace std;
+
 int main(int argc, char *argv[]) {
 	try {
 		sseditor *Editor = sseditor::create_instance(argc, argv, UI_FILE);
 		Editor->run();
 	} catch (const Glib::FileError &ex) {
-		std::cerr << ex.what() << std::endl;
+		cerr << ex.what() << endl;
 		return 1;
 	}
 	return 0;

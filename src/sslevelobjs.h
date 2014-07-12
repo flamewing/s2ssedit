@@ -45,8 +45,7 @@ public:
 
 	void print() const;
 
-	void read(std::istream &in, std::istream &lay, size_t const term,
-	          size_t const term2);
+	void read(std::istream &in, std::istream &lay, int term, int term2);
 	void write(std::ostream &out, std::ostream &lay) const;
 
 	size_t fill_position_array(std::vector<size_t> &segpos) const {

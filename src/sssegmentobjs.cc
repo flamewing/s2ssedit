@@ -22,10 +22,12 @@
 
 #include "sssegmentobjs.h"
 
-void sssegments::read(std::istream &in, std::istream &lay) {
+using namespace std;
+
+void sssegments::read(istream &in, istream &lay) {
 	unsigned char geom = Read1(lay);
 	flip = (geom & 0x80) != 0;
-	geometry = (SegmentGeometry)(geom & 0x7f);
+	geometry = static_cast<SegmentGeometry>(geom & 0x7f);
 
 	while (in.good()) {
 		unsigned char type = Read1(in), pos, angle;
@@ -34,7 +36,7 @@ void sssegments::read(std::istream &in, std::istream &lay) {
 			case eCheckpoint:           // Checkpoint
 			case eRingsMessage:         // Message
 			case eNormalSegment:        // End of segment
-				terminator = (SegmentTypes)type;
+				terminator = static_cast<SegmentTypes>(type);
 				return;
 			default:            // Ring, bomb
 				pos = (type & 0x3f);
@@ -69,33 +71,33 @@ void sssegments::print() const {
 	char buf[0x103];
 	buf[0] = buf[0x101] = '|';
 	buf[0x102] = 0;
-	std::memset(buf + 1, '-', sizeof(buf) - 3);
+	memset(buf + 1, '-', sizeof(buf) - 3);
 	switch (terminator) {
 		case 0xfc: {        // Message
 			char const msg[] = "====== Message  ======";
-			size_t const len = std::strlen(msg);
-			std::memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
+			size_t const len = strlen(msg);
+			memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
 			break;
 		}
 		case 0xfd: {        // Emerald
 			char const msg[] = "====== Emerald  ======";
-			size_t const len = std::strlen(msg);
-			std::memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
+			size_t const len = strlen(msg);
+			memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
 			break;
 		}
 		case 0xfe: {        // Checkpoint
 			char const msg[] = "====== Checkpoint ======";
-			size_t const len = std::strlen(msg);
-			std::memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
+			size_t const len = strlen(msg);
+			memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
 			break;
 		}
 		default:            // Ring, bomb, normal segment terminator
 			break;
 	}
 
-	std::cout << buf << std::endl;
+	cout << buf << endl;
 	for (size_t i = 0; i < 0x40; i++) {
-		std::memset(buf + 1, ' ', sizeof(buf) - 3);
+		memset(buf + 1, ' ', sizeof(buf) - 3);
 		segobjs::const_iterator it0 = objects.find(i);
 		if (it0 != objects.end()) {
 			segobjs::mapped_type const &posobjs = it0->second;
@@ -112,11 +114,11 @@ void sssegments::print() const {
 				}
 			}
 		}
-		std::cout << buf << std::endl;
+		cout << buf << endl;
 	}
 }
 
-void sssegments::write(std::ostream &out, std::ostream &lay) const {
+void sssegments::write(ostream &out, ostream &lay) const {
 	for (segobjs::const_iterator it = objects.begin();
 	        it != objects.end(); ++it) {
 		segobjs::mapped_type const &posobjs = it->second;

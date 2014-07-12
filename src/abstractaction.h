@@ -19,7 +19,7 @@
 #ifndef _ABSTRACTACTION_H_
 #define _ABSTRACTACTION_H_
 
-#include <tr1/memory>
+#include <memory>
 #include <string>
 #include <set>
 #include <algorithm>
@@ -39,9 +39,9 @@ public:
 	};
 	virtual ~abstract_action() {  }
 	virtual std::string const display_string() const = 0;
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) = 0;
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) = 0;
-	virtual MergeResult merge(std::tr1::shared_ptr<abstract_action> other) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) = 0;
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) = 0;
+	virtual MergeResult merge(std::shared_ptr<abstract_action> UNUSED(other)) {
 		return eNoMerge;
 	}
 };
@@ -58,7 +58,7 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Change selection");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		sslevels *currlvl = ss->get_stage(stage);
 		if (sel)
 			sel->clear();
@@ -71,7 +71,7 @@ public:
 				                   it->get_pos(), type));
 		}
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		sslevels *currlvl = ss->get_stage(stage);
 		for (std::set<object>::iterator it = objlist.begin();
 		        it != objlist.end(); ++it) {
@@ -81,9 +81,9 @@ public:
 		if (sel)
 			*sel = objlist;
 	}
-	virtual MergeResult merge(std::tr1::shared_ptr<abstract_action> other) {
-		std::tr1::shared_ptr<alter_selection_action> act =
-		    std::tr1::dynamic_pointer_cast<alter_selection_action>(other);
+	virtual MergeResult merge(std::shared_ptr<abstract_action> other) {
+		std::shared_ptr<alter_selection_action> act =
+		    std::dynamic_pointer_cast<alter_selection_action>(other);
 		if (!act)
 			return eNoMerge;
 
@@ -115,11 +115,11 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Delete selection");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		if (sel)
 			sel->clear();
 		sslevels *currlvl = ss->get_stage(stage);
-		size_t numsegments = currlvl->num_segments();
+		int numsegments = currlvl->num_segments();
 
 		for (std::set<object>::iterator it = objlist.begin();
 		        it != objlist.end(); ++it) {
@@ -130,9 +130,9 @@ public:
 			currseg->remove(it->get_pos(), it->get_angle());
 		}
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		sslevels *currlvl = ss->get_stage(stage);
-		size_t numsegments = currlvl->num_segments();
+		int numsegments = currlvl->num_segments();
 
 		for (std::set<object>::iterator it = objlist.begin();
 		        it != objlist.end(); ++it) {
@@ -166,10 +166,10 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Insert objects");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		delete_selection_action::revert(ss, sel);
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		delete_selection_action::apply(ss, sel);
 	}
 };
@@ -186,8 +186,8 @@ public:
 
 class move_objects_action : public abstract_action {
 protected:
-	std::tr1::shared_ptr<delete_selection_action> from;
-	std::tr1::shared_ptr<paste_objects_action> to;
+	std::shared_ptr<delete_selection_action> from;
+	std::shared_ptr<paste_objects_action> to;
 public:
 	move_objects_action(int s, std::set<object> const &del, std::set<object> const &add)
 		: from(new delete_selection_action(s, del)), to(new paste_objects_action(s, add)) {
@@ -196,17 +196,17 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Move objects");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		from->apply(ss, sel);
 		to->apply(ss, sel);
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		to->revert(ss, sel);
 		from->revert(ss, sel);
 	}
-	virtual MergeResult merge(std::tr1::shared_ptr<abstract_action> other) {
-		std::tr1::shared_ptr<move_objects_action> act =
-		    std::tr1::dynamic_pointer_cast<move_objects_action>(other);
+	virtual MergeResult merge(std::shared_ptr<abstract_action> other) {
+		std::shared_ptr<move_objects_action> act =
+		    std::dynamic_pointer_cast<move_objects_action>(other);
 		if (!act)
 			return eNoMerge;
 
@@ -235,7 +235,7 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Insert objects");
 	}
-	virtual MergeResult merge(std::tr1::shared_ptr<abstract_action> other) {
+	virtual MergeResult merge(std::shared_ptr<abstract_action> UNUSED(other)) {
 		return eNoMerge;
 	}
 };
@@ -262,7 +262,7 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Change selection");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		sslevels *currlvl = ss->get_stage(stage);
 		if (!currlvl)
 			return;
@@ -277,7 +277,7 @@ public:
 		if (sel)
 			sel->clear();
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		sslevels *currlvl = ss->get_stage(stage);
 		if (!currlvl)
 			return;
@@ -292,9 +292,9 @@ public:
 		if (sel)
 			sel->clear();
 	}
-	virtual MergeResult merge(std::tr1::shared_ptr<abstract_action> other) {
-		std::tr1::shared_ptr<alter_segment_action> act =
-		    std::tr1::dynamic_pointer_cast<alter_segment_action>(other);
+	virtual MergeResult merge(std::shared_ptr<abstract_action> other) {
+		std::shared_ptr<alter_segment_action> act =
+		    std::dynamic_pointer_cast<alter_segment_action>(other);
 		if (!act)
 			return eNoMerge;
 
@@ -315,7 +315,7 @@ public:
 class delete_segment_action : public abstract_action {
 protected:
 	sssegments segment;
-	int stage, seg;
+	unsigned stage, seg;
 public:
 	delete_segment_action(int s, int sg, sssegments const &sgm)
 		: segment(sgm), stage(s), seg(sg) {     }
@@ -323,7 +323,7 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Delete segment");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		sslevels *currlvl = ss->get_stage(stage);
 		if (seg >= currlvl->num_segments())
 			return;
@@ -332,7 +332,7 @@ public:
 		if (sel)
 			sel->clear();
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		sslevels *currlvl = ss->get_stage(stage);
 		if (seg == currlvl->num_segments())
 			ss->get_stage(stage)->append(segment);
@@ -361,10 +361,10 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Insert segment");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		delete_segment_action::revert(ss, sel);
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		delete_segment_action::apply(ss, sel);
 	}
 };
@@ -390,8 +390,7 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Move segment");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
-		sslevels *currlvl = ss->get_stage(stage);
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		if (dir > 0)
 			ss->get_stage(stage)->move_right(seg);
 		else if (dir < 0)
@@ -399,8 +398,7 @@ public:
 		if (sel)
 			sel->clear();
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
-		sslevels *currlvl = ss->get_stage(stage);
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		if (dir < 0)
 			ss->get_stage(stage)->move_right(seg - 1);
 		else if (dir > 0)
@@ -413,7 +411,7 @@ public:
 class delete_stage_action : public abstract_action {
 protected:
 	sslevels level;
-	int stage;
+	unsigned stage;
 public:
 	friend class move_stage_action;
 	delete_stage_action(int s, sslevels const &l)
@@ -422,7 +420,7 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Delete stage");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		if (stage >= ss->num_stages())
 			return;
 
@@ -430,7 +428,7 @@ public:
 		if (sel)
 			sel->clear();
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		if (stage == ss->num_stages())
 			ss->append(level);
 		else if (stage < ss->num_stages())
@@ -458,10 +456,10 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Insert stage");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		delete_stage_action::revert(ss, sel);
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		delete_stage_action::apply(ss, sel);
 	}
 };
@@ -487,7 +485,7 @@ public:
 	virtual std::string const display_string() const {
 		return std::string("Move stage");
 	}
-	virtual void apply(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		if (dir > 0)
 			ss->move_right(stage);
 		else if (dir < 0)
@@ -495,7 +493,7 @@ public:
 		if (sel)
 			sel->clear();
 	}
-	virtual void revert(std::tr1::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
+	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) {
 		if (dir < 0)
 			ss->move_right(stage - 1);
 		else if (dir > 0)

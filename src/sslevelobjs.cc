@@ -18,8 +18,9 @@
 
 #include "sslevelobjs.h"
 
-void sslevels::read(std::istream &in, std::istream &lay,
-                    size_t const term, size_t const term2) {
+using namespace std;
+
+void sslevels::read(istream &in, istream &lay, int term, int term2) {
 	while (in.tellg() < term && lay.tellg() < term2) {
 		sssegments nn;
 		nn.read(in, lay);
@@ -29,7 +30,7 @@ void sslevels::read(std::istream &in, std::istream &lay,
 
 size_t sslevels::size() const {
 	size_t sz = 0;
-	for (std::vector<sssegments>::const_iterator it = segments.begin();
+	for (vector<sssegments>::const_iterator it = segments.begin();
 	        it != segments.end(); ++it) {
 		sssegments const &sd = *it;
 		sz += sd.size();
@@ -38,15 +39,15 @@ size_t sslevels::size() const {
 }
 
 void sslevels::print() const {
-	for (std::vector<sssegments>::const_iterator it = segments.begin();
+	for (vector<sssegments>::const_iterator it = segments.begin();
 	        it != segments.end(); ++it) {
 		sssegments const &sd = *it;
 		sd.print();
 	}
 }
 
-void sslevels::write(std::ostream &out, std::ostream &lay) const {
-	for (std::vector<sssegments>::const_iterator it = segments.begin();
+void sslevels::write(ostream &out, ostream &lay) const {
+	for (vector<sssegments>::const_iterator it = segments.begin();
 	        it != segments.end(); ++it) {
 		sssegments const &sd = *it;
 		sd.write(out, lay);

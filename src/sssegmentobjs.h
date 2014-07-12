@@ -23,6 +23,17 @@
 #include <istream>
 #include <ostream>
 
+#ifdef UNUSED
+#elif defined(__GNUC__)
+#	define UNUSED(x) UNUSED_ ## x __attribute__((unused))
+#elif defined(__LCLINT__)
+#	define UNUSED(x) /*@unused@*/ x
+#elif defined(__cplusplus)
+#	define UNUSED(x)
+#else
+#	define UNUSED(x) x
+#endif
+
 class sssegments {
 public:
 	enum SegmentTypes {
@@ -94,7 +105,7 @@ public:
 	SegmentGeometry get_geometry() const {
 		return geometry;
 	}
-	static unsigned int get_length(SegmentGeometry geometry) {
+	static unsigned int get_length(SegmentGeometry UNUSED(geometry)) {
 		// Not yet:
 		/*
 		switch (geometry)
