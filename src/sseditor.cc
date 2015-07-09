@@ -1,7 +1,7 @@
 /* -*- Mode: C++; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
  * S2-SSEdit
- * Copyright (C) Flamewing 2011 <flamewing.sonic@gmail.com>
+ * Copyright (C) Flamewing 2011-2015 <flamewing.sonic@gmail.com>
  *
  * S2-SSEdit is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
