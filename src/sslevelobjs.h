@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SSLEVELOBJS_H_
-#define _SSLEVELOBJS_H_
+#ifndef __SSLEVELOBJS_H
+#define __SSLEVELOBJS_H
 
 #include <vector>
 #include <istream>
@@ -34,8 +34,9 @@ public:
 		copy(other);
 	}
 	sslevels &operator=(sslevels const &other) {
-		if (this != &other)
+		if (this != &other) {
 			copy(other);
+		}
 		return *this;
 	}
 	void copy(sslevels const &other) {
@@ -76,22 +77,25 @@ public:
 	}
 	sssegments *remove(size_t s) {
 		std::vector<sssegments>::iterator it = segments.erase(segments.begin() + s);
-		if (it == segments.end())
+		if (it == segments.end()) {
 			return &segments.back();
+		}
 		return &*it;
 	}
 	sssegments *move_left(size_t s) {
-		if (s == 0)
+		if (s == 0) {
 			return &segments.front();
+		}
 		std::swap(segments[s - 1], segments[s]);
 		return &segments[s - 1];
 	}
 	sssegments *move_right(size_t s) {
-		if (s >= segments.size() - 1)
+		if (s >= segments.size() - 1) {
 			return &segments.back();
+		}
 		std::swap(segments[s], segments[s + 1]);
 		return &segments[s + 1];
 	}
 };
 
-#endif // _SSLEVELOBJS_H_
+#endif // __SSLEVELOBJS_H

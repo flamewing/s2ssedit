@@ -16,12 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SSOBJFILE_H_
-#define _SSOBJFILE_H_
+#ifndef __SSOBJFILE_H
+#define __SSOBJFILE_H
 
 #include <algorithm>
-#include <vector>
 #include <istream>
+#include <vector>
 #include <ostream>
 #include <string>
 
@@ -68,19 +68,22 @@ public:
 	}
 	sslevels *remove(size_t s) {
 		std::vector<sslevels>::iterator it = stages.erase(stages.begin() + s);
-		if (it == stages.end())
+		if (it == stages.end()) {
 			return &stages.back();
+		}
 		return &*it;
 	}
 	sslevels *move_left(size_t s) {
-		if (s == 0)
+		if (s == 0) {
 			return &stages.front();
+		}
 		std::swap(stages[s - 1], stages[s]);
 		return &stages[s - 1];
 	}
 	sslevels *move_right(size_t s) {
-		if (s >= stages.size() - 1)
+		if (s >= stages.size() - 1) {
 			return &stages.back();
+		}
 		std::swap(stages[s], stages[s + 1]);
 		return &stages[s + 1];
 	}
@@ -90,4 +93,4 @@ public:
 	}
 };
 
-#endif // _SSOBJFILE_H_
+#endif // __SSOBJFILE_H

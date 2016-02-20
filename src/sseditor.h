@@ -16,16 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SSEDITOR_H_
-#define _SSEDITOR_H_
+#ifndef __SSEDITOR_H
+#define __SSEDITOR_H
 
 #include <memory>
 
 #include <deque>
 #include <set>
 #include "abstractaction.h"
-#include "ssobjfile.h"
 #include "object.h"
+#include "ssobjfile.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#pragma GCC diagnostic ignored "-Winline"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#include <gtkmm.h>
+#pragma GCC diagnostic pop
 
 #define IMAGE_SIZE 16
 
@@ -180,8 +188,9 @@ private:
 	void draw_outlines(std::set<object> &col1, std::set<object> &col2,
 	                   Cairo::RefPtr<Cairo::Context> cr) {
 		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it) {
-			if (col2.find(*it) != col2.end())
+			if (col2.find(*it) != col2.end()) {
 				continue;
+			}
 			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
 			int ty = (segpos[it->get_segment()] +
 			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
@@ -235,17 +244,20 @@ private:
 		abstract_action::MergeResult ret;
 		if (!undostack.size()
 		        || (ret = undostack.front()->merge(act)) == abstract_action::eNoMerge) {
-			if (undostack.size() == 100)
+			if (undostack.size() == 100) {
 				undostack.pop_back();
+			}
 			undostack.push_front(act);
-		} else if (ret == abstract_action::eDeleteAction)
+		} else if (ret == abstract_action::eDeleteAction) {
 			undostack.pop_front();
+		}
 		act->apply(specialstages, static_cast<std::set<object> *>(0));
 	}
 public:
 	static sseditor *create_instance(int argc, char *argv[], char const *uifile) {
-		if (!instance)
+		if (!instance) {
 			instance = new sseditor(argc, argv, uifile);
+		}
 		return instance;
 	}
 	static sseditor *get_instance() {
@@ -345,12 +357,12 @@ public:
 	// Segment flags
 	template <sssegments::SegmentTypes N, Gtk::RadioButton *sseditor::*btn>
 	void on_segmenttype_toggled() {
-		if (!specialstages || update_in_progress)
+		if (!specialstages || update_in_progress) {
 			return;
-
-		if (!(this->*btn)->get_active())
+		}
+		if (!(this->*btn)->get_active()) {
 			return;
-
+		}
 		sslevels *currlvl = specialstages->get_stage(currstage);
 		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
@@ -363,12 +375,12 @@ public:
 	}
 	template <sssegments::SegmentGeometry N, Gtk::RadioButton *sseditor::*btn>
 	void on_segment_segmentgeometry_toggled() {
-		if (!specialstages || update_in_progress)
+		if (!specialstages || update_in_progress) {
 			return;
-
-		if (!(this->*btn)->get_active())
+		}
+		if (!(this->*btn)->get_active()) {
 			return;
-
+		}
 		sslevels *currlvl = specialstages->get_stage(currstage);
 		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
@@ -382,12 +394,12 @@ public:
 	}
 	template <bool tf, Gtk::RadioButton *sseditor::*btn>
 	void on_segmentdirection_toggled() {
-		if (!specialstages || update_in_progress)
+		if (!specialstages || update_in_progress) {
 			return;
-
-		if (!(this->*btn)->get_active())
+		}
+		if (!(this->*btn)->get_active()) {
 			return;
-
+		}
 		sslevels *currlvl = specialstages->get_stage(currstage);
 		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
@@ -405,12 +417,12 @@ public:
 	}
 	template <sssegments::ObjectTypes N, Gtk::RadioButton *sseditor::*btn>
 	void on_objecttype_toggled() {
-		if (!specialstages || selection.empty() || update_in_progress)
+		if (!specialstages || selection.empty() || update_in_progress) {
 			return;
-
-		if (!(this->*btn)->get_active())
+		}
+		if (!(this->*btn)->get_active()) {
 			return;
-
+		}
 		std::shared_ptr<abstract_action>
 		act(new alter_selection_action(currstage, N, selection));
 		do_action(act);
@@ -433,4 +445,4 @@ protected:
 	void update();
 };
 
-#endif // _SSEDITOR_H_
+#endif // __SSEDITOR_H

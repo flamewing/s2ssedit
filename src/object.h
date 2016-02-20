@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _OBJECT_H_
-#define _OBJECT_H_
+#ifndef __OBJECT_H
+#define __OBJECT_H
 
 #include "ssobjfile.h"
 
@@ -48,14 +48,16 @@ public:
 		return segment != -1;
 	}
 	bool operator<(object const &other) const {
-		if (segment < other.segment)
+		if (segment < other.segment) {
 			return true;
-		else if (segment > other.segment)
+		} else if (segment > other.segment) {
 			return false;
-		if (pos < other.pos)
+		}
+		if (pos < other.pos) {
 			return true;
-		else if (pos > other.pos)
+		} else if (pos > other.pos) {
 			return false;
+		}
 		return angle < other.angle;
 	}
 	bool operator==(object const &other) const {
@@ -104,4 +106,4 @@ struct ObjectMatchFunctor {
 	}
 };
 
-#endif // _OBJECT_H_
+#endif // __OBJECT_H
