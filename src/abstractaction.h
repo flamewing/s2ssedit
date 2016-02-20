@@ -63,22 +63,20 @@ public:
 		if (sel) {
 			sel->clear();
 		}
-		for (std::set<object>::iterator it = objlist.begin();
-		        it != objlist.end(); ++it) {
-			sssegments *currseg = currlvl->get_segment(it->get_segment());
-			currseg->update(it->get_pos(), it->get_angle(), type, false);
+		for (const auto & elem : objlist) {
+			sssegments *currseg = currlvl->get_segment(elem.get_segment());
+			currseg->update(elem.get_pos(), elem.get_angle(), type, false);
 			if (sel) {
-				sel->insert(object(it->get_segment(), it->get_angle(),
-				                   it->get_pos(), type));
+				sel->insert(object(elem.get_segment(), elem.get_angle(),
+				                   elem.get_pos(), type));
 			}
 		}
 	}
 	void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) override {
 		sslevels *currlvl = ss->get_stage(stage);
-		for (std::set<object>::iterator it = objlist.begin();
-		        it != objlist.end(); ++it) {
-			sssegments *currseg = currlvl->get_segment(it->get_segment());
-			currseg->update(it->get_pos(), it->get_angle(), it->get_type(), false);
+		for (const auto & elem : objlist) {
+			sssegments *currseg = currlvl->get_segment(elem.get_segment());
+			currseg->update(elem.get_pos(), elem.get_angle(), elem.get_type(), false);
 		}
 		if (sel) {
 			*sel = objlist;
@@ -99,9 +97,8 @@ public:
 			return eNoMerge;
 		}
 
-		for (std::set<object>::iterator it = objlist.begin();
-		        it != objlist.end(); ++it) {
-			if (it->get_type() != act->type) {
+		for (const auto & elem : objlist) {
+			if (elem.get_type() != act->type) {
 				type = act->type;
 				return eMergedActions;
 			}
@@ -129,29 +126,27 @@ public:
 		sslevels *currlvl = ss->get_stage(stage);
 		int numsegments = currlvl->num_segments();
 
-		for (std::set<object>::iterator it = objlist.begin();
-		        it != objlist.end(); ++it) {
-			if (it->get_segment() >= numsegments) {
+		for (const auto & elem : objlist) {
+			if (elem.get_segment() >= numsegments) {
 				continue;
 			}
 
-			sssegments *currseg = currlvl->get_segment(it->get_segment());
-			currseg->remove(it->get_pos(), it->get_angle());
+			sssegments *currseg = currlvl->get_segment(elem.get_segment());
+			currseg->remove(elem.get_pos(), elem.get_angle());
 		}
 	}
 	void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) override {
 		sslevels *currlvl = ss->get_stage(stage);
 		int numsegments = currlvl->num_segments();
 
-		for (std::set<object>::iterator it = objlist.begin();
-		        it != objlist.end(); ++it) {
-			if (it->get_segment() >= numsegments) {
+		for (const auto & elem : objlist) {
+			if (elem.get_segment() >= numsegments) {
 				continue;
 			}
 
-			sssegments *currseg = currlvl->get_segment(it->get_segment());
-			currseg->update(it->get_pos(), it->get_angle(),
-			                it->get_type(), true);
+			sssegments *currseg = currlvl->get_segment(elem.get_segment());
+			currseg->update(elem.get_pos(), elem.get_angle(),
+			                elem.get_type(), true);
 		}
 		if (sel) {
 			*sel = objlist;

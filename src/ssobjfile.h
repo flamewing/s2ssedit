@@ -67,7 +67,7 @@ public:
 		return &stages.back();
 	}
 	sslevels *remove(size_t s) {
-		std::vector<sslevels>::iterator it = stages.erase(stages.begin() + s);
+		auto it = stages.erase(stages.begin() + s);
 		if (it == stages.end()) {
 			return &stages.back();
 		}

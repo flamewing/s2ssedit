@@ -53,10 +53,9 @@ public:
 		segpos.clear();
 		segpos.reserve(segments.size());
 		size_t tally = 0;
-		for (std::vector<sssegments>::const_iterator it = segments.begin();
-		        it != segments.end(); ++it) {
+		for (const auto & elem : segments) {
 			segpos.push_back(tally);
-			tally += it->get_length();
+			tally += elem.get_length();
 		}
 		// Total size.
 		return tally;
@@ -76,7 +75,7 @@ public:
 		return &segments.back();
 	}
 	sssegments *remove(size_t s) {
-		std::vector<sssegments>::iterator it = segments.erase(segments.begin() + s);
+		auto it = segments.erase(segments.begin() + s);
 		if (it == segments.end()) {
 			return &segments.back();
 		}

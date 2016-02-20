@@ -143,12 +143,12 @@ public:
 		return objects[row];
 	}
 	bool exists(unsigned char row, unsigned char angle, ObjectTypes &type) const {
-		segobjs::const_iterator it = objects.find(row);
+		auto it = objects.find(row);
 		if (it == objects.end()) {
 			return false;
 		}
 		segobjs::mapped_type const &t = it->second;
-		segobjs::mapped_type::const_iterator it2 = t.find(angle);
+		auto it2 = t.find(angle);
 		if (it2 == t.end()) {
 			return false;
 		}
@@ -156,7 +156,7 @@ public:
 		return true;
 	}
 	void update(unsigned char row, unsigned char angle, ObjectTypes type, bool insert) {
-		segobjs::iterator it = objects.find(row);
+		auto it = objects.find(row);
 		if (it == objects.end()) {
 			if (!insert) {
 				return;
@@ -166,7 +166,7 @@ public:
 			objects[row] = t;
 		} else {
 			segobjs::mapped_type &t = it->second;
-			segobjs::mapped_type::iterator it2 = t.find(angle);
+			auto it2 = t.find(angle);
 			if (it2 == t.end()) {
 				if (!insert) {
 					return;
@@ -197,12 +197,12 @@ public:
 		}
 	}
 	void remove(unsigned char row, unsigned char angle) {
-		segobjs::iterator it = objects.find(row);
+		auto it = objects.find(row);
 		if (it == objects.end()) {
 			return;
 		}
 		segobjs::mapped_type &t = it->second;
-		segobjs::mapped_type::iterator it2 = t.find(angle);
+		auto it2 = t.find(angle);
 		if (it2 == t.end()) {
 			return;
 		}

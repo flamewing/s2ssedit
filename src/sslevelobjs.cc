@@ -30,26 +30,20 @@ void sslevels::read(istream &in, istream &lay, int term, int term2) {
 
 size_t sslevels::size() const {
 	size_t sz = 0;
-	for (vector<sssegments>::const_iterator it = segments.begin();
-	        it != segments.end(); ++it) {
-		sssegments const &sd = *it;
+	for (const auto & sd : segments) {
 		sz += sd.size();
 	}
 	return sz;
 }
 
 void sslevels::print() const {
-	for (vector<sssegments>::const_iterator it = segments.begin();
-	        it != segments.end(); ++it) {
-		sssegments const &sd = *it;
+	for (const auto & sd : segments) {
 		sd.print();
 	}
 }
 
 void sslevels::write(ostream &out, ostream &lay) const {
-	for (vector<sssegments>::const_iterator it = segments.begin();
-	        it != segments.end(); ++it) {
-		sssegments const &sd = *it;
+	for (const auto & sd : segments) {
 		sd.write(out, lay);
 	}
 }

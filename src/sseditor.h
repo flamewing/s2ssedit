@@ -177,32 +177,32 @@ private:
 	void render();
 	void show();
 	void draw_outlines(std::set<object> &col, Cairo::RefPtr<Cairo::Context> cr) {
-		for (std::set<object>::iterator it = col.begin(); it != col.end(); ++it) {
-			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
-			int ty = (segpos[it->get_segment()] +
-			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
+		for (const auto & elem : col) {
+			int tx = angle_to_x(elem.get_angle()) - IMAGE_SIZE / 2;
+			int ty = (segpos[elem.get_segment()] +
+			          elem.get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
 			cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
 			cr->stroke();
 		}
 	}
 	void draw_outlines(std::set<object> &col1, std::set<object> &col2,
 	                   Cairo::RefPtr<Cairo::Context> cr) {
-		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it) {
-			if (col2.find(*it) != col2.end()) {
+		for (const auto & elem : col1) {
+			if (col2.find(elem) != col2.end()) {
 				continue;
 			}
-			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
-			int ty = (segpos[it->get_segment()] +
-			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
+			int tx = angle_to_x(elem.get_angle()) - IMAGE_SIZE / 2;
+			int ty = (segpos[elem.get_segment()] +
+			          elem.get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
 			cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
 			cr->stroke();
 		}
 	}
 	void draw_x(std::set<object> &col1, Cairo::RefPtr<Cairo::Context> cr) {
-		for (std::set<object>::iterator it = col1.begin(); it != col1.end(); ++it) {
-			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
-			int ty = (segpos[it->get_segment()] +
-			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
+		for (const auto & elem : col1) {
+			int tx = angle_to_x(elem.get_angle()) - IMAGE_SIZE / 2;
+			int ty = (segpos[elem.get_segment()] +
+			          elem.get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
 			cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
 			cr->move_to(tx, ty);
 			cr->line_to(tx + IMAGE_SIZE, ty + IMAGE_SIZE);
@@ -212,12 +212,12 @@ private:
 		}
 	}
 	void draw_objects(std::set<object> &col, Cairo::RefPtr<Cairo::Context> cr) {
-		for (std::set<object>::iterator it = col.begin(); it != col.end(); ++it) {
-			Glib::RefPtr<Gdk::Pixbuf> image = (it->get_type() == sssegments::eBomb)
+		for (const auto & elem : col) {
+			Glib::RefPtr<Gdk::Pixbuf> image = (elem.get_type() == sssegments::eBomb)
 			                                  ? bombimg : ringimg;
-			int tx = angle_to_x(it->get_angle()) - IMAGE_SIZE / 2;
-			int ty = (segpos[it->get_segment()] +
-			          it->get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
+			int tx = angle_to_x(elem.get_angle()) - IMAGE_SIZE / 2;
+			int ty = (segpos[elem.get_segment()] +
+			          elem.get_pos() - pvscrollbar->get_value()) * IMAGE_SIZE;
 			Gdk::Cairo::set_source_pixbuf(cr, image, tx, ty);
 			cr->paint_with_alpha(0.5);
 
@@ -251,7 +251,7 @@ private:
 		} else if (ret == abstract_action::eDeleteAction) {
 			undostack.pop_front();
 		}
-		act->apply(specialstages, static_cast<std::set<object> *>(0));
+		act->apply(specialstages, static_cast<std::set<object> *>(nullptr));
 	}
 public:
 	static sseditor *create_instance(int argc, char *argv[], char const *uifile) {
@@ -429,11 +429,10 @@ public:
 
 		std::set<object> temp;
 		//sslevels *currlvl = specialstages->get_stage(currstage);
-		for (std::set<object>::iterator it = selection.begin();
-		        it != selection.end(); ++it) {
+		for (const auto & elem : selection) {
 			//sssegments *currseg = currlvl->get_segment(it->get_segment());
-			temp.insert(object(it->get_segment(), it->get_angle(),
-			                   it->get_pos(), N));
+			temp.insert(object(elem.get_segment(), elem.get_angle(),
+			                   elem.get_pos(), N));
 		}
 		selection.swap(temp);
 

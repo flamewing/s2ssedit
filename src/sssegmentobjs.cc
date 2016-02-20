@@ -61,9 +61,8 @@ void sssegments::read(istream &in, istream &lay) {
 
 size_t sssegments::size() const {
 	size_t sz = 1;  // Terminator
-	for (segobjs::const_iterator it = objects.begin();
-	        it != objects.end(); ++it) {
-		segobjs::mapped_type const &posobjs = it->second;
+	for (const auto & elem : objects) {
+		segobjs::mapped_type const &posobjs = elem.second;
 		sz += (2 * posobjs.size());
 	}
 	return sz;
@@ -100,13 +99,12 @@ void sssegments::print() const {
 	cout << buf << endl;
 	for (size_t i = 0; i < 0x40; i++) {
 		memset(buf + 1, ' ', sizeof(buf) - 3);
-		segobjs::const_iterator it0 = objects.find(i);
+		auto it0 = objects.find(i);
 		if (it0 != objects.end()) {
 			segobjs::mapped_type const &posobjs = it0->second;
-			for (segobjs::mapped_type::const_iterator it = posobjs.begin();
-			        it != posobjs.end(); ++it) {
-				size_t angle = ((it->first + 0x40) & 0xff);
-				switch ((it->second)) {
+			for (const auto & posobj : posobjs) {
+				size_t angle = ((posobj.first + 0x40) & 0xff);
+				switch ((posobj.second)) {
 					case eBomb:         // Bomb
 						buf[1 + angle] = '*';
 						break;
@@ -121,14 +119,12 @@ void sssegments::print() const {
 }
 
 void sssegments::write(ostream &out, ostream &lay) const {
-	for (segobjs::const_iterator it = objects.begin();
-	        it != objects.end(); ++it) {
-		segobjs::mapped_type const &posobjs = it->second;
-		unsigned char pos = it->first;
-		for (segobjs::mapped_type::const_iterator it2 = posobjs.begin();
-		        it2 != posobjs.end(); ++it2) {
-			Write1(out, ((it2->second) | pos));
-			Write1(out, (it2->first));
+	for (const auto & elem : objects) {
+		segobjs::mapped_type const &posobjs = elem.second;
+		unsigned char pos = elem.first;
+		for (const auto & posobj : posobjs) {
+			Write1(out, ((posobj.second) | pos));
+			Write1(out, (posobj.first));
 		}
 	}
 	Write1(out, terminator);

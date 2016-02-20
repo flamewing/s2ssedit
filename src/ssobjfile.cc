@@ -127,9 +127,8 @@ void ssobj_file::read_internal(istream &objfile, istream &layfile) {
 
 size_t ssobj_file::size() const {
 	size_t sz = 2 * stages.size();
-	for (vector<sslevels>::const_iterator it = stages.begin();
-	        it != stages.end(); ++it) {
-		sz += it->size();
+	for (const auto & elem : stages) {
+		sz += elem.size();
 	}
 	return sz;
 }
@@ -138,10 +137,8 @@ void ssobj_file::print() const {
 	char buf[0x103];
 	buf[0x102] = 0;
 	memset(buf, '=', sizeof(buf) - 1);
-	for (vector<sslevels>::const_iterator it = stages.begin();
-	        it != stages.end(); ++it) {
+	for (const auto & sd : stages) {
 		cout << buf << endl;
-		sslevels const &sd = *it;
 		sd.print();
 	}
 }
@@ -196,17 +193,13 @@ void ssobj_file::write_snapshot(int i) const {
 
 void ssobj_file::write_internal(ostream &objfile, ostream &layfile) const {
 	size_t sz = 2 * stages.size(), off = sz;
-	for (vector<sslevels>::const_iterator it = stages.begin();
-	        it != stages.end(); ++it) {
-		sslevels const &sd = *it;
+	for (const auto & sd : stages) {
 		BigEndian::Write2(objfile, sz);
 		BigEndian::Write2(layfile, off);
 		sz += sd.size();
 		off += sd.num_segments();
 	}
-	for (vector<sslevels>::const_iterator it = stages.begin();
-	        it != stages.end(); ++it) {
-		sslevels const &sd = *it;
+	for (const auto & sd : stages) {
 		sd.write(objfile, layfile);
 	}
 }
