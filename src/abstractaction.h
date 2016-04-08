@@ -27,6 +27,7 @@
 #include "object.h"
 #include "sslevelobjs.h"
 #include "sssegmentobjs.h"
+#include "ignore_unused_variable_warning.h"
 
 class ssobj_file;
 
@@ -41,7 +42,8 @@ public:
 	virtual std::string const display_string() const = 0;
 	virtual void apply(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) = 0;
 	virtual void revert(std::shared_ptr<ssobj_file> ss, std::set<object> *sel) = 0;
-	virtual MergeResult merge(std::shared_ptr<abstract_action> UNUSED(other)) {
+	virtual MergeResult merge(std::shared_ptr<abstract_action> other) {
+		ignore_unused_variable_warning(other);
 		return eNoMerge;
 	}
 };
@@ -245,7 +247,8 @@ public:
 	std::string const display_string() const override {
 		return std::string("Insert objects");
 	}
-	MergeResult merge(std::shared_ptr<abstract_action> UNUSED(other)) override {
+	MergeResult merge(std::shared_ptr<abstract_action> other) override {
+		ignore_unused_variable_warning(other);
 		return eNoMerge;
 	}
 };

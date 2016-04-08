@@ -52,7 +52,8 @@ s2ssedit_SOURCES = \
 	ssobjfile.h   \
 	ssobjfile.cc   \
 	abstractaction.h   \
-	object.h   
+	object.h   \
+	lib/ignore_unused_variable_warning.h   
 
 s2ssedit_CXXFLAGS = \
 	-I$(srcdir)/lib $(EXTRA_FLAGS)

@@ -23,16 +23,7 @@
 #include <istream>
 #include <ostream>
 
-#ifdef UNUSED
-#elif defined(__GNUC__)
-#	define UNUSED(x) UNUSED_ ## x __attribute__((unused))
-#elif defined(__LCLINT__)
-#	define UNUSED(x) /*@unused@*/ x
-#elif defined(__cplusplus)
-#	define UNUSED(x)
-#else
-#	define UNUSED(x) x
-#endif
+#include "ignore_unused_variable_warning.h"
 
 class sssegments {
 public:
@@ -106,7 +97,8 @@ public:
 	SegmentGeometry get_geometry() const {
 		return geometry;
 	}
-	static unsigned int get_length(SegmentGeometry UNUSED(geometry)) {
+	static unsigned int get_length(SegmentGeometry geometry) {
+		ignore_unused_variable_warning(geometry);
 		// Not yet:
 		/*
 		switch (geometry)

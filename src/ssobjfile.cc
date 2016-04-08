@@ -26,6 +26,7 @@
 #include <mdcomp/nemesis.h>
 #include "ssobjfile.h"
 #include "bigendian_io.h"
+#include "ignore_unused_variable_warning.h"
 
 using namespace std;
 
@@ -65,7 +66,8 @@ void ssobj_file::read() {
 	read_internal(objfile, layfile);
 }
 
-void ssobj_file::read_backup(int UNUSED(i)) {
+void ssobj_file::read_backup(int i) {
+	ignore_unused_variable_warning(i);
 	ifstream fobj((objectfile + "~").c_str(), ios::in | ios::binary),
 	         flay((layoutfile + "~").c_str(), ios::in | ios::binary);
 

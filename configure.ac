@@ -42,7 +42,7 @@ AM_CONDITIONAL(BUILD_ICON, test ! x$ICON_FILE = x)
 
 AC_PROG_CXX
 AC_LANG([C++])
-AX_CXX_COMPILE_STDCXX_11([],[mandatory])
+AX_CXX_COMPILE_STDCXX_14([],[mandatory])
 AC_HEADER_STDC
 
 CXXFLAGS="$CXXFLAGS -Wall -Wextra -pedantic -Wcast-qual -Wold-style-cast"

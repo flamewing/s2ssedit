@@ -29,6 +29,7 @@
 
 #include "sseditor.h"
 
+#include "ignore_unused_variable_warning.h"
 #include "bigendian_io.h"
 #include "ssobjfile.h"
 
@@ -175,7 +176,7 @@ sseditor::sseditor(int argc, char *argv[], char const *uifile)
 
 	pspecialstageobjs->signal_configure_event().connect(
 	    sigc::mem_fun(this, &sseditor::on_specialstageobjs_configure_event));
-	pspecialstageobjs->signal_expose_event().connect(
+		  pspecialstageobjs->signal_expose_event().connect(
 	    sigc::mem_fun(this, &sseditor::on_specialstageobjs_expose_event));
 	pspecialstageobjs->signal_key_press_event().connect(
 	    sigc::mem_fun(this, &sseditor::on_specialstageobjs_key_press_event));
@@ -797,7 +798,8 @@ void sseditor::on_redobutton_clicked() {
 	update();
 }
 
-void sseditor::on_helpdialog_response(int UNUSED(response_id)) {
+void sseditor::on_helpdialog_response(int response_id) {
+	ignore_unused_variable_warning(response_id);
 	helpdlg->hide();
 }
 
@@ -812,7 +814,8 @@ void sseditor::on_helpbutton_clicked() {
 	}
 }
 
-void sseditor::on_aboutdialog_response(int UNUSED(response_id)) {
+void sseditor::on_aboutdialog_response(int response_id) {
+	ignore_unused_variable_warning(response_id);
 	aboutdlg->hide();
 }
 
@@ -1567,7 +1570,8 @@ void sseditor::show() {
 	}
 }
 
-bool sseditor::on_specialstageobjs_expose_event(GdkEventExpose *UNUSED(event)) {
+bool sseditor::on_specialstageobjs_expose_event(GdkEventExpose *event) {
+	ignore_unused_variable_warning(event);
 	show();
 	return true;
 }
@@ -1854,6 +1858,7 @@ bool sseditor::on_specialstageobjs_scroll_event(GdkEventScroll *event) {
 				pmodebuttons[mode]->set_active(true);
 			}
 			break;
+
 	}
 
 	return true;
@@ -1861,8 +1866,9 @@ bool sseditor::on_specialstageobjs_scroll_event(GdkEventScroll *event) {
 
 void sseditor::object_triangle(
     int x, int y, int dx, int dy, int h, sssegments::ObjectTypes type,
-    bool fill, set<object> &UNUSED(col)
+    bool fill, set<object> &col
 ) {
+	ignore_unused_variable_warning(col);
 	//sslevels *currlvl = specialstages->get_stage(currstage);
 	int numsegments = segpos.size();
 	int angle = x;
@@ -2223,8 +2229,9 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion *event) {
 }
 
 void sseditor::on_specialstageobjs_drag_begin(
-    Glib::RefPtr<Gdk::DragContext> const &UNUSED(targets)
+    Glib::RefPtr<Gdk::DragContext> const &targets
 ) {
+	ignore_unused_variable_warning(targets);
 	if (selection.empty()) {
 		return;
 	}
@@ -2236,9 +2243,11 @@ void sseditor::on_specialstageobjs_drag_begin(
 }
 
 bool sseditor::on_drag_motion(
-    Glib::RefPtr<Gdk::DragContext> const &UNUSED(context),
-    int x, int y, guint UNUSED(time)
+    Glib::RefPtr<Gdk::DragContext> const &context,
+    int x, int y, guint time
 ) {
+	ignore_unused_variable_warning(context);
+	ignore_unused_variable_warning(time);
 	if (y < 5) {
 		pvscrollbar->set_value(pvscrollbar->get_value() - 4.0);
 	} else if (draw_height - y < 5) {
@@ -2293,10 +2302,13 @@ bool sseditor::on_drag_motion(
 }
 
 void sseditor::on_specialstageobjs_drag_data_get(
-    Glib::RefPtr<Gdk::DragContext> const &UNUSED(targets),
+    Glib::RefPtr<Gdk::DragContext> const &targets,
     Gtk::SelectionData &selection_data,
-    guint UNUSED(info), guint UNUSED(time)
+    guint info, guint time
 ) {
+	ignore_unused_variable_warning(targets);
+	ignore_unused_variable_warning(info);
+	ignore_unused_variable_warning(time);
 	if (insertstack.empty()) {
 		return;
 	}
@@ -2312,15 +2324,19 @@ void sseditor::on_specialstageobjs_drag_data_get(
 }
 
 void sseditor::on_specialstageobjs_drag_end(
-    Glib::RefPtr<Gdk::DragContext> const &UNUSED(context)
+    Glib::RefPtr<Gdk::DragContext> const &context
 ) {
+	ignore_unused_variable_warning(context);
 	dragging = false;
 }
 
 void sseditor::on_specialstageobjs_drag_data_received(
-    Glib::RefPtr<Gdk::DragContext> const &context, int UNUSED(x), int UNUSED(y),
-    Gtk::SelectionData const &selection_data, guint UNUSED(info), guint time
+    Glib::RefPtr<Gdk::DragContext> const &context, int x, int y,
+    Gtk::SelectionData const &selection_data, guint info, guint time
 ) {
+	ignore_unused_variable_warning(x);
+	ignore_unused_variable_warning(y);
+	ignore_unused_variable_warning(info);
 	if (selection_data.get_data_type() == "SpecialStageObjects"
 	        && selection_data.get_length() > 0) {
 		//set<object> temp = sourcestack;

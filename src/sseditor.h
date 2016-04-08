@@ -32,6 +32,7 @@
 #pragma GCC diagnostic ignored "-Wredundant-decls"
 #pragma GCC diagnostic ignored "-Winline"
 #pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <gtkmm.h>
 #pragma GCC diagnostic pop
 
