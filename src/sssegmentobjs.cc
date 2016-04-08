@@ -47,7 +47,7 @@ void sssegments::read(istream &in, istream &lay) {
 				break;
 		}
 		segobjs::mapped_type &posobjs = objects[pos];
-		posobjs.insert(segobjs::mapped_type::value_type(angle, ObjectTypes(type)));
+		posobjs.emplace(angle, ObjectTypes(type));
 		if ((angle & 0x80) == 0) {
 			numshadows++;
 		}

@@ -368,10 +368,9 @@ public:
 		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
-		std::shared_ptr<abstract_action>
-		act(new alter_segment_action(currstage, currsegment, *currseg,
-		                             currseg->get_direction(), N,
-		                             currseg->get_geometry()));
+		auto act = std::make_shared<alter_segment_action>(currstage, currsegment, *currseg,
+		                                                  currseg->get_direction(), N,
+		                                                  currseg->get_geometry());
 		do_action(act);
 	}
 	template <sssegments::SegmentGeometry N, Gtk::RadioButton *sseditor::*btn>
@@ -386,10 +385,9 @@ public:
 		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
-		std::shared_ptr<abstract_action>
-		act(new alter_segment_action(currstage, currsegment, *currseg,
-		                             currseg->get_direction(), currseg->get_type(),
-		                             N));
+		auto act = std::make_shared<alter_segment_action>(currstage, currsegment, *currseg,
+		                                                  currseg->get_direction(),
+		                                                  currseg->get_type(), N);
 		do_action(act);
 		update_segment_positions(false);
 	}
@@ -405,10 +403,9 @@ public:
 		//size_t numsegments = currlvl->num_segments();
 		sssegments *currseg = currlvl->get_segment(currsegment);
 
-		std::shared_ptr<abstract_action>
-		act(new alter_segment_action(currstage, currsegment, *currseg,
-		                             tf, currseg->get_type(),
-		                             currseg->get_geometry()));
+		auto act = std::make_shared<alter_segment_action>(currstage, currsegment, *currseg,
+		                                                  tf, currseg->get_type(),
+		                                                  currseg->get_geometry());
 		do_action(act);
 	}
 	// Object flags
@@ -424,16 +421,14 @@ public:
 		if (!(this->*btn)->get_active()) {
 			return;
 		}
-		std::shared_ptr<abstract_action>
-		act(new alter_selection_action(currstage, N, selection));
+		auto act = std::make_shared<alter_selection_action>(currstage, N, selection);
 		do_action(act);
 
 		std::set<object> temp;
 		//sslevels *currlvl = specialstages->get_stage(currstage);
 		for (const auto & elem : selection) {
 			//sssegments *currseg = currlvl->get_segment(it->get_segment());
-			temp.insert(object(elem.get_segment(), elem.get_angle(),
-			                   elem.get_pos(), N));
+			temp.emplace(elem.get_segment(), elem.get_angle(), elem.get_pos(), N);
 		}
 		selection.swap(temp);
 

@@ -198,7 +198,8 @@ protected:
 	std::shared_ptr<paste_objects_action> to;
 public:
 	move_objects_action(int s, std::set<object> const &del, std::set<object> const &add)
-		: from(new delete_selection_action(s, del)), to(new paste_objects_action(s, add)) {
+		: from(std::make_shared<delete_selection_action>(s, del)),
+		  to(std::make_shared<paste_objects_action>(s, add)) {
 	}
 	~move_objects_action() override {  }
 	std::string const display_string() const override {
