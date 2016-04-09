@@ -2206,8 +2206,7 @@ bool sseditor::on_drag_motion(
     Glib::RefPtr<Gdk::DragContext> const &context,
     int x, int y, guint time
 ) {
-	ignore_unused_variable_warning(context);
-	ignore_unused_variable_warning(time);
+	ignore_unused_variable_warning(context, time);
 	if (y < 5) {
 		pvscrollbar->set_value(pvscrollbar->get_value() - 4.0);
 	} else if (draw_height - y < 5) {
@@ -2266,9 +2265,7 @@ void sseditor::on_specialstageobjs_drag_data_get(
     Gtk::SelectionData &selection_data,
     guint info, guint time
 ) {
-	ignore_unused_variable_warning(targets);
-	ignore_unused_variable_warning(info);
-	ignore_unused_variable_warning(time);
+	ignore_unused_variable_warning(targets, info, time);
 	if (insertstack.empty()) {
 		return;
 	}
@@ -2294,9 +2291,7 @@ void sseditor::on_specialstageobjs_drag_data_received(
     Glib::RefPtr<Gdk::DragContext> const &context, int x, int y,
     Gtk::SelectionData const &selection_data, guint info, guint time
 ) {
-	ignore_unused_variable_warning(x);
-	ignore_unused_variable_warning(y);
-	ignore_unused_variable_warning(info);
+	ignore_unused_variable_warning(x, y, info);
 	if (selection_data.get_data_type() == "SpecialStageObjects"
 	        && selection_data.get_length() > 0) {
 		//set<object> temp = sourcestack;
