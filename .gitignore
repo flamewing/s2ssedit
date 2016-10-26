@@ -43,6 +43,7 @@ Makefile.in
 *.i*86
 *.x86_64
 *.hex
+/src/s2ssedit
 
 # Debug files
 *.dSYM/
@@ -62,6 +63,11 @@ config.h.in
 /depcomp
 /install-sh
 /missing
+/config.h
+/config.log
+/config.status
+/po/POTFILES
+/po/stamp-it
 /stamp-h1
 
 ##### Anjuta #####
