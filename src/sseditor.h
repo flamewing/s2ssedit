@@ -33,6 +33,7 @@
 #pragma GCC diagnostic ignored "-Winline"
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wctor-dtor-privacy"
 #include <gtkmm.h>
 #pragma GCC diagnostic pop
 
