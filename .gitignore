@@ -53,6 +53,7 @@ Makefile.in
 
 Makefile.in
 config.h.in
+po/Makefile.in.in
 
 # http://www.gnu.org/software/autoconf
 
@@ -60,15 +61,17 @@ config.h.in
 /aclocal.m4
 /compile
 /configure
+config.guess
+config.sub
 /depcomp
 /install-sh
 /missing
+/stamp-h1
 /config.h
 /config.log
 /config.status
 /po/POTFILES
 /po/stamp-it
-/stamp-h1
 
 ##### Anjuta #####
 # Local configuration folder and symbol database

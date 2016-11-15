@@ -3,31 +3,22 @@
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
-SUBDIRS = src po
+SUBDIRS = src
 
 s2sseditdocdir = ${prefix}/doc/s2ssedit
+
 s2sseditdoc_DATA = \
-	README\
-	COPYING\
-	AUTHORS\
-	ChangeLog\
-	INSTALL\
-	NEWS
-
-
-INTLTOOL_FILES = intltool-extract.in \
-	intltool-merge.in \
-	intltool-update.in
+	README \
+	COPYING \
+	INSTALL
 
 EXTRA_DIST = $(s2sseditdoc_DATA) \
 	$(INTLTOOL_FILES)
 
-DISTCLEANFILES = intltool-extract \
-	intltool-merge \
-	intltool-update \
-	po/.intltool-merge-cache
+DISTCLEANFILES =
 
 
 # Remove doc directory on uninstall
 uninstall-local:
 	-rm -r $(s2sseditdocdir)
+

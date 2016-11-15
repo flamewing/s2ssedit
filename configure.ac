@@ -61,16 +61,6 @@ if test "$HAVE_NEMESIS" = "no"; then
     exit 1
 fi
 
-dnl ***************************************************************************
-dnl Internatinalization
-dnl ***************************************************************************
-IT_PROG_INTLTOOL([0.35.0])
-
-GETTEXT_PACKAGE=s2ssedit
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
-AM_GLIB_GNU_GETTEXT
-
 LT_INIT
 
 PKG_CHECK_MODULES(S2SSEDIT, [gdkmm-2.4 cairomm-1.0 gtkmm-2.4 sigc++-2.0 glibmm-2.4])
@@ -82,5 +72,4 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 src/lib/Makefile
-po/Makefile.in
 ])
