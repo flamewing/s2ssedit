@@ -1,3 +1,5 @@
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/13716/badge.svg)](https://scan.coverity.com/projects/13714)
+
 Commands
 ========
 Page Up/Page Down/Mouse Wheel up or down: scrolls through the special stage.
