@@ -1,4 +1,4 @@
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/13716/badge.svg)](https://scan.coverity.com/projects/13714)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/13714/badge.svg)](https://scan.coverity.com/projects/13714)
 
 Commands
 ========
