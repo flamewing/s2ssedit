@@ -5,6 +5,12 @@ sudo: required
 language: cpp
 compiler: gcc
 
+env:
+  global:
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    #   via the "travis encrypt" command using the project repo's public key
+    - secure: "pnsbgmxN9IHWZjwW4jxv2AzhKfBjIi8t+jrEgCz+RQF9XwC8hKj/KoCmP7daLz4ZKMAgwhkY+SN4nbdXjk2XV3J1E+pJCW9wOUKkr0iKCWHrXUOg2c4b9PxXgOCptgrBDiLYc+7jXP2l+EgtVldb3jJ+f4uYGHNX9+2sphVMJstFZaqjLtEK+QzVuJGvuuTs+Jkodfu2ihhw2RisKAQftFYOuuLObWNvyGtogyUJq4CBqAUOcAGx4rBf4+zgqcj5ei5T1jQYZyscueIDgzSyby4cK9Oe6NVqZsNQr20KpiYVgQP/yR7wifx41dcXJ8CPjEsd3NzWw4V7iosRO24f4H8K3XEF7zuCifmRTlGNU1eHDQVBehWV1YW5XBx7SdEDQ+260qsHg7d82iqVokWrQTRDWxyUjCwOYxpx2kmHrf6CjRnK6dPMEOLRtNeOqGGYr0+iBMNlpdAhZb6z0fEEkIjjaXcDYcoymraxaPTZvt1Xp/RDtk0zaChdw5MODLS/TzmfjcwuazqOTn1iyL5iWDgpb5NDbinIPSBv6VTrhp44pVGB4+timzOHjNVeJ28wqQCtjtzjMVxt64dPXHLDYRVIf0mJww/QEb+qoLizhEg0RdK8IGYIiqteLjTEJ4357ZxnAAlqBNyulkDrd8xDUdt42IPb8JvTYeiMGKLeiMw="
+
 before_install:
   # Exit immediately if the branch is the "coverity_scan" branch and the job number is not 1
   - test "$TRAVIS_BRANCH" != "coverity_scan" -o "${TRAVIS_JOB_NUMBER##*.}" = "1" || exit 0
