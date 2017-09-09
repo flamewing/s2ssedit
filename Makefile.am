@@ -8,7 +8,7 @@ SUBDIRS = src
 s2sseditdocdir = ${prefix}/doc/s2ssedit
 
 s2sseditdoc_DATA = \
-	README \
+	README.md \
 	COPYING \
 	INSTALL
 
