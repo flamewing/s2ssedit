@@ -27,6 +27,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-6
+      - libboost-all-dev
       - libgtkmm-2.4-dev
       - libglibmm-2.4-dev
       - libcairomm-1.0-dev
