@@ -84,7 +84,6 @@ private:
 	// State variables.
 	std::shared_ptr<ssobj_file> specialstages;
 	unsigned currstage, currsegment;
-	int first_line;
 	int draw_width, draw_height;
 	int mouse_x, mouse_y;
 	guint state;

@@ -40,8 +40,8 @@ ssobj_file::ssobj_file(string dir) {
 	ifstream fobj(objectfile.c_str(), ios::in | ios::binary),
 	         flay(layoutfile.c_str(), ios::in | ios::binary);
 
-	if (!fobj.good() || !flay.good()) {
-		error = true;
+	error = !(fobj.good() && flay.good());
+	if (error) {
 		return;
 	}
 

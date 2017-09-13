@@ -53,10 +53,11 @@ using namespace std;
 
 sseditor::sseditor(int argc, char *argv[], char const *uifile)
 	: update_in_progress(false), dragging(false), drop_enabled(false),
-	  currstage(0), currsegment(0),
+	  currstage(0), currsegment(0), draw_width(0), draw_height(0),
 	  mouse_x(0), mouse_y(0), state(0), mode(eSelectMode),
 	  ringmode(eSingle), bombmode(eSingle), copypos(0), drawbox(false),
-	  snaptogrid(true), endpos(0), main_win(nullptr) {
+	  snaptogrid(true), endpos(0), main_win(nullptr), helpdlg(nullptr),
+	  aboutdlg(nullptr), filedlg(nullptr) {
 	kit = make_shared<Gtk::Main>(argc, argv);
 
 	ringimg = Gdk::Pixbuf::create_from_file(RINGFILE);
