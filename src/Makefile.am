@@ -5,11 +5,11 @@
 uidir = $(datadir)/s2ssedit/ui
 ui_DATA = s2ssedit.ui \
 	phoenix.png \
-	bomb.png\
-	ring.png\
-	ring.svg\
-	bomb.svg\
-	bomb-22.png\
+	bomb.png \
+	ring.png \
+	ring.svg \
+	bomb.svg \
+	bomb-22.png \
 	ring-22.png \
 	s2ssedit.png \
 	ring-diamond.png \
@@ -41,17 +41,17 @@ bin_PROGRAMS = s2ssedit
 
 s2ssedit_SOURCES = \
 	main.cc   \
-	sseditor.h   \
+	sseditor.hh   \
 	sseditor.cc   \
-	sssegmentobjs.h   \
+	sssegmentobjs.hh   \
 	sssegmentobjs.cc   \
-	sslevelobjs.h   \
+	sslevelobjs.hh   \
 	sslevelobjs.cc   \
-	ssobjfile.h   \
+	ssobjfile.hh   \
 	ssobjfile.cc   \
-	abstractaction.h   \
-	object.h   \
-	lib/ignore_unused_variable_warning.h   
+	abstractaction.hh   \
+	object.hh   \
+	lib/ignore_unused_variable_warning.hh
 
 s2ssedit_CXXFLAGS = \
 	-I$(srcdir)/lib $(EXTRA_FLAGS)

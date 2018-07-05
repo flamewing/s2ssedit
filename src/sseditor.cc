@@ -27,11 +27,11 @@
 #include <set>
 #include <vector>
 
-#include "sseditor.h"
+#include "sseditor.hh"
 
-#include "ignore_unused_variable_warning.h"
-#include "bigendian_io.h"
-#include "ssobjfile.h"
+#include "ignore_unused_variable_warning.hh"
+#include "bigendian_io.hh"
+#include "ssobjfile.hh"
 
 //#define DEBUG 1
 #ifdef WIN32

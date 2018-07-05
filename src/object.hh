@@ -19,7 +19,7 @@
 #ifndef __OBJECT_H
 #define __OBJECT_H
 
-#include "ssobjfile.h"
+#include "ssobjfile.hh"
 
 class object {
 private:

@@ -23,7 +23,7 @@
 #include <istream>
 #include <ostream>
 
-#include "ignore_unused_variable_warning.h"
+#include "ignore_unused_variable_warning.hh"
 
 class sssegments {
 public:

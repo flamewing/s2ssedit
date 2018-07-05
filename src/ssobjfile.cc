@@ -22,11 +22,11 @@
 #include <sstream>
 #include <fstream>
 
-#include <mdcomp/kosinski.h>
-#include <mdcomp/nemesis.h>
-#include "ssobjfile.h"
-#include "bigendian_io.h"
-#include "ignore_unused_variable_warning.h"
+#include <mdcomp/kosinski.hh>
+#include <mdcomp/nemesis.hh>
+#include "ssobjfile.hh"
+#include "bigendian_io.hh"
+#include "ignore_unused_variable_warning.hh"
 
 using namespace std;
 

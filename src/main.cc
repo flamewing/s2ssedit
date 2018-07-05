@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-#include "sseditor.h"
+#include "sseditor.hh"
 
 #include <fstream>
 

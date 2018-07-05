@@ -23,9 +23,9 @@
 
 #include <deque>
 #include <set>
-#include "abstractaction.h"
-#include "object.h"
-#include "ssobjfile.h"
+#include "abstractaction.hh"
+#include "object.hh"
+#include "ssobjfile.hh"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"

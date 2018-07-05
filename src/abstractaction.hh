@@ -23,11 +23,11 @@
 #include <set>
 #include <string>
 #include <algorithm>
-#include "ssobjfile.h"
-#include "object.h"
-#include "sslevelobjs.h"
-#include "sssegmentobjs.h"
-#include "ignore_unused_variable_warning.h"
+#include "ssobjfile.hh"
+#include "object.hh"
+#include "sslevelobjs.hh"
+#include "sssegmentobjs.hh"
+#include "ignore_unused_variable_warning.hh"
 
 class ssobj_file;
 

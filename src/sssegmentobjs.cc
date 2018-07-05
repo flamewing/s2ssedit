@@ -18,9 +18,9 @@
 
 #include <iostream>
 #include <cstring>
-#include "bigendian_io.h"
+#include "bigendian_io.hh"
 
-#include "sssegmentobjs.h"
+#include "sssegmentobjs.hh"
 
 using namespace std;
 

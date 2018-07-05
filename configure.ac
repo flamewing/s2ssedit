@@ -215,12 +215,12 @@ AX_BOOST_BASE([1.54],, [AC_MSG_ERROR([mdcomp requires Boost, but it was not foun
 # Required mdcomp headers
 # ---------------------------------------------------------------------
 
-AC_CHECK_HEADER(mdcomp/kosinski.h,break,[HAVE_KOSINSKI="no"])
+AC_CHECK_HEADER(mdcomp/kosinski.hh,break,[HAVE_KOSINSKI="no"])
 if test "$HAVE_KOSINSKI" = "no"; then
     echo "Fatal error: Kosinski header not found!"
     exit 1
 fi
-AC_CHECK_HEADER(mdcomp/nemesis.h,break,[HAVE_NEMESIS="no"])
+AC_CHECK_HEADER(mdcomp/nemesis.hh,break,[HAVE_NEMESIS="no"])
 if test "$HAVE_NEMESIS" = "no"; then
     echo "Fatal error: Nemesis header not found!"
     exit 1

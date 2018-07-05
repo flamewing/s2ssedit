@@ -23,7 +23,7 @@
 #include <istream>
 #include <ostream>
 
-#include "sssegmentobjs.h"
+#include "sssegmentobjs.hh"
 
 class sslevels {
 protected:
