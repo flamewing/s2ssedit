@@ -29,8 +29,9 @@
 
 #include "sseditor.hh"
 
+#include <mdcomp/bigendian_io.hh>
+
 #include "ignore_unused_variable_warning.hh"
-#include "bigendian_io.hh"
 #include "ssobjfile.hh"
 
 //#define DEBUG 1

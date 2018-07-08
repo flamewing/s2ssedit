@@ -215,6 +215,11 @@ AX_BOOST_BASE([1.54],, [AC_MSG_ERROR([mdcomp requires Boost, but it was not foun
 # Required mdcomp headers
 # ---------------------------------------------------------------------
 
+AC_CHECK_HEADER(mdcomp/bigendian_io.hh,break,[HAVE_BIGENDIANIO="no"])
+if test "$HAVE_BIGENDIANIO" = "no"; then
+    echo "Fatal error: bigendian_io header not found!"
+    exit 1
+fi
 AC_CHECK_HEADER(mdcomp/kosinski.hh,break,[HAVE_KOSINSKI="no"])
 if test "$HAVE_KOSINSKI" = "no"; then
     echo "Fatal error: Kosinski header not found!"

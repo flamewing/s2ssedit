@@ -18,7 +18,8 @@
 
 #include <iostream>
 #include <cstring>
-#include "bigendian_io.hh"
+
+#include <mdcomp/bigendian_io.hh>
 
 #include "sssegmentobjs.hh"
 
