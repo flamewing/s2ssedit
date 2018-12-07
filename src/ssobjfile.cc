@@ -26,8 +26,8 @@
 #include <mdcomp/kosinski.hh>
 #include <mdcomp/nemesis.hh>
 
-#include "ssobjfile.hh"
-#include "ignore_unused_variable_warning.hh"
+#include <s2ssedit/ssobjfile.hh>
+#include <s2ssedit/ignore_unused_variable_warning.hh>
 
 using namespace std;
 

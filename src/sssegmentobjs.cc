@@ -21,7 +21,7 @@
 
 #include <mdcomp/bigendian_io.hh>
 
-#include "sssegmentobjs.hh"
+#include <s2ssedit/sssegmentobjs.hh>
 
 using namespace std;
 

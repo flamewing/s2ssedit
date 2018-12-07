@@ -1,7 +1,3 @@
-## Process this file with automake to produce Makefile.in
-
-## Created by Anjuta
-
 uidir = $(datadir)/s2ssedit/ui
 ui_DATA = s2ssedit.ui \
 	phoenix.png \
@@ -41,20 +37,12 @@ bin_PROGRAMS = s2ssedit
 
 s2ssedit_SOURCES = \
 	main.cc   \
-	sseditor.hh   \
 	sseditor.cc   \
-	sssegmentobjs.hh   \
 	sssegmentobjs.cc   \
-	sslevelobjs.hh   \
 	sslevelobjs.cc   \
-	ssobjfile.hh   \
-	ssobjfile.cc   \
-	abstractaction.hh   \
-	object.hh   \
-	lib/ignore_unused_variable_warning.hh
+	ssobjfile.cc
 
-s2ssedit_CXXFLAGS = \
-	-I$(srcdir)/lib $(EXTRA_FLAGS)
+s2ssedit_CXXFLAGS = -I$(srcdir)/../include $(EXTRA_FLAGS)
 
 s2ssedit_LDFLAGS = -lkosinski -lnemesis
 
@@ -68,9 +56,7 @@ endif
 
 EXTRA_DIST = $(ui_DATA)
 
-SUBDIRS = lib
-
-AM_CXXFLAGS = 
+AM_CXXFLAGS =
 
 $(builddir)/s2sseditico.o: $(srcdir)/ssedit.rc $(srcdir)/s2ssedit.ico
 	windres --include-dir $(srcdir) $(srcdir)/ssedit.rc $(builddir)/s2sseditico.o

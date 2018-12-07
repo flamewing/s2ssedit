@@ -25,7 +25,7 @@
 #include <ostream>
 #include <string>
 
-#include "sslevelobjs.hh"
+#include <s2ssedit/sslevelobjs.hh>
 
 #define SS_OBJECT_FILE "Special stage object location lists (Kosinski compression).bin"
 #define SS_LAYOUT_FILE "Special stage level layouts (Nemesis compression).bin"

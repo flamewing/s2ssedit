@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sslevelobjs.hh"
+#include <s2ssedit/sslevelobjs.hh>
 
 using namespace std;
 

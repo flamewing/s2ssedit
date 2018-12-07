@@ -1,22 +1,14 @@
-## Process this file with automake to produce Makefile.in
-## Created by Anjuta
+SUBDIRS = src
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
-SUBDIRS = src
-
 s2sseditdocdir = ${prefix}/doc/s2ssedit
 
-s2sseditdoc_DATA = \
-	README.md \
-	COPYING \
-	INSTALL
+s2sseditdoc_DATA = README.md COPYING INSTALL
 
-EXTRA_DIST = $(s2sseditdoc_DATA) \
-	$(INTLTOOL_FILES)
+EXTRA_DIST = $(s2sseditdoc_DATA) $(INTLTOOL_FILES)
 
 DISTCLEANFILES =
-
 
 # Remove doc directory on uninstall
 uninstall-local:

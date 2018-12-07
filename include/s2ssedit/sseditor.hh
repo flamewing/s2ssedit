@@ -23,9 +23,9 @@
 
 #include <deque>
 #include <set>
-#include "abstractaction.hh"
-#include "object.hh"
-#include "ssobjfile.hh"
+#include <s2ssedit/abstractaction.hh>
+#include <s2ssedit/object.hh>
+#include <s2ssedit/ssobjfile.hh>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"

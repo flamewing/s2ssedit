@@ -17,10 +17,9 @@
  */
 
 #include <iostream>
-
-#include "sseditor.hh"
-
 #include <fstream>
+
+#include <s2ssedit/sseditor.hh>
 
 /* For testing propose use the local (not installed) ui file */
 //#define DEBUG 1

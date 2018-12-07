@@ -27,12 +27,12 @@
 #include <set>
 #include <vector>
 
-#include "sseditor.hh"
+#include <s2ssedit/sseditor.hh>
 
 #include <mdcomp/bigendian_io.hh>
 
-#include "ignore_unused_variable_warning.hh"
-#include "ssobjfile.hh"
+#include <s2ssedit/ignore_unused_variable_warning.hh>
+#include <s2ssedit/ssobjfile.hh>
 
 //#define DEBUG 1
 #ifdef WIN32
