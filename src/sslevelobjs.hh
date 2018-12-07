@@ -28,6 +28,7 @@
 class sslevels {
 protected:
 	std::vector<sssegments> segments;
+
 public:
 	sslevels() {        }
 	sslevels(sslevels const &other) {

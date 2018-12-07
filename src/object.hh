@@ -25,6 +25,7 @@ class object {
 private:
 	int segment, pos, angle;
 	sssegments::ObjectTypes type;
+
 public:
 	object(int seg, int x, int y, sssegments::ObjectTypes t)
 		: segment(seg), pos(y), angle(x), type(t)

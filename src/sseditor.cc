@@ -1696,7 +1696,6 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton *event) {
 				shared_ptr<abstract_action> act;
 
 				if (currseg->exists(pos, angle, type)) {
-
 					if (type == sssegments::eBomb) {
 						set<object> temp;
 						temp.emplace(seg, angle, pos, type);
@@ -1826,7 +1825,6 @@ bool sseditor::on_specialstageobjs_scroll_event(GdkEventScroll *event) {
 				pmodebuttons[mode]->set_active(true);
 			}
 			break;
-
 	}
 
 	return true;

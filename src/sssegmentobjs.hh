@@ -46,12 +46,14 @@ public:
 	};
 	//               pos
 	typedef std::map<unsigned char, std::map<unsigned char, ObjectTypes> > segobjs;
+
 protected:
 	segobjs objects;
 	bool flip;
 	SegmentTypes terminator;
 	SegmentGeometry geometry;
 	unsigned short numrings, numbombs, numshadows;
+
 public:
 	sssegments()
 		: flip(false), terminator(eNormalSegment), geometry(eStraight),

@@ -35,10 +35,12 @@ private:
 	ssobj_file();
 	void read_internal(std::istream &objfile, std::istream &layfile);
 	void write_internal(std::ostream &objfile, std::ostream &layfile) const;
+
 protected:
 	std::vector<sslevels> stages;
 	std::string layoutfile, objectfile;
 	bool error;
+
 public:
 	ssobj_file(std::string dir);
 	size_t size() const;

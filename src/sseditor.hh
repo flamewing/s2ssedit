@@ -229,8 +229,6 @@ private:
 			cr->rectangle(tx, ty, image->get_width(), image->get_height());
 			cr->stroke();
 		}
-		if (col.size()) {
-		}
 	}
 	void object_triangle(int x, int y, int dx, int dy, int h,
 	                     sssegments::ObjectTypes type, bool fill,
@@ -256,6 +254,7 @@ private:
 		}
 		act->apply(specialstages, static_cast<std::set<object> *>(nullptr));
 	}
+
 public:
 	static sseditor *create_instance(int argc, char *argv[], char const *uifile) {
 		if (!instance) {
@@ -438,6 +437,7 @@ public:
 		update();
 		show();
 	}
+
 protected:
 	void update();
 };
