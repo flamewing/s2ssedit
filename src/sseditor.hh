@@ -256,6 +256,7 @@ private:
 		}
 		act->apply(specialstages, static_cast<std::set<object> *>(nullptr));
 	}
+
 public:
 	static sseditor *create_instance(int argc, char *argv[], char const *uifile) {
 		if (!instance) {
@@ -438,6 +439,7 @@ public:
 		update();
 		show();
 	}
+
 protected:
 	void update();
 };
