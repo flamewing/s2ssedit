@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/flamewing/s2ssedit.svg?branch=master)](https://travis-ci.org/flamewing/s2ssedit)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/13714/badge.svg)](https://scan.coverity.com/projects/13714)
+[![CodeFactor](https://www.codefactor.io/repository/github/flamewing/s2ssedit/badge)](https://www.codefactor.io/repository/github/flamewing/s2ssedit)
 
 Commands
 ========
