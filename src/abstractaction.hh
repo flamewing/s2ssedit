@@ -53,6 +53,7 @@ protected:
 	std::set<object> objlist;
 	int stage;
 	sssegments::ObjectTypes type;
+
 public:
 	alter_selection_action(int s, sssegments::ObjectTypes t, std::set<object> const &sel)
 		: objlist(sel), stage(s), type(t) {     }
@@ -113,6 +114,7 @@ class delete_selection_action : public abstract_action {
 protected:
 	std::set<object> objlist;
 	int stage;
+
 public:
 	friend class move_objects_action;
 	delete_selection_action(int s, std::set<object> const &sel)
@@ -196,6 +198,7 @@ class move_objects_action : public abstract_action {
 protected:
 	std::shared_ptr<delete_selection_action> from;
 	std::shared_ptr<paste_objects_action> to;
+
 public:
 	move_objects_action(int s, std::set<object> const &del, std::set<object> const &add)
 		: from(std::make_shared<delete_selection_action>(s, del)),
@@ -260,6 +263,7 @@ protected:
 	bool newflip, oldflip;
 	sssegments::SegmentTypes    newterminator, oldterminator;
 	sssegments::SegmentGeometry newgeometry  , oldgeometry;
+
 public:
 	alter_segment_action(int s, int sg, sssegments const &sgm, bool tf,
 	                     sssegments::SegmentTypes newterm,
@@ -339,6 +343,7 @@ class delete_segment_action : public abstract_action {
 protected:
 	sssegments segment;
 	unsigned stage, seg;
+
 public:
 	delete_segment_action(int s, int sg, sssegments const &sgm)
 		: segment(sgm), stage(s), seg(sg) {     }
@@ -409,6 +414,7 @@ public:
 class move_segment_action : public abstract_action {
 protected:
 	int stage, seg, dir;
+
 public:
 	move_segment_action(int s, int sg, int d)
 		: stage(s), seg(sg), dir(d) {
@@ -443,6 +449,7 @@ class delete_stage_action : public abstract_action {
 protected:
 	sslevels level;
 	unsigned stage;
+
 public:
 	friend class move_stage_action;
 	delete_stage_action(int s, sslevels const &l)
@@ -512,6 +519,7 @@ public:
 class move_stage_action : public abstract_action {
 protected:
 	int stage, dir;
+
 public:
 	move_stage_action(int s, int d)
 		: stage(s), dir(d) {
