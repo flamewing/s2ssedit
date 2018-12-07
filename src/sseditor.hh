@@ -229,8 +229,6 @@ private:
 			cr->rectangle(tx, ty, image->get_width(), image->get_height());
 			cr->stroke();
 		}
-		if (col.size()) {
-		}
 	}
 	void object_triangle(int x, int y, int dx, int dy, int h,
 	                     sssegments::ObjectTypes type, bool fill,
