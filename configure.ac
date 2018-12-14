@@ -231,13 +231,14 @@ if test "$HAVE_NEMESIS" = "no"; then
     exit 1
 fi
 
+NEWCXXFLAGS=""
 PKG_CHECK_MODULES(S2SSEDIT, [gdkmm-2.4 cairomm-1.0 gtkmm-2.4 sigc++-2.0 glibmm-2.4])
 # Damn you, gtkmm!
 for cxxflag in $S2SSEDIT_CFLAGS; do
 	AS_CASE([$cxxflag],
 			[-std=c++11], [],
 			[NEWCXXFLAGS="$NEWCXXFLAGS $cxxflag"])
-done¶
+done
 S2SSEDIT_CFLAGS="$NEWCXXFLAGS"
 
 AC_SUBST(S2SSEDIT_CFLAGS)
