@@ -1308,24 +1308,24 @@ void sseditor::render() {
 				double angle = (iangle * 64.0) / 3.0;
 				cr->set_source_rgb(180.0 / 256.0, 108.0 / 256.0, 36.0 / 256.0);
 				cr->arc(angle_to_x(angle + 0x80) + IMAGE_SIZE / 2, ty,
-				        IMAGE_SIZE / 2, 0.0, 2.0 * M_PI);
+				        IMAGE_SIZE / 2, 0.0, 2.0 * G_PI);
 				cr->begin_new_sub_path();
 				cr->arc(angle_to_x(0x00 - angle) - IMAGE_SIZE / 2, ty,
-				        IMAGE_SIZE / 2, 0.0, 2.0 * M_PI);
+				        IMAGE_SIZE / 2, 0.0, 2.0 * G_PI);
 				cr->fill();
 				cr->set_source_rgb(216.0 / 256.0, 144.0 / 256.0, 36.0 / 256.00);
 				cr->arc(angle_to_x(angle + 0x80) + IMAGE_SIZE / 2, ty - 1.5,
-				        IMAGE_SIZE / 2 - 2, 0.0, 2.0 * M_PI);
+				        IMAGE_SIZE / 2 - 2, 0.0, 2.0 * G_PI);
 				cr->begin_new_sub_path();
 				cr->arc(angle_to_x(0x00 - angle) - IMAGE_SIZE / 2, ty - 1.5,
-				        IMAGE_SIZE / 2 - 2, 0.0, 2.0 * M_PI);
+				        IMAGE_SIZE / 2 - 2, 0.0, 2.0 * G_PI);
 				cr->fill();
 				cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
 				cr->arc(angle_to_x(angle + 0x80) + IMAGE_SIZE / 2, ty - 3.0,
-				        IMAGE_SIZE / 2 - 4, 0.0, 2.0 * M_PI);
+				        IMAGE_SIZE / 2 - 4, 0.0, 2.0 * G_PI);
 				cr->begin_new_sub_path();
 				cr->arc(angle_to_x(0x00 - angle) - IMAGE_SIZE / 2, ty - 3.0,
-				        IMAGE_SIZE / 2 - 4, 0.0, 2.0 * M_PI);
+				        IMAGE_SIZE / 2 - 4, 0.0, 2.0 * G_PI);
 				cr->fill();
 			}
 			// Yellow beams.
