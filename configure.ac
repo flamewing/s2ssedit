@@ -11,7 +11,7 @@ AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE([1.11])
 
-AM_SILENT_RULES([no])
+AM_SILENT_RULES([yes])
 
 AC_PROG_CXX
 AC_LANG([C++])
@@ -232,7 +232,15 @@ if test "$HAVE_NEMESIS" = "no"; then
 fi
 
 PKG_CHECK_MODULES(S2SSEDIT, [gdkmm-2.4 cairomm-1.0 gtkmm-2.4 sigc++-2.0 glibmm-2.4])
+# Damn you, gtkmm!
+for cxxflag in $S2SSEDIT_CFLAGS; do
+	AS_CASE([$cxxflag],
+			[-std=c++11], [],
+			NEWCXXFLAGS="$NEWCXXFLAGS $cxxflag"])
+done¶
+S2SSEDIT_CFLAGS="$NEWCXXFLAGS"
 
+AC_SUBST(S2SSEDIT_CFLAGS)
 AC_SUBST(EXTRA_FLAGS)
 AC_SUBST(ICON_FILE)
 
