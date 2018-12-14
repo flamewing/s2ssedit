@@ -236,7 +236,7 @@ PKG_CHECK_MODULES(S2SSEDIT, [gdkmm-2.4 cairomm-1.0 gtkmm-2.4 sigc++-2.0 glibmm-2
 for cxxflag in $S2SSEDIT_CFLAGS; do
 	AS_CASE([$cxxflag],
 			[-std=c++11], [],
-			NEWCXXFLAGS="$NEWCXXFLAGS $cxxflag"])
+			[NEWCXXFLAGS="$NEWCXXFLAGS $cxxflag"])
 done¶
 S2SSEDIT_CFLAGS="$NEWCXXFLAGS"
 
