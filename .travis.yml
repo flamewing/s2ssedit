@@ -42,9 +42,11 @@ before_install:
   # Exit immediately if the branch is the "coverity_scan" branch and DO_COVERITY is "0"
   - if [ "$TRAVIS_BRANCH" == "coverity_scan" -a "${DO_COVERITY}" == "0" ] ; then exit 0; fi
   # Exit immediately if the branch is not the "coverity_scan" branch and DO_COVERITY is "1"
+  - if [ "$TRAVIS_BRANCH" != "coverity_scan" -a "${DO_COVERITY}" == "1" ] ; then exit 0; fi
+  # Work around bug in glibmm that is revealed in gcc8
+  - sudo sed -ri 's/GPrivate\* gobj\(\) \{ return gobject_; \}/GPrivate* gobj\(\) \{ return \&gobject_; \}/' /usr/include/glibmm-2.4/glibmm/threads.h || true
   - eval "${MATRIX_EVAL}"
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get -qq update; fi
-  - if [ "$TRAVIS_BRANCH" != "coverity_scan" -a "${DO_COVERITY}" == "1" ] ; then exit 0; fi
   - if [ "${DO_COVERITY}" == "1" ]; then echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca- ; fi
 
 before_script:
