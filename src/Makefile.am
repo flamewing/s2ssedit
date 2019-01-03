@@ -24,14 +24,11 @@ ui_DATA = s2ssedit.ui \
 	ring-loop.png \
 	grid.png
 
-
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	$(S2SSEDIT_CFLAGS)
-
-AM_CFLAGS =
 
 bin_PROGRAMS = s2ssedit
 
@@ -42,7 +39,10 @@ s2ssedit_SOURCES = \
 	sslevelobjs.cc   \
 	ssobjfile.cc
 
-s2ssedit_CXXFLAGS = -I$(srcdir)/../include $(EXTRA_FLAGS)
+s2ssedit_CXXFLAGS = \
+	-I$(srcdir)/../include \
+	-I$(srcdir)/../mdcomp/include \
+	$(EXTRA_FLAGS)
 
 s2ssedit_LDFLAGS = -lkosinski -lnemesis
 
@@ -53,6 +53,7 @@ else !BUILD_ICON
 s2ssedit_DEPENDENCIES = $(ICON_FILE)
 s2ssedit_LDADD = $(S2SSEDIT_LIBS)
 endif
+s2ssedit_LDADD += -L$(srcdir)/../mdcomp/src/lib/.libs
 
 EXTRA_DIST = $(ui_DATA)
 

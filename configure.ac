@@ -235,28 +235,16 @@ LT_INIT
 # Boost
 # ---------------------------------------------------------------------
 
-AX_BOOST_BASE([1.54],, [AC_MSG_ERROR([mdcomp requires Boost, but it was not found in your system])])
+AX_BOOST_BASE([1.54],, [AC_MSG_ERROR([s2ssedit requires Boost, but it was not found in your system])])
 
 # ---------------------------------------------------------------------
-# Required mdcomp headers
+# Configure mdcomp
 # ---------------------------------------------------------------------
+AC_CONFIG_SUBDIRS([mdcomp])
 
-AC_CHECK_HEADER(mdcomp/bigendian_io.hh,break,[HAVE_BIGENDIANIO="no"])
-if test "$HAVE_BIGENDIANIO" = "no"; then
-    echo "Fatal error: bigendian_io header not found!"
-    exit 1
-fi
-AC_CHECK_HEADER(mdcomp/kosinski.hh,break,[HAVE_KOSINSKI="no"])
-if test "$HAVE_KOSINSKI" = "no"; then
-    echo "Fatal error: Kosinski header not found!"
-    exit 1
-fi
-AC_CHECK_HEADER(mdcomp/nemesis.hh,break,[HAVE_NEMESIS="no"])
-if test "$HAVE_NEMESIS" = "no"; then
-    echo "Fatal error: Nemesis header not found!"
-    exit 1
-fi
-
+# ---------------------------------------------------------------------
+# Additional dependencies
+# ---------------------------------------------------------------------
 NEWCXXFLAGS=""
 PKG_CHECK_MODULES(S2SSEDIT, [gdkmm-2.4 cairomm-1.0 gtkmm-2.4 sigc++-2.0 glibmm-2.4])
 # Damn you, gtkmm!
