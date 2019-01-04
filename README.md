@@ -3,6 +3,7 @@
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/13714/badge.svg)](https://scan.coverity.com/projects/13714)
 [![CodeFactor](https://www.codefactor.io/repository/github/flamewing/s2ssedit/badge)](https://www.codefactor.io/repository/github/flamewing/s2ssedit)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/flamewing/s2ssedit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/flamewing/s2ssedit/alerts/)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/flamewing/s2ssedit.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/flamewing/s2ssedit/context:cpp)
 
 Commands
 ========
