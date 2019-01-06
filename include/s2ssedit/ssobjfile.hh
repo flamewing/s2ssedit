@@ -21,9 +21,9 @@
 
 #include <algorithm>
 #include <istream>
-#include <vector>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <s2ssedit/sslevelobjs.hh>
 

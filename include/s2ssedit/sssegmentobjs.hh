@@ -19,8 +19,8 @@
 #ifndef __SSSEGMENTOBJS_H
 #define __SSSEGMENTOBJS_H
 
-#include <map>
 #include <istream>
+#include <map>
 #include <ostream>
 
 #include <s2ssedit/ignore_unused_variable_warning.hh>

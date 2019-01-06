@@ -19,9 +19,9 @@
 #ifndef __SSLEVELOBJS_H
 #define __SSLEVELOBJS_H
 
-#include <vector>
 #include <istream>
 #include <ostream>
+#include <vector>
 
 #include <s2ssedit/sssegmentobjs.hh>
 

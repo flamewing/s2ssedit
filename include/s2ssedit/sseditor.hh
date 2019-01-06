@@ -19,10 +19,10 @@
 #ifndef __SSEDITOR_H
 #define __SSEDITOR_H
 
-#include <memory>
-
 #include <deque>
+#include <memory>
 #include <set>
+
 #include <s2ssedit/abstractaction.hh>
 #include <s2ssedit/object.hh>
 #include <s2ssedit/ssobjfile.hh>
