@@ -24,24 +24,24 @@
 /* For testing propose use the local (not installed) ui file */
 //#define DEBUG 1
 #ifdef WIN32
-#   define UI_FILE "./s2ssedit.ui"
+#    define UI_FILE "./s2ssedit.ui"
 #else
-#   ifdef DEBUG
-#       define UI_FILE "src/s2ssedit.ui"
-#   else
-#       define UI_FILE PACKAGE_DATA_DIR"/s2ssedit/ui/s2ssedit.ui"
-#   endif
+#    ifdef DEBUG
+#        define UI_FILE "src/s2ssedit.ui"
+#    else
+#        define UI_FILE PACKAGE_DATA_DIR "/s2ssedit/ui/s2ssedit.ui"
+#    endif
 #endif
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
-	try {
-		sseditor *Editor = sseditor::create_instance(argc, argv, UI_FILE);
-		Editor->run();
-	} catch (const Glib::FileError &ex) {
-		cerr << ex.what() << endl;
-		return 1;
-	}
-	return 0;
+int main(int argc, char* argv[]) {
+    try {
+        sseditor* Editor = sseditor::create_instance(argc, argv, UI_FILE);
+        Editor->run();
+    } catch (const Glib::FileError& ex) {
+        cerr << ex.what() << endl;
+        return 1;
+    }
+    return 0;
 }

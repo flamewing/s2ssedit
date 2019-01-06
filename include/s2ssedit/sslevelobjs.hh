@@ -27,75 +27,67 @@
 
 class sslevels {
 protected:
-	std::vector<sssegments> segments;
+    std::vector<sssegments> segments;
 
 public:
-	sslevels() {        }
-	sslevels(sslevels const &other) {
-		copy(other);
-	}
-	sslevels &operator=(sslevels const &other) {
-		if (this != &other) {
-			copy(other);
-		}
-		return *this;
-	}
-	void copy(sslevels const &other) {
-		segments = other.segments;
-	}
-	size_t size() const;
+    sslevels() {}
+    sslevels(sslevels const& other) { copy(other); }
+    sslevels& operator=(sslevels const& other) {
+        if (this != &other) {
+            copy(other);
+        }
+        return *this;
+    }
+    void   copy(sslevels const& other) { segments = other.segments; }
+    size_t size() const;
 
-	void print() const;
+    void print() const;
 
-	void read(std::istream &in, std::istream &lay, int term, int term2);
-	void write(std::ostream &out, std::ostream &lay) const;
+    void read(std::istream& in, std::istream& lay, int term, int term2);
+    void write(std::ostream& out, std::ostream& lay) const;
 
-	size_t fill_position_array(std::vector<size_t> &segpos) const {
-		segpos.clear();
-		segpos.reserve(segments.size());
-		size_t tally = 0;
-		for (const auto & elem : segments) {
-			segpos.push_back(tally);
-			tally += elem.get_length();
-		}
-		// Total size.
-		return tally;
-	}
+    size_t fill_position_array(std::vector<size_t>& segpos) const {
+        segpos.clear();
+        segpos.reserve(segments.size());
+        size_t tally = 0;
+        for (const auto& elem : segments) {
+            segpos.push_back(tally);
+            tally += elem.get_length();
+        }
+        // Total size.
+        return tally;
+    }
 
-	size_t num_segments() const {
-		return segments.size();
-	}
-	sssegments *get_segment(size_t s) {
-		return &(segments[s]);
-	}
-	sssegments *insert(sssegments const &lvl, size_t s) {
-		return &*(segments.insert(segments.begin() + s, lvl));
-	}
-	sssegments *append(sssegments const &lvl) {
-		segments.push_back(lvl);
-		return &segments.back();
-	}
-	sssegments *remove(size_t s) {
-		auto it = segments.erase(segments.begin() + s);
-		if (it == segments.end()) {
-			return &segments.back();
-		}
-		return &*it;
-	}
-	sssegments *move_left(size_t s) {
-		if (s == 0) {
-			return &segments.front();
-		}
-		std::swap(segments[s - 1], segments[s]);
-		return &segments[s - 1];
-	}
-	sssegments *move_right(size_t s) {
-		if (s >= segments.size() - 1) {
-			return &segments.back();
-		}
-		std::swap(segments[s], segments[s + 1]);
-		return &segments[s + 1];
-	}
+    size_t      num_segments() const { return segments.size(); }
+    sssegments* get_segment(size_t s) { return &(segments[s]); }
+    sssegments* insert(sssegments const& lvl, size_t s) {
+        return &*(segments.insert(segments.begin() + s, lvl));
+    }
+    sssegments* append(sssegments const& lvl) {
+        segments.push_back(lvl);
+        return &segments.back();
+    }
+    sssegments* remove(size_t s) {
+        auto it = segments.erase(segments.begin() + s);
+        if (it == segments.end()) {
+            return &segments.back();
+        }
+        return &*it;
+    }
+    sssegments* move_left(size_t s) {
+        if (s == 0) {
+            return &segments.front();
+        }
+        std::swap(segments[s - 1], segments[s]);
+        return &segments[s - 1];
+    }
+    sssegments* move_right(size_t s) {
+        if (s >= segments.size() - 1) {
+            return &segments.back();
+        }
+        std::swap(segments[s], segments[s + 1]);
+        return &segments[s + 1];
+    }
 };
 
 #endif // __SSLEVELOBJS_H

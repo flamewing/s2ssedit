@@ -20,30 +20,30 @@
 
 using namespace std;
 
-void sslevels::read(istream &in, istream &lay, int term, int term2) {
-	while (in.tellg() < term && lay.tellg() < term2) {
-		sssegments nn;
-		nn.read(in, lay);
-		segments.push_back(nn);
-	}
+void sslevels::read(istream& in, istream& lay, int term, int term2) {
+    while (in.tellg() < term && lay.tellg() < term2) {
+        sssegments nn;
+        nn.read(in, lay);
+        segments.push_back(nn);
+    }
 }
 
 size_t sslevels::size() const {
-	size_t sz = 0;
-	for (const auto & sd : segments) {
-		sz += sd.size();
-	}
-	return sz;
+    size_t sz = 0;
+    for (const auto& sd : segments) {
+        sz += sd.size();
+    }
+    return sz;
 }
 
 void sslevels::print() const {
-	for (const auto & sd : segments) {
-		sd.print();
-	}
+    for (const auto& sd : segments) {
+        sd.print();
+    }
 }
 
-void sslevels::write(ostream &out, ostream &lay) const {
-	for (const auto & sd : segments) {
-		sd.write(out, lay);
-	}
+void sslevels::write(ostream& out, ostream& lay) const {
+    for (const auto& sd : segments) {
+        sd.write(out, lay);
+    }
 }
