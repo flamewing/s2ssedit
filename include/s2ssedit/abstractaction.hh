@@ -16,13 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ABSTRACTACTION_H
-#define __ABSTRACTACTION_H
+#ifndef ABSTRACTACTION_H
+#define ABSTRACTACTION_H
 
 #include <algorithm>
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 
 #include <s2ssedit/ignore_unused_variable_warning.hh>
 #include <s2ssedit/object.hh>
@@ -32,63 +33,65 @@
 
 class ssobj_file;
 
+using ssobj_file_shared = std::shared_ptr<ssobj_file>;
+using object_set        = std::set<object>;
+
 class abstract_action {
 public:
     enum MergeResult { eNoMerge = 0, eMergedActions = 1, eDeleteAction = -1 };
-    virtual ~abstract_action() {}
-    virtual std::string const display_string() const = 0;
-    virtual void
-    apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) = 0;
-    virtual void
-                        revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) = 0;
-    virtual MergeResult merge(std::shared_ptr<abstract_action> other) {
+    // Boilerplate
+    abstract_action() noexcept                  = default;
+    abstract_action(abstract_action const&)     = default;
+    abstract_action(abstract_action&&) noexcept = default;
+    abstract_action& operator=(abstract_action const&) = default;
+    abstract_action& operator=(abstract_action&&) noexcept = default;
+    // End boilerplate
+    virtual ~abstract_action() noexcept                        = default;
+    virtual void apply(ssobj_file_shared ss, object_set* sel)  = 0;
+    virtual void revert(ssobj_file_shared ss, object_set* sel) = 0;
+
+    virtual MergeResult merge(std::shared_ptr<abstract_action> const& other) {
         ignore_unused_variable_warning(other);
         return eNoMerge;
     }
 };
 
 class alter_selection_action : public abstract_action {
-protected:
-    std::set<object>        objlist;
+private:
+    object_set              objlist;
     int                     stage;
     sssegments::ObjectTypes type;
 
 public:
-    alter_selection_action(
-        int s, sssegments::ObjectTypes t, std::set<object> const& sel)
-        : objlist(sel), stage(s), type(t) {}
-    ~alter_selection_action() override {}
-    std::string const display_string() const override {
-        return std::string("Change selection");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    alter_selection_action(int s, sssegments::ObjectTypes t, object_set sel)
+        : objlist(std::move(sel)), stage(s), type(t) {}
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
-        for (const auto& elem : objlist) {
+        for (auto const& elem : objlist) {
             sssegments* currseg = currlvl->get_segment(elem.get_segment());
             currseg->update(elem.get_pos(), elem.get_angle(), type, false);
-            if (sel) {
+            if (sel != nullptr) {
                 sel->insert(object(
                     elem.get_segment(), elem.get_angle(), elem.get_pos(),
                     type));
             }
         }
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
-        for (const auto& elem : objlist) {
+        for (auto const& elem : objlist) {
             sssegments* currseg = currlvl->get_segment(elem.get_segment());
             currseg->update(
                 elem.get_pos(), elem.get_angle(), elem.get_type(), false);
         }
-        if (sel) {
+        if (sel != nullptr) {
             *sel = objlist;
         }
     }
-    MergeResult merge(std::shared_ptr<abstract_action> other) override {
+    MergeResult merge(std::shared_ptr<abstract_action> const& other) override {
         std::shared_ptr<alter_selection_action> act =
             std::dynamic_pointer_cast<alter_selection_action>(other);
         if (!act) {
@@ -103,7 +106,7 @@ public:
             return eNoMerge;
         }
 
-        for (const auto& elem : objlist) {
+        for (auto const& elem : objlist) {
             if (elem.get_type() != act->type) {
                 type = act->type;
                 return eMergedActions;
@@ -114,26 +117,22 @@ public:
 };
 
 class delete_selection_action : public abstract_action {
-protected:
-    std::set<object> objlist;
-    int              stage;
+private:
+    object_set objlist;
+    int        stage;
 
 public:
     friend class move_objects_action;
-    delete_selection_action(int s, std::set<object> const& sel)
-        : objlist(sel), stage(s) {}
-    ~delete_selection_action() override {}
-    std::string const display_string() const override {
-        return std::string("Delete selection");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
-        if (sel) {
+    delete_selection_action(int s, object_set sel)
+        : objlist(std::move(sel)), stage(s) {}
+    void apply(ssobj_file_shared ss, object_set* sel) override {
+        if (sel != nullptr) {
             sel->clear();
         }
         sslevels* currlvl     = ss->get_stage(stage);
         int       numsegments = currlvl->num_segments();
 
-        for (const auto& elem : objlist) {
+        for (auto const& elem : objlist) {
             if (elem.get_segment() >= numsegments) {
                 continue;
             }
@@ -142,12 +141,11 @@ public:
             currseg->remove(elem.get_pos(), elem.get_angle());
         }
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl     = ss->get_stage(stage);
         int       numsegments = currlvl->num_segments();
 
-        for (const auto& elem : objlist) {
+        for (auto const& elem : objlist) {
             if (elem.get_segment() >= numsegments) {
                 continue;
             }
@@ -156,80 +154,54 @@ public:
             currseg->update(
                 elem.get_pos(), elem.get_angle(), elem.get_type(), true);
         }
-        if (sel) {
+        if (sel != nullptr) {
             *sel = objlist;
         }
     }
 };
 
-class cut_selection_action : public delete_selection_action {
-public:
-    cut_selection_action(int s, std::set<object> const& sel)
-        : delete_selection_action(s, sel) {}
-    ~cut_selection_action() override {}
-    std::string const display_string() const override {
-        return std::string("Cut selection");
-    }
-};
+using cut_selection_action = delete_selection_action;
 
 class insert_objects_action : public delete_selection_action {
 public:
-    insert_objects_action(int s, std::set<object> const& sel)
+    insert_objects_action(int s, object_set const& sel)
         : delete_selection_action(s, sel) {}
-    ~insert_objects_action() override {}
-    std::string const display_string() const override {
-        return std::string("Insert objects");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         delete_selection_action::revert(ss, sel);
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         delete_selection_action::apply(ss, sel);
     }
 };
 
-class paste_objects_action : public insert_objects_action {
-public:
-    paste_objects_action(int s, std::set<object> const& sel)
-        : insert_objects_action(s, sel) {}
-    ~paste_objects_action() override {}
-    std::string const display_string() const override {
-        return std::string("Paste objects");
-    }
-};
+using paste_objects_action = insert_objects_action;
 
 class move_objects_action : public abstract_action {
-protected:
+private:
     std::shared_ptr<delete_selection_action> from;
     std::shared_ptr<paste_objects_action>    to;
 
 public:
-    move_objects_action(
-        int s, std::set<object> const& del, std::set<object> const& add)
+    move_objects_action(int s, object_set const& del, object_set const& add)
         : from(std::make_shared<delete_selection_action>(s, del)),
           to(std::make_shared<paste_objects_action>(s, add)) {}
-    ~move_objects_action() override {}
-    std::string const display_string() const override {
-        return std::string("Move objects");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         from->apply(ss, sel);
         to->apply(ss, sel);
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         to->revert(ss, sel);
         from->revert(ss, sel);
     }
-    MergeResult merge(std::shared_ptr<abstract_action> other) override {
+    MergeResult merge(std::shared_ptr<abstract_action> const& other) override {
         std::shared_ptr<move_objects_action> act =
             std::dynamic_pointer_cast<move_objects_action>(other);
         if (!act) {
             return eNoMerge;
         }
 
-        std::set<object>&list1 = to->objlist, list2 = act->from->objlist;
+        object_set& list1 = to->objlist;
+        object_set& list2 = act->from->objlist;
         if (list1.size() != list2.size()) {
             return eNoMerge;
         }
@@ -254,21 +226,19 @@ public:
 class insert_objects_ex_action : public move_objects_action {
 public:
     insert_objects_ex_action(
-        int s, std::set<object> const& del, std::set<object> const& add)
+        int s, object_set const& del, object_set const& add)
         : move_objects_action(s, del, add) {}
-    std::string const display_string() const override {
-        return std::string("Insert objects");
-    }
-    MergeResult merge(std::shared_ptr<abstract_action> other) override {
+    MergeResult merge(std::shared_ptr<abstract_action> const& other) override {
         ignore_unused_variable_warning(other);
         return eNoMerge;
     }
 };
 
 class alter_segment_action : public abstract_action {
-protected:
-    int                         stage, seg;
-    bool                        newflip, oldflip;
+private:
+    int  stage, seg;
+    bool newflip, oldflip;
+
     sssegments::SegmentTypes    newterminator, oldterminator;
     sssegments::SegmentGeometry newgeometry, oldgeometry;
 
@@ -284,48 +254,43 @@ public:
         newgeometry   = newgeom;
         oldgeometry   = sgm.get_geometry();
     }
-    ~alter_segment_action() override {}
-    std::string const display_string() const override {
-        return std::string("Change selection");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
-        if (!currlvl) {
+        if (currlvl == nullptr) {
             return;
         }
 
         sssegments* currseg = currlvl->get_segment(seg);
-        if (!currseg) {
+        if (currseg == nullptr) {
             return;
         }
 
         currseg->set_direction(newflip);
         currseg->set_type(newterminator);
         currseg->set_geometry(newgeometry);
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
-        if (!currlvl) {
+        if (currlvl == nullptr) {
             return;
         }
 
         sssegments* currseg = currlvl->get_segment(seg);
-        if (!currseg) {
+        if (currseg == nullptr) {
             return;
         }
 
         currseg->set_direction(oldflip);
         currseg->set_type(oldterminator);
         currseg->set_geometry(oldgeometry);
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
-    MergeResult merge(std::shared_ptr<abstract_action> other) override {
+    MergeResult merge(std::shared_ptr<abstract_action> const& other) override {
         std::shared_ptr<alter_segment_action> act =
             std::dynamic_pointer_cast<alter_segment_action>(other);
         if (!act) {
@@ -349,37 +314,32 @@ public:
 };
 
 class delete_segment_action : public abstract_action {
-protected:
+private:
     sssegments segment;
     unsigned   stage, seg;
 
 public:
-    delete_segment_action(int s, int sg, sssegments const& sgm)
-        : segment(sgm), stage(s), seg(sg) {}
-    ~delete_segment_action() override {}
-    std::string const display_string() const override {
-        return std::string("Delete segment");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    delete_segment_action(int s, int sg, sssegments sgm)
+        : segment(std::move(sgm)), stage(s), seg(sg) {}
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
         if (seg >= currlvl->num_segments()) {
             return;
         }
 
         ss->get_stage(stage)->remove(seg);
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
         if (seg == currlvl->num_segments()) {
             ss->get_stage(stage)->append(segment);
         } else if (seg < currlvl->num_segments()) {
             ss->get_stage(stage)->insert(segment, seg);
         }
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
@@ -389,172 +349,121 @@ class cut_segment_action : public delete_segment_action {
 public:
     cut_segment_action(int s, int sg, sssegments const& sgm)
         : delete_segment_action(s, sg, sgm) {}
-    ~cut_segment_action() override {}
-    std::string const display_string() const override {
-        return std::string("Cut segment");
-    }
 };
 
 class insert_segment_action : public delete_segment_action {
 public:
     insert_segment_action(int s, int sg, sssegments const& sgm)
         : delete_segment_action(s, sg, sgm) {}
-    ~insert_segment_action() override {}
-    std::string const display_string() const override {
-        return std::string("Insert segment");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         delete_segment_action::revert(ss, sel);
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         delete_segment_action::apply(ss, sel);
     }
 };
 
-class paste_segment_action : public insert_segment_action {
-public:
-    paste_segment_action(int s, int sg, sssegments const& sgm)
-        : insert_segment_action(s, sg, sgm) {}
-    ~paste_segment_action() override {}
-    std::string const display_string() const override {
-        return std::string("Paste segment");
-    }
-};
+using paste_segment_action = insert_segment_action;
 
 class move_segment_action : public abstract_action {
-protected:
+private:
     int stage, seg, dir;
 
 public:
     move_segment_action(int s, int sg, int d) : stage(s), seg(sg), dir(d) {}
-    ~move_segment_action() override {}
-    std::string const display_string() const override {
-        return std::string("Move segment");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         if (dir > 0) {
             ss->get_stage(stage)->move_right(seg);
         } else if (dir < 0) {
             ss->get_stage(stage)->move_left(seg);
         }
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         if (dir < 0) {
             ss->get_stage(stage)->move_right(seg - 1);
         } else if (dir > 0) {
             ss->get_stage(stage)->move_left(seg + 1);
         }
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
 };
 
 class delete_stage_action : public abstract_action {
-protected:
+private:
     sslevels level;
     unsigned stage;
 
 public:
     friend class move_stage_action;
-    delete_stage_action(int s, sslevels const& l) : level(l), stage(s) {}
-    ~delete_stage_action() override {}
-    std::string const display_string() const override {
-        return std::string("Delete stage");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    delete_stage_action(int s, sslevels l) : level(std::move(l)), stage(s) {}
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         if (stage >= ss->num_stages()) {
             return;
         }
 
         ss->remove(stage);
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         if (stage == ss->num_stages()) {
             ss->append(level);
         } else if (stage < ss->num_stages()) {
             ss->insert(level, stage);
         }
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
 };
 
-class cut_stage_action : public delete_stage_action {
-public:
-    cut_stage_action(int s, sslevels const& l) : delete_stage_action(s, l) {}
-    ~cut_stage_action() override {}
-    std::string const display_string() const override {
-        return std::string("Cut stage");
-    }
-};
+using cut_stage_action = delete_stage_action;
 
 class insert_stage_action : public delete_stage_action {
 public:
     insert_stage_action(int s, sslevels const& l) : delete_stage_action(s, l) {}
-    ~insert_stage_action() override {}
-    std::string const display_string() const override {
-        return std::string("Insert stage");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         delete_stage_action::revert(ss, sel);
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         delete_stage_action::apply(ss, sel);
     }
 };
 
-class paste_stage_action : public insert_stage_action {
-public:
-    paste_stage_action(int s, sslevels const& l) : insert_stage_action(s, l) {}
-    ~paste_stage_action() override {}
-    std::string const display_string() const override {
-        return std::string("Paste stage");
-    }
-};
+using paste_stage_action = insert_stage_action;
 
 class move_stage_action : public abstract_action {
-protected:
+private:
     int stage, dir;
 
 public:
     move_stage_action(int s, int d) : stage(s), dir(d) {}
-    ~move_stage_action() override {}
-    std::string const display_string() const override {
-        return std::string("Move stage");
-    }
-    void apply(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void apply(ssobj_file_shared ss, object_set* sel) override {
         if (dir > 0) {
             ss->move_right(stage);
         } else if (dir < 0) {
             ss->move_left(stage);
         }
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
-    void
-    revert(std::shared_ptr<ssobj_file> ss, std::set<object>* sel) override {
+    void revert(ssobj_file_shared ss, object_set* sel) override {
         if (dir < 0) {
             ss->move_right(stage - 1);
         } else if (dir > 0) {
             ss->move_left(stage + 1);
         }
-        if (sel) {
+        if (sel != nullptr) {
             sel->clear();
         }
     }
 };
 
-#endif // __ABSTRACTACTION_H
+#endif // ABSTRACTACTION_H

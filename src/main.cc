@@ -33,12 +33,13 @@
 #    endif
 #endif
 
-using namespace std;
+using std::cerr;
+using std::endl;
 
 int main(int argc, char* argv[]) {
     try {
-        sseditor* Editor = sseditor::create_instance(argc, argv, UI_FILE);
-        Editor->run();
+        sseditor Editor(argc, argv, UI_FILE);
+        Editor.run();
     } catch (const Glib::FileError& ex) {
         cerr << ex.what() << endl;
         return 1;

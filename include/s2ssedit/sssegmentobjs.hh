@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SSSEGMENTOBJS_H
-#define __SSSEGMENTOBJS_H
+#ifndef SSSEGMENTOBJS_H
+#define SSSEGMENTOBJS_H
 
 #include <istream>
 #include <map>
@@ -40,125 +40,33 @@ public:
         eStraight,
         eStraightThenTurn
     };
-    enum ObjectTypes { eRing = 0x00, eBomb = 0x40 };
-    //               pos
-    typedef std::map<unsigned char, std::map<unsigned char, ObjectTypes>>
-        segobjs;
+    enum ObjectTypes : uint8_t {
+        ePositionMask = 0x3fU,
+        eRing         = 0x00U,
+        eBomb         = 0x40U,
+        eItemMask     = eBomb
+    };
+    enum AngleMasks : uint8_t { eOnAirMask = 0x80U };
+    enum GeometryMasks : uint8_t {
+        eNoFlip   = 0U,
+        eGeomMask = 0x7fU,
+        eFlipMask = 0x80U
+    };
+    enum SegmentSizes : uint32_t {
+        eTurnThenRiseLen     = 24,
+        eTurnThenDropLen     = 24,
+        eTurnThenStraightLen = 12,
+        eStraightLen         = 16,
+        eStraightThenTurnLen = 11
+    };
+    //                       position          angle
+    using segobjs = std::map<uint8_t, std::map<uint8_t, ObjectTypes>>;
 
-protected:
-    segobjs         objects;
-    bool            flip;
-    SegmentTypes    terminator;
-    SegmentGeometry geometry;
-    unsigned short  numrings, numbombs, numshadows;
-
-public:
-    sssegments()
-        : flip(false), terminator(eNormalSegment), geometry(eStraight),
-          numrings(0), numbombs(0), numshadows(0) {}
-    sssegments(sssegments const& other) { copy(other); }
-    sssegments& operator=(sssegments const& other) {
-        if (this != &other) {
-            copy(other);
-        }
-        return *this;
+    static bool is_aerial(uint8_t angle) noexcept {
+        return (angle & eOnAirMask) != 0;
     }
-    void copy(sssegments const& other) {
-        objects    = other.objects;
-        flip       = other.flip;
-        terminator = other.terminator;
-        geometry   = other.geometry;
-        numrings   = other.numrings;
-        numbombs   = other.numbombs;
-        numshadows = other.numshadows;
-    }
-    size_t size() const;
-
-    void print() const;
-
-    unsigned short get_numrings() const { return numrings; }
-    unsigned short get_numbombs() const { return numbombs; }
-    unsigned short get_numshadows() const { return numshadows; }
-    unsigned short get_totalobjs() const {
-        return numrings + numbombs + numshadows;
-    }
-    SegmentTypes        get_type() const { return terminator; }
-    SegmentGeometry     get_geometry() const { return geometry; }
-    static unsigned int get_length(SegmentGeometry geometry) {
-        ignore_unused_variable_warning(geometry);
-        // Not yet:
-        /*
-        switch (geometry)
-        {
-            case eTurnThenRise:
-            case eTurnThenDrop:
-                return 24;
-            case eTurnThenStraight:
-                return 12;
-            case eStraight:
-                return 16;
-            case eStraightThenTurn:
-                return 11;
-        }
-        //*/
-        return 24;
-    }
-    unsigned int get_length() const { return get_length(geometry); }
-    bool         get_direction() const { return flip; }
-    void         set_type(SegmentTypes t) { terminator = t; }
-    void         set_geometry(SegmentGeometry g) { geometry = g; }
-    void         set_direction(bool tf) { flip = tf; }
-    segobjs::mapped_type const& get_row(unsigned char row) {
-        return objects[row];
-    }
-    bool
-    exists(unsigned char row, unsigned char angle, ObjectTypes& type) const {
-        auto it = objects.find(row);
-        if (it == objects.end()) {
-            return false;
-        }
-        segobjs::mapped_type const& t   = it->second;
-        auto                        it2 = t.find(angle);
-        if (it2 == t.end()) {
-            return false;
-        }
-        type = it2->second;
-        return true;
-    }
-    void update(
-        unsigned char row, unsigned char angle, ObjectTypes type, bool insert) {
-        auto it = objects.find(row);
-        if (it == objects.end()) {
-            if (!insert) {
-                return;
-            }
-            segobjs::mapped_type t;
-            t[angle]     = type;
-            objects[row] = t;
-        } else {
-            segobjs::mapped_type& t   = it->second;
-            auto                  it2 = t.find(angle);
-            if (it2 == t.end()) {
-                if (!insert) {
-                    return;
-                }
-                t[angle] = type;
-            } else {
-                if (it2->second == type) {
-                    return;
-                }
-                if (it2->second == eRing) {
-                    numrings--;
-                    numbombs++;
-                } else {
-                    numbombs--;
-                    numrings++;
-                }
-                it2->second = type;
-                return;
-            }
-        }
-        if ((angle & 0x80) == 0) {
+    void add_obj(uint8_t angle, ObjectTypes type) noexcept {
+        if (!is_aerial(angle)) {
             numshadows++;
         }
         if (type == eRing) {
@@ -167,24 +75,118 @@ public:
             numbombs++;
         }
     }
-    void remove(unsigned char row, unsigned char angle) {
-        auto it = objects.find(row);
-        if (it == objects.end()) {
-            return;
-        }
-        segobjs::mapped_type& t   = it->second;
-        auto                  it2 = t.find(angle);
-        if (it2 == t.end()) {
-            return;
-        }
-        if ((angle & 0x80) == 0) {
+    void del_obj(uint8_t angle, ObjectTypes type) noexcept {
+        if (!is_aerial(angle)) {
             numshadows--;
         }
-        if (it2->second == eRing) {
+        if (type == eRing) {
             numrings--;
         } else {
             numbombs--;
         }
+    }
+
+private:
+    segobjs         objects;
+    bool            flip       = false;
+    SegmentTypes    terminator = eNormalSegment;
+    SegmentGeometry geometry   = eStraight;
+    uint16_t        numrings   = 0;
+    uint16_t        numbombs   = 0;
+    uint16_t        numshadows = 0;
+
+public:
+    size_t size() const;
+
+    uint16_t get_numrings() const noexcept { return numrings; }
+    uint16_t get_numbombs() const noexcept { return numbombs; }
+    uint16_t get_numshadows() const noexcept { return numshadows; }
+    uint16_t get_totalobjs() const noexcept {
+        return numrings + numbombs + numshadows;
+    }
+    SegmentTypes    get_type() const noexcept { return terminator; }
+    SegmentGeometry get_geometry() const noexcept { return geometry; }
+    static uint32_t get_length(SegmentGeometry geometry) noexcept {
+        ignore_unused_variable_warning(geometry);
+        // Not yet:
+        /*
+        switch (geometry)
+        {
+            case eTurnThenRise:
+                return eTurnThenRiseLen;
+            case eTurnThenDrop:
+                return eTurnThenDropLen;
+            case eTurnThenStraight:
+                return eTurnThenStraightLen;
+            case eStraight:
+                return eStraightLen;
+            case eStraightThenTurn:
+                return eStraightThenTurnLen;
+        }
+        //*/
+        return eTurnThenRiseLen;
+    }
+    uint32_t get_length() const noexcept { return get_length(geometry); }
+    bool     get_direction() const noexcept { return flip; }
+    uint8_t  get_flip_geom() const noexcept {
+        return static_cast<uint8_t>(flip ? eFlipMask : eNoFlip) |
+               static_cast<uint8_t>(geometry);
+    }
+    void set_type(SegmentTypes t) noexcept { terminator = t; }
+    void set_geometry(SegmentGeometry g) noexcept { geometry = g; }
+    void set_direction(bool tf) noexcept { flip = tf; }
+
+    auto const& get_row(uint8_t row) noexcept { return objects[row]; }
+    bool exists(uint8_t row, uint8_t angle, ObjectTypes& type) const noexcept {
+        auto it = objects.find(row);
+        if (it == objects.end()) {
+            return false;
+        }
+        auto const& t   = it->second;
+        auto        it2 = t.find(angle);
+        if (it2 == t.end()) {
+            return false;
+        }
+        type = it2->second;
+        return true;
+    }
+    void update(uint8_t row, uint8_t angle, ObjectTypes type, bool insert) {
+        auto it = objects.find(row);
+        if (it == objects.end()) {
+            if (!insert) {
+                return;
+            }
+            segobjs::mapped_type t;
+            t[angle]     = type;
+            objects[row] = std::move(t);
+        } else {
+            auto& t   = it->second;
+            auto  it2 = t.find(angle);
+            if (it2 == t.end()) {
+                if (!insert) {
+                    return;
+                }
+                t[angle] = type;
+            } else if (it2->second == type) {
+                return;
+            } else {
+                del_obj(angle, it2->second);
+                it2->second = type;
+            }
+        }
+        add_obj(angle, type);
+    }
+    void remove(uint8_t row, uint8_t angle) noexcept {
+        auto it = objects.find(row);
+        if (it == objects.end()) {
+            return;
+        }
+        auto& t   = it->second;
+        auto  it2 = t.find(angle);
+        if (it2 == t.end()) {
+            return;
+        }
+        del_obj(angle, it2->second);
         t.erase(it2);
     }
 
@@ -192,4 +194,4 @@ public:
     void write(std::ostream& out, std::ostream& lay) const;
 };
 
-#endif // __SSSEGMENTOBJS_H
+#endif // SSSEGMENTOBJS_H

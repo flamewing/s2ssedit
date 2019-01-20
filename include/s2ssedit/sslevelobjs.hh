@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SSLEVELOBJS_H
-#define __SSLEVELOBJS_H
+#ifndef SSLEVELOBJS_H
+#define SSLEVELOBJS_H
 
 #include <istream>
 #include <ostream>
@@ -26,22 +26,11 @@
 #include <s2ssedit/sssegmentobjs.hh>
 
 class sslevels {
-protected:
+private:
     std::vector<sssegments> segments;
 
 public:
-    sslevels() {}
-    sslevels(sslevels const& other) { copy(other); }
-    sslevels& operator=(sslevels const& other) {
-        if (this != &other) {
-            copy(other);
-        }
-        return *this;
-    }
-    void   copy(sslevels const& other) { segments = other.segments; }
     size_t size() const;
-
-    void print() const;
 
     void read(std::istream& in, std::istream& lay, int term, int term2);
     void write(std::ostream& out, std::ostream& lay) const;
@@ -50,7 +39,7 @@ public:
         segpos.clear();
         segpos.reserve(segments.size());
         size_t tally = 0;
-        for (const auto& elem : segments) {
+        for (auto const& elem : segments) {
             segpos.push_back(tally);
             tally += elem.get_length();
         }
@@ -90,4 +79,4 @@ public:
     }
 };
 
-#endif // __SSLEVELOBJS_H
+#endif // SSLEVELOBJS_H

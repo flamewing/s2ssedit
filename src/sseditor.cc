@@ -48,9 +48,18 @@
 #    endif
 #endif
 
-sseditor* sseditor::instance = nullptr;
-
-using namespace std;
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::ios;
+using std::make_shared;
+using std::set;
+using std::shared_ptr;
+using std::string;
+using std::stringstream;
+using std::swap;
+using std::to_string;
+using std::vector;
 
 sseditor::sseditor(int argc, char* argv[], char const* uifile)
     : update_in_progress(false), dragging(false), drop_enabled(false),
@@ -58,7 +67,39 @@ sseditor::sseditor(int argc, char* argv[], char const* uifile)
       mouse_y(0), state(0), mode(eSelectMode), ringmode(eSingle),
       bombmode(eSingle), copypos(0), drawbox(false), snaptogrid(true),
       endpos(0), main_win(nullptr), helpdlg(nullptr), aboutdlg(nullptr),
-      filedlg(nullptr) {
+      filedlg(nullptr), pspecialstageobjs(nullptr), pmodenotebook(nullptr),
+      plabelcurrentstage(nullptr), plabeltotalstages(nullptr),
+      plabelcurrentsegment(nullptr), plabeltotalsegments(nullptr),
+      plabelcurrsegrings(nullptr), plabelcurrsegbombs(nullptr),
+      plabelcurrsegshadows(nullptr), plabelcurrsegtotal(nullptr),
+      pimagecurrsegwarn(nullptr), pvscrollbar(nullptr),
+      popenfilebutton(nullptr), psavefilebutton(nullptr),
+      prevertfilebutton(nullptr), pundobutton(nullptr), predobutton(nullptr),
+      phelpbutton(nullptr), paboutbutton(nullptr),
+      pquitbutton(nullptr), pmodebuttons{}, psnapgridbutton(nullptr),
+      pcutbutton(nullptr), pcopybutton(nullptr), ppastebutton(nullptr),
+      pdeletebutton(nullptr), pringmodebuttons{}, pbombmodebuttons{},
+      pstage_toolbar(nullptr), pfirst_stage_button(nullptr),
+      pprevious_stage_button(nullptr), pnext_stage_button(nullptr),
+      plast_stage_button(nullptr), pinsert_stage_before_button(nullptr),
+      pappend_stage_button(nullptr), pcut_stage_button(nullptr),
+      pcopy_stage_button(nullptr), ppaste_stage_button(nullptr),
+      pdelete_stage_button(nullptr), pswap_stage_prev_button(nullptr),
+      pswap_stage_next_button(nullptr), psegment_toolbar(nullptr),
+      pfirst_segment_button(nullptr), pprevious_segment_button(nullptr),
+      pnext_segment_button(nullptr), plast_segment_button(nullptr),
+      pinsert_segment_before_button(nullptr), pappend_segment_button(nullptr),
+      pcut_segment_button(nullptr), pcopy_segment_button(nullptr),
+      ppaste_segment_button(nullptr), pdelete_segment_button(nullptr),
+      pswap_segment_prev_button(nullptr), pswap_segment_next_button(nullptr),
+      psegment_expander(nullptr), pnormal_segment(nullptr),
+      pring_message(nullptr), pcheckpoint(nullptr), pchaos_emerald(nullptr),
+      psegment_turnthenrise(nullptr), psegment_turnthendrop(nullptr),
+      psegment_turnthenstraight(nullptr), psegment_straight(nullptr),
+      psegment_straightthenturn(nullptr), psegment_right(nullptr),
+      psegment_left(nullptr), pobject_expander(nullptr), pmoveup(nullptr),
+      pmovedown(nullptr), pmoveleft(nullptr), pmoveright(nullptr),
+      pringtype(nullptr), pbombtype(nullptr) {
     kit = make_shared<Gtk::Main>(argc, argv);
 
     ringimg = Gdk::Pixbuf::create_from_file(RINGFILE);
@@ -380,7 +421,7 @@ sseditor::sseditor(int argc, char* argv[], char const* uifile)
 }
 
 size_t sseditor::get_current_segment() const {
-    size_t pos = size_t(pvscrollbar->get_value());
+    auto pos = size_t(pvscrollbar->get_value());
     return get_segment(pos);
 }
 
@@ -395,17 +436,20 @@ size_t sseditor::get_segment(size_t pos) const {
 
 void sseditor::update_segment_positions(bool setpos) {
     if (!specialstages) {
-        pvscrollbar->set_value(0.0);
-        pvscrollbar->set_range(0.0, 0.1);
+        disable_scroll();
         segpos.clear();
         endpos = 0;
         return;
     }
+    constexpr const double range_offset = 9.0;
+    constexpr const double step_size    = 4.0;
+    constexpr const double page_incr    = 32.0;
+    auto                   start_pos    = draw_height / IMAGE_SIZE;
     endpos = specialstages->get_stage(currstage)->fill_position_array(segpos);
-    cout << endpos << "\t" << segpos.back() << "\t"
-         << (draw_height / IMAGE_SIZE) << endl;
-    pvscrollbar->set_range(0.0, endpos + 9 - (draw_height / IMAGE_SIZE));
-    pvscrollbar->set_increments(4, 32);
+    cout << endpos << "\t" << segpos.back() << "\t" << start_pos << endl;
+    pvscrollbar->set_range(
+        0.0, static_cast<double>(endpos) + range_offset - start_pos);
+    pvscrollbar->set_increments(step_size, page_incr);
     if (setpos) {
         goto_segment(currsegment);
     }
@@ -422,8 +466,8 @@ void sseditor::update() {
         psavefilebutton->set_sensitive(false);
         prevertfilebutton->set_sensitive(false);
 
-        for (int i = int(eSelectMode); i < int(eNumModes); i++) {
-            pmodebuttons[i]->set_sensitive(false);
+        for (auto& elem : pmodebuttons) {
+            elem->set_sensitive(false);
         }
 
         pmodenotebook->set_sensitive(false);
@@ -439,16 +483,15 @@ void sseditor::update() {
         plabelcurrsegshadows->set_label("0");
         plabelcurrsegtotal->set_label("0/100");
         pimagecurrsegwarn->set_visible(false);
-        pvscrollbar->set_value(0.0);
-        pvscrollbar->set_range(0.0, 0.1);
+        disable_scroll();
     } else {
         psavefilebutton->set_sensitive(true);
         prevertfilebutton->set_sensitive(true);
-        pundobutton->set_sensitive(undostack.size());
-        predobutton->set_sensitive(redostack.size());
+        pundobutton->set_sensitive(!undostack.empty());
+        predobutton->set_sensitive(!redostack.empty());
 
-        for (int i = int(eSelectMode); i < int(eNumModes); i++) {
-            pmodebuttons[i]->set_sensitive(true);
+        for (auto& elem : pmodebuttons) {
+            elem->set_sensitive(true);
         }
 
         pmodenotebook->set_sensitive(true);
@@ -513,12 +556,8 @@ void sseditor::update() {
             pcopy_stage_button->set_sensitive(true);
             ppaste_stage_button->set_sensitive(copylevel != nullptr);
             pdelete_stage_button->set_sensitive(true);
-            char buf[20];
-            sprintf(buf, "%d", numstages);
-            plabeltotalstages->set_label(buf);
-
-            sprintf(buf, "%d", currstage + 1);
-            plabelcurrentstage->set_label(buf);
+            plabeltotalstages->set_label(to_string(numstages));
+            plabelcurrentstage->set_label(to_string(currstage + 1));
 
             sslevels* currlvl     = specialstages->get_stage(currstage);
             unsigned  numsegments = segpos.size();
@@ -583,26 +622,21 @@ void sseditor::update() {
                 pdelete_segment_button->set_sensitive(true);
 
                 psegment_expander->set_sensitive(true);
-                sprintf(buf, "%d", numsegments);
-                plabeltotalsegments->set_label(buf);
-
-                sprintf(buf, "%d", currsegment + 1);
-                plabelcurrentsegment->set_label(buf);
+                plabeltotalsegments->set_label(to_string(numsegments));
+                plabelcurrentsegment->set_label(to_string(currsegment + 1));
 
                 sssegments* currseg = currlvl->get_segment(currsegment);
-
-                sprintf(buf, "%d", int(currseg->get_numrings()));
-                plabelcurrsegrings->set_label(buf);
-
-                sprintf(buf, "%d", int(currseg->get_numbombs()));
-                plabelcurrsegbombs->set_label(buf);
-
-                sprintf(buf, "%d", int(currseg->get_numshadows()));
-                plabelcurrsegshadows->set_label(buf);
-
-                sprintf(buf, "%d/100", int(currseg->get_totalobjs()));
-                plabelcurrsegtotal->set_label(buf);
-                pimagecurrsegwarn->set_visible(currseg->get_totalobjs() > 100);
+                plabelcurrsegrings->set_label(
+                    to_string(currseg->get_numrings()));
+                plabelcurrsegbombs->set_label(
+                    to_string(currseg->get_numbombs()));
+                plabelcurrsegshadows->set_label(
+                    to_string(currseg->get_numshadows()));
+                plabelcurrsegtotal->set_label(
+                    to_string(currseg->get_totalobjs()) + "/100");
+                constexpr const uint16_t max_safe_num_objs = 100;
+                pimagecurrsegwarn->set_visible(
+                    currseg->get_totalobjs() > max_safe_num_objs);
 
                 switch (currseg->get_type()) {
                 case sssegments::eRingsMessage:
@@ -646,8 +680,9 @@ void sseditor::update() {
                     pbombtype->set_inconsistent(true);
                     pobject_expander->set_sensitive(false);
                 } else {
-                    size_t nrings = 0, nbombs = 0;
-                    for (const auto& elem : selection) {
+                    size_t nrings = 0;
+                    size_t nbombs = 0;
+                    for (auto const& elem : selection) {
                         if (elem.get_type() == sssegments::eBomb) {
                             ++nbombs;
                         } else {
@@ -679,7 +714,7 @@ void sseditor::update() {
 }
 
 void sseditor::run() {
-    if (main_win) {
+    if (main_win != nullptr) {
         kit->run(*main_win);
     }
 }
@@ -694,13 +729,12 @@ void sseditor::on_vscrollbar_value_changed() {
 }
 
 void sseditor::on_filedialog_response(int response_id) {
-    switch (response_id) {
-    case Gtk::RESPONSE_OK: {
-        string dirname    = filedlg->get_filename() + '/';
-        string layoutfile = dirname + SS_LAYOUT_FILE,
-               objectfile = dirname + SS_OBJECT_FILE;
-        ifstream fobj(objectfile.c_str(), ios::in | ios::binary),
-            flay(layoutfile.c_str(), ios::in | ios::binary);
+    if (response_id == Gtk::RESPONSE_OK) {
+        string   dirname    = filedlg->get_filename() + '/';
+        string   layoutfile = dirname + SS_LAYOUT_FILE;
+        string   objectfile = dirname + SS_OBJECT_FILE;
+        ifstream fobj(objectfile.c_str(), ios::in | ios::binary);
+        ifstream flay(layoutfile.c_str(), ios::in | ios::binary);
         if (!fobj.good() || !flay.good()) {
             return;
         }
@@ -718,22 +752,18 @@ void sseditor::on_filedialog_response(int response_id) {
         update_segment_positions(true);
         render();
         update();
-        break;
-    }
-    default:
-        break;
     }
     filedlg->hide();
 }
 
 void sseditor::on_openfilebutton_clicked() {
-    if (!filedlg) {
+    if (filedlg == nullptr) {
         builder->get_widget("filechooserdialog", filedlg);
         filedlg->signal_response().connect(
             sigc::mem_fun(this, &sseditor::on_filedialog_response));
     }
 
-    if (filedlg) {
+    if (filedlg != nullptr) {
         filedlg->run();
     }
 }
@@ -758,10 +788,6 @@ void sseditor::on_revertfilebutton_clicked() {
 }
 
 void sseditor::on_undobutton_clicked() {
-    if (redostack.size() == 100) {
-        redostack.pop_back();
-    }
-
     shared_ptr<abstract_action> act = undostack.front();
     undostack.pop_front();
     redostack.push_front(act);
@@ -783,10 +809,6 @@ void sseditor::on_undobutton_clicked() {
 }
 
 void sseditor::on_redobutton_clicked() {
-    if (undostack.size() == 100) {
-        undostack.pop_back();
-    }
-
     shared_ptr<abstract_action> act = redostack.front();
     redostack.pop_front();
     undostack.push_front(act);
@@ -813,12 +835,12 @@ void sseditor::on_helpdialog_response(int response_id) {
 }
 
 void sseditor::on_helpbutton_clicked() {
-    if (!helpdlg) {
+    if (helpdlg == nullptr) {
         builder->get_widget("helpdialog", helpdlg);
         helpdlg->signal_response().connect(
             sigc::mem_fun(this, &sseditor::on_helpdialog_response));
     }
-    if (helpdlg) {
+    if (helpdlg != nullptr) {
         helpdlg->run();
     }
 }
@@ -829,12 +851,12 @@ void sseditor::on_aboutdialog_response(int response_id) {
 }
 
 void sseditor::on_aboutbutton_clicked() {
-    if (!aboutdlg) {
+    if (aboutdlg == nullptr) {
         builder->get_widget("aboutdialog", aboutdlg);
         aboutdlg->signal_response().connect(
             sigc::mem_fun(this, &sseditor::on_aboutdialog_response));
     }
-    if (aboutdlg) {
+    if (aboutdlg != nullptr) {
         aboutdlg->run();
     }
 }
@@ -843,7 +865,7 @@ void sseditor::on_quitbutton_clicked() { kit->quit(); }
 
 void sseditor::on_cutbutton_clicked() {
     copystack = selection;
-    copypos   = pvscrollbar->get_value();
+    copypos   = static_cast<int>(pvscrollbar->get_value());
 
     auto act = make_shared<cut_selection_action>(currstage, copystack);
     do_action(act);
@@ -855,24 +877,26 @@ void sseditor::on_cutbutton_clicked() {
 
 void sseditor::on_copybutton_clicked() {
     copystack = selection;
-    copypos   = pvscrollbar->get_value();
+    copypos   = static_cast<int>(pvscrollbar->get_value());
     update();
 }
 
 void sseditor::on_pastebutton_clicked() {
-    int maxpos = endpos - 1;
-    int delta  = pvscrollbar->get_value() - copypos;
+    int maxpos = static_cast<int>(endpos) - 1;
+    int delta  = static_cast<int>(pvscrollbar->get_value()) - copypos;
 
     selection.clear();
-    for (const auto& elem : copystack) {
-        int newpos = segpos[elem.get_segment()] + elem.get_pos() + delta;
+    for (auto const& elem : copystack) {
+        int newpos = delta + static_cast<int>(
+                                 segpos[elem.get_segment()] + elem.get_pos());
         if (newpos < 0) {
             newpos = 0;
         } else if (newpos > maxpos) {
             newpos = maxpos;
         }
 
-        int newseg = get_segment(newpos), newy = newpos - segpos[newseg];
+        int newseg = static_cast<int>(get_segment(newpos));
+        int newy   = newpos - static_cast<int>(segpos[newseg]);
         selection.emplace(newseg, elem.get_angle(), newy, elem.get_type());
     }
 
@@ -1181,31 +1205,35 @@ bool sseditor::move_object(int dx, int dy) {
     sslevels*   currlvl     = specialstages->get_stage(currstage);
     int         numsegments = segpos.size();
 
-    for (const auto& elem : selection) {
-        int oldseg = elem.get_segment(), oldx = elem.get_angle(),
-            oldy = elem.get_pos();
+    for (auto const& elem : selection) {
+        int  oldseg = elem.get_segment();
+        auto oldx   = static_cast<int>(elem.get_angle());
+        auto oldy   = static_cast<int>(elem.get_pos());
         // sssegments::ObjectTypes oldtype = it->get_type();
 
         if (oldseg >= numsegments) {
             continue;
         }
 
-        sssegments*             currseg = currlvl->get_segment(oldseg);
+        sssegments* currseg = currlvl->get_segment(oldseg);
+
         sssegments::ObjectTypes type;
         if (!currseg->exists(oldy, oldx, type)) {
             continue;
         }
 
-        int newx = (oldx + dx) & 0xff, newy = (oldy + dy) & 0x3f;
+        constexpr const int max_angle = 0x40;
 
-        int cnt = 0x40;
+        int newx = static_cast<uint8_t>(oldx + dx);
+        int newy = (oldy + dy) % max_angle;
+        int cnt  = max_angle;
+
         while (cnt > 0 && currseg->exists(newy, newx, type) &&
                selection.find(object(oldseg, newx, newy, type)) ==
                    selection.end()) {
-            newx += dx;
-            newx &= 0xff;
+            newx = static_cast<uint8_t>(newx + dx);
             newy += dy;
-            newy &= 0x3f;
+            newy %= max_angle;
             cnt--;
         }
 
@@ -1305,7 +1333,7 @@ void sseditor::render() {
         }
 
         if ((i + 1) % 4 == 0) {
-            cr->set_line_width(IMAGE_SIZE / 2);
+            cr->set_line_width(HALF_IMAGE_SIZE);
             cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
             // Horizontal beams.
             int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE;
@@ -1317,34 +1345,34 @@ void sseditor::render() {
                 double angle = (iangle * 64.0) / 3.0;
                 cr->set_source_rgb(180.0 / 256.0, 108.0 / 256.0, 36.0 / 256.0);
                 cr->arc(
-                    angle_to_x(angle + 0x80) + IMAGE_SIZE / 2, ty,
-                    IMAGE_SIZE / 2, 0.0, 2.0 * G_PI);
+                    angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty,
+                    HALF_IMAGE_SIZE, 0.0, 2.0 * G_PI);
                 cr->begin_new_sub_path();
                 cr->arc(
-                    angle_to_x(0x00 - angle) - IMAGE_SIZE / 2, ty,
-                    IMAGE_SIZE / 2, 0.0, 2.0 * G_PI);
+                    angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty,
+                    HALF_IMAGE_SIZE, 0.0, 2.0 * G_PI);
                 cr->fill();
                 cr->set_source_rgb(216.0 / 256.0, 144.0 / 256.0, 36.0 / 256.00);
                 cr->arc(
-                    angle_to_x(angle + 0x80) + IMAGE_SIZE / 2, ty - 1.5,
-                    IMAGE_SIZE / 2 - 2, 0.0, 2.0 * G_PI);
+                    angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty - 1.5,
+                    HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
                 cr->begin_new_sub_path();
                 cr->arc(
-                    angle_to_x(0x00 - angle) - IMAGE_SIZE / 2, ty - 1.5,
-                    IMAGE_SIZE / 2 - 2, 0.0, 2.0 * G_PI);
+                    angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty - 1.5,
+                    HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
                 cr->fill();
                 cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
                 cr->arc(
-                    angle_to_x(angle + 0x80) + IMAGE_SIZE / 2, ty - 3.0,
-                    IMAGE_SIZE / 2 - 4, 0.0, 2.0 * G_PI);
+                    angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty - 3.0,
+                    HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
                 cr->begin_new_sub_path();
                 cr->arc(
-                    angle_to_x(0x00 - angle) - IMAGE_SIZE / 2, ty - 3.0,
-                    IMAGE_SIZE / 2 - 4, 0.0, 2.0 * G_PI);
+                    angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty - 3.0,
+                    HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
                 cr->fill();
             }
             // Yellow beams.
-            cr->set_line_width(IMAGE_SIZE / 4);
+            cr->set_line_width(QUARTER_IMAGE_SIZE);
             cr->set_source_rgb(1.0, 1.0, 0.0);
             cr->move_to(angle_to_x(0x30 - 4), ty - IMAGE_SIZE);
             cr->line_to(angle_to_x(0x30 - 4), ty + IMAGE_SIZE);
@@ -1369,22 +1397,22 @@ void sseditor::render() {
             int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE;
             cr->set_dash(dash, 0.0);
             cr->set_source_rgb(1.0, 1.0, 1.0);
-            cr->set_line_width(IMAGE_SIZE / 2);
-            cr->move_to(angle_to_x(0x00), ty - IMAGE_SIZE / 2);
-            cr->line_to(angle_to_x(0x80), ty - IMAGE_SIZE / 2);
+            cr->set_line_width(HALF_IMAGE_SIZE);
+            cr->move_to(angle_to_x(0x00), ty - HALF_IMAGE_SIZE);
+            cr->line_to(angle_to_x(0x80), ty - HALF_IMAGE_SIZE);
             cr->move_to(angle_to_x(0x80), ty);
             cr->line_to(angle_to_x(0x00), ty);
-            cr->move_to(angle_to_x(0x00), ty + IMAGE_SIZE / 2);
-            cr->line_to(angle_to_x(0x80), ty + IMAGE_SIZE / 2);
+            cr->move_to(angle_to_x(0x00), ty + HALF_IMAGE_SIZE);
+            cr->line_to(angle_to_x(0x80), ty + HALF_IMAGE_SIZE);
             cr->stroke();
             cr->set_source_rgb(0.0, 0.0, 0.0);
-            cr->set_line_width(IMAGE_SIZE / 2);
-            cr->move_to(angle_to_x(0x80), ty - IMAGE_SIZE / 2);
-            cr->line_to(angle_to_x(0x00), ty - IMAGE_SIZE / 2);
+            cr->set_line_width(HALF_IMAGE_SIZE);
+            cr->move_to(angle_to_x(0x80), ty - HALF_IMAGE_SIZE);
+            cr->line_to(angle_to_x(0x00), ty - HALF_IMAGE_SIZE);
             cr->move_to(angle_to_x(0x00), ty);
             cr->line_to(angle_to_x(0x80), ty);
-            cr->move_to(angle_to_x(0x80), ty + IMAGE_SIZE / 2);
-            cr->line_to(angle_to_x(0x00), ty + IMAGE_SIZE / 2);
+            cr->move_to(angle_to_x(0x80), ty + HALF_IMAGE_SIZE);
+            cr->line_to(angle_to_x(0x00), ty + HALF_IMAGE_SIZE);
             cr->stroke();
             cr->restore();
         }
@@ -1407,9 +1435,8 @@ void sseditor::render() {
         }
 
         sssegments* currseg = currlvl->get_segment(seg);
-        sssegments::segobjs::mapped_type const& row =
-            currseg->get_row(i - segpos[seg]);
-        for (const auto& elem : row) {
+        auto const& row     = currseg->get_row(i - segpos[seg]);
+        for (auto const& elem : row) {
             Glib::RefPtr<Gdk::Pixbuf> image =
                 (elem.second == sssegments::eBomb) ? bombimg : ringimg;
 
@@ -1460,14 +1487,14 @@ void sseditor::show() {
         }
 
         sssegments* currseg = currlvl->get_segment(seg);
-        sssegments::segobjs::mapped_type const& row =
-            currseg->get_row(i - segpos[seg]);
-        for (const auto& elem : row) {
+        auto const& row     = currseg->get_row(i - segpos[seg]);
+        for (auto const& elem : row) {
             int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE,
-                tx = angle_to_x(elem.first) - IMAGE_SIZE / 2;
+                tx = angle_to_x(elem.first) - HALF_IMAGE_SIZE;
 
-            if (mouse_x >= tx && mouse_y >= ty && mouse_x < tx + IMAGE_SIZE &&
-                mouse_y < ty + IMAGE_SIZE) {
+            if (mouse_x >= tx && mouse_y >= ty &&
+                mouse_x < tx + static_cast<int>(IMAGE_SIZE) &&
+                mouse_y < ty + static_cast<int>(IMAGE_SIZE)) {
                 hotspot.set(seg, elem.first, i - segpos[seg], elem.second);
                 break;
             }
@@ -1482,7 +1509,7 @@ void sseditor::show() {
         if (hotspot.valid()) {
             cr->set_source_rgb(1.0, 1.0, 0.0);
             cr->set_line_width(2.0);
-            int tx = angle_to_x(hotspot.get_angle()) - IMAGE_SIZE / 2;
+            int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
             int ty = (segpos[hotspot.get_segment()] + hotspot.get_pos() -
                       pvscrollbar->get_value()) *
                      IMAGE_SIZE;
@@ -1544,7 +1571,7 @@ void sseditor::show() {
             cr->set_line_width(1.0);
             cr->stroke();
         } else if (hotspot.valid()) {
-            int tx = angle_to_x(hotspot.get_angle()) - IMAGE_SIZE / 2;
+            int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
             int ty = (segpos[hotspot.get_segment()] + hotspot.get_pos() -
                       pvscrollbar->get_value()) *
                      IMAGE_SIZE;
@@ -1632,7 +1659,9 @@ bool sseditor::on_specialstageobjs_button_press_event(GdkEventButton* event) {
     }
     int pos = event->y / IMAGE_SIZE + pvscrollbar->get_value(),
         seg = get_segment(pos);
-    lastclick.set(seg, x_to_angle_constrained(event->x), pos - segpos[seg]);
+    lastclick.set(
+        seg, x_to_angle_constrained(event->x), pos - segpos[seg],
+        sssegments::eRing);
 
     selclear.reset();
     if (mode == eSelectMode) {
@@ -1669,7 +1698,7 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
     size_t angle, pos, seg;
     if (!hotspot.valid()) {
         if (snaptogrid ^ ((state & GDK_CONTROL_MASK) != 0)) {
-            angle = x_to_angle_constrained(event->x + IMAGE_SIZE / 4);
+            angle = x_to_angle_constrained(event->x + QUARTER_IMAGE_SIZE);
         } else {
             angle = x_to_angle(event->x);
         }
@@ -1696,7 +1725,7 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
     case eSelectMode:
         if (event->button == 1) {
             if (!hotstack.empty()) {
-                for (const auto& elem : hotstack) {
+                for (auto const& elem : hotstack) {
                     auto it2 = selection.find(elem);
                     if (it2 == selection.end()) {
                         selection.insert(elem);
@@ -1757,7 +1786,7 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         if (event->button == 1) {
             if (!insertstack.empty()) {
                 set<object> delstack;
-                for (const auto& elem : insertstack) {
+                for (auto const& elem : insertstack) {
                     seg = elem.get_segment();
                     if (seg >= numsegments) {
                         continue;
@@ -1890,7 +1919,7 @@ void sseditor::object_triangle(
 
         int tx;
         if (fill) {
-            int const cnt    = (2 * delta) / (IMAGE_SIZE / 2),
+            int const cnt    = (2 * delta) / HALF_IMAGE_SIZE,
                       middle = (cnt & 1) == 0;
             int const dj     = 8 * delta;
             int const min    = middle ? cnt * IMAGE_SIZE : 0;
@@ -1900,15 +1929,15 @@ void sseditor::object_triangle(
 
             for (int j = 4 * delta * cnt; j >= min; j -= dj) {
                 double jang = j / (4.0 * cnt);
-                tx          = angle_normal(int(angle - jang + 0x100) & 0xff);
+                tx          = angle_normal(static_cast<uint8_t>(angle - jang));
                 insertstack.emplace(seg, tx, pos, type);
-                tx = angle_normal(int(angle + jang + 0x100) & 0xff);
+                tx = angle_normal(static_cast<uint8_t>(angle + jang));
                 insertstack.emplace(seg, tx, pos, type);
             }
         } else {
-            tx = angle_normal((angle - delta + 0x100) & 0xff);
+            tx = angle_normal(static_cast<uint8_t>(angle - delta));
             insertstack.emplace(seg, tx, pos, type);
-            tx = angle_normal((angle + delta + 0x100) & 0xff);
+            tx = angle_normal(static_cast<uint8_t>(angle + delta));
             insertstack.emplace(seg, tx, pos, type);
         }
         delta += dx;
@@ -1941,7 +1970,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
         int angle1, pos1;
         if (!hotspot.valid()) {
             if (snaptogrid ^ ((event->state & GDK_CONTROL_MASK) != 0)) {
-                angle1 = x_to_angle_constrained(event->x + IMAGE_SIZE / 4);
+                angle1 = x_to_angle_constrained(event->x + QUARTER_IMAGE_SIZE);
             } else {
                 angle1 = x_to_angle(event->x);
             }
@@ -1970,7 +1999,8 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
             if (dangle || dpos) {
                 int seg1 = get_segment(pos1);
                 boxcorner.set(
-                    seg1, (angle1 + 0xc0) & 0xff, pos1 - segpos[seg1]);
+                    seg1, static_cast<uint8_t>(angle1 + 0xc0),
+                    pos1 - segpos[seg1], sssegments::eRing);
                 if (dpos < 0) {
                     swap(pos0, pos1);
                 }
@@ -1984,9 +2014,9 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                         continue;
                     }
                     for (int j = angle0; j <= angle1; j++) {
-                        int                     angle = (j + 0xc0) & 0xff;
-                        sssegments::ObjectTypes type;
+                        int         angle   = static_cast<uint8_t>(j + 0xc0);
                         sssegments* currseg = currlvl->get_segment(seg);
+                        sssegments::ObjectTypes type;
                         if (currseg->exists(pos, angle, type)) {
                             hotstack.emplace(seg, angle, pos, type);
                         }
@@ -2038,8 +2068,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                     }
 
                     insertstack.emplace(seg, angle_normal(angle), pos, type);
-                    angle += angledelta + 0x100;
-                    angle &= 0xff;
+                    angle = static_cast<uint8_t>(angle + angledelta);
                 } while (i != pos1 + delta);
                 break;
             }
@@ -2065,8 +2094,8 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                     if (angledelta < 0) {
                         angledelta = -angledelta;
                     }
-                    if (angledelta < IMAGE_SIZE / 2) {
-                        angledelta = IMAGE_SIZE / 2;
+                    if (angledelta < HALF_IMAGE_SIZE) {
+                        angledelta = HALF_IMAGE_SIZE;
                     }
                     nobj  = (0x100 - angledelta) / angledelta;
                     delta = double(0x100 - angledelta) / nobj;
@@ -2079,17 +2108,18 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                         continue;
                     }
                     insertstack.emplace(
-                        seg, angle_normal(int(angle) & 0xff), pos, type);
-                    angle += delta + 0x100;
+                        seg, angle_normal(static_cast<uint8_t>(angle)), pos,
+                        type);
+                    angle += delta;
                 }
                 break;
             }
             case eZigzag: {
                 int const delta = dpos >= 0 ? 1 : -1;
-                if (angledelta > (IMAGE_SIZE / 2)) {
-                    angledelta = (IMAGE_SIZE / 2);
-                } else if (angledelta < -(IMAGE_SIZE / 2)) {
-                    angledelta = -(IMAGE_SIZE / 2);
+                if (angledelta > HALF_IMAGE_SIZE) {
+                    angledelta = HALF_IMAGE_SIZE;
+                } else if (angledelta < -HALF_IMAGE_SIZE) {
+                    angledelta = -HALF_IMAGE_SIZE;
                 }
                 int angle = angle0;
                 int i     = pos0;
@@ -2101,8 +2131,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                     }
 
                     insertstack.emplace(seg, angle_normal(angle), pos, type);
-                    angle += angledelta + 0x100;
-                    angle &= 0xff;
+                    angle      = static_cast<uint8_t>(angle + angledelta);
                     angledelta = -angledelta;
                 } while (i != pos1 + delta);
                 break;
@@ -2112,10 +2141,10 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                 if (angledelta < 0) {
                     angledelta = -angledelta;
                 }
-                if (angledelta > (IMAGE_SIZE / 2)) {
-                    angledelta = (IMAGE_SIZE / 2);
-                } else if (angledelta < (IMAGE_SIZE / 4)) {
-                    angledelta = (IMAGE_SIZE / 4);
+                if (angledelta > HALF_IMAGE_SIZE) {
+                    angledelta = HALF_IMAGE_SIZE;
+                } else if (angledelta < QUARTER_IMAGE_SIZE) {
+                    angledelta = QUARTER_IMAGE_SIZE;
                 }
                 int angle = angle0;
                 int i     = pos0 + delta;
@@ -2136,9 +2165,10 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                         continue;
                     }
 
-                    int tx = angle_normal((angle - angledelta + 0x100) & 0xff);
+                    int tx =
+                        angle_normal(static_cast<uint8_t>(angle - angledelta));
                     insertstack.emplace(seg, tx, pos, type);
-                    tx = angle_normal((angle + angledelta + 0x100) & 0xff);
+                    tx = angle_normal(static_cast<uint8_t>(angle + angledelta));
                     insertstack.emplace(seg, tx, pos, type);
                 }
                 break;
@@ -2150,10 +2180,10 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                 if (angledelta < 0) {
                     angledelta = -angledelta;
                 }
-                if (angledelta > (IMAGE_SIZE / 2)) {
-                    angledelta = (IMAGE_SIZE / 2);
-                } else if (angledelta < (IMAGE_SIZE / 4)) {
-                    angledelta = (IMAGE_SIZE / 4);
+                if (angledelta > HALF_IMAGE_SIZE) {
+                    angledelta = HALF_IMAGE_SIZE;
+                } else if (angledelta < QUARTER_IMAGE_SIZE) {
+                    angledelta = QUARTER_IMAGE_SIZE;
                 }
                 if (dpos >= 0) {
                     object_triangle(
@@ -2177,10 +2207,10 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                 if (angledelta < 0) {
                     angledelta = -angledelta;
                 }
-                if (angledelta > (IMAGE_SIZE / 2)) {
-                    angledelta = (IMAGE_SIZE / 2);
-                } else if (angledelta < (IMAGE_SIZE / 4)) {
-                    angledelta = (IMAGE_SIZE / 4);
+                if (angledelta > HALF_IMAGE_SIZE) {
+                    angledelta = HALF_IMAGE_SIZE;
+                } else if (angledelta < QUARTER_IMAGE_SIZE) {
+                    angledelta = QUARTER_IMAGE_SIZE;
                 }
                 object_triangle(
                     angle0, pos1, angledelta, -delta, -dpos, type, true,
@@ -2231,15 +2261,19 @@ void sseditor::on_specialstageobjs_drag_begin(
 bool sseditor::on_drag_motion(
     Glib::RefPtr<Gdk::DragContext> const& context, int x, int y, guint time) {
     ignore_unused_variable_warning(context, time);
-    if (y < 5) {
-        pvscrollbar->set_value(pvscrollbar->get_value() - 4.0);
-    } else if (draw_height - y < 5) {
-        pvscrollbar->set_value(pvscrollbar->get_value() + 4.0);
+    constexpr const double delta       = 4.0;
+    constexpr const int    threshold_y = 5;
+    if (y < threshold_y) {
+        pvscrollbar->set_value(pvscrollbar->get_value() - delta);
+    } else if (draw_height - y < threshold_y) {
+        pvscrollbar->set_value(pvscrollbar->get_value() + delta);
     }
-    int dangle, dpos;
+    int dangle;
+    int dpos;
     if (hotspot.valid()) {
-        dangle = hotspot.get_angle();
-        dpos   = segpos[hotspot.get_segment()] + hotspot.get_pos();
+        dangle = static_cast<int>(hotspot.get_angle());
+        dpos =
+            static_cast<int>(segpos[hotspot.get_segment()] + hotspot.get_pos());
     } else {
         if (snaptogrid) {
             dangle = x_to_angle_constrained(x);
@@ -2247,11 +2281,12 @@ bool sseditor::on_drag_motion(
             dangle = x_to_angle(x);
         }
 
-        dpos = y / IMAGE_SIZE + pvscrollbar->get_value();
+        dpos = static_cast<int>(y / IMAGE_SIZE) +
+               static_cast<int>(pvscrollbar->get_value());
     }
-    dangle -= lastclick.get_angle();
-    dangle = (dangle + 0x100) & 0xff;
-    dpos -= (segpos[lastclick.get_segment()] + lastclick.get_pos());
+    dangle = static_cast<uint8_t>(dangle - lastclick.get_angle());
+    dpos -=
+        static_cast<int>(segpos[lastclick.get_segment()] + lastclick.get_pos());
 
     insertstack.clear();
 
@@ -2259,10 +2294,12 @@ bool sseditor::on_drag_motion(
         insertstack = sourcestack;
     } else {
         // sslevels *currlvl = specialstages->get_stage(currstage);
-        int maxpos = endpos - 1;
+        int maxpos = static_cast<int>(endpos) - 1;
         for (auto obj : sourcestack) {
-            obj.set_angle((obj.get_angle() + dangle) & 0xff);
-            int pos = segpos[obj.get_segment()] + obj.get_pos() + dpos;
+            obj.set_angle(static_cast<uint8_t>(obj.get_angle() + dangle));
+            int pos =
+                static_cast<int>(segpos[obj.get_segment()] + obj.get_pos()) +
+                dpos;
 
             if (pos < 0) {
                 pos = 0;
@@ -2293,11 +2330,11 @@ void sseditor::on_specialstageobjs_drag_data_get(
     }
 
     stringstream data(ios::in | ios::out | ios::binary);
-    for (const auto& elem : insertstack) {
-        Write1(data, elem.get_segment() & 0xff);
-        Write1(data, elem.get_angle() & 0xff);
-        Write1(data, elem.get_pos() & 0xff);
-        Write1(data, int(elem.get_type()) & 0xff);
+    for (auto const& elem : insertstack) {
+        Write1(data, elem.get_segment());
+        Write1(data, elem.get_angle());
+        Write1(data, elem.get_pos());
+        Write1(data, uint8_t(elem.get_type()));
     }
     selection_data.set("SpecialStageObjects", data.str());
 }
@@ -2326,9 +2363,10 @@ void sseditor::on_specialstageobjs_drag_data_received(
         // size_t numsegments = segpos.size();
 
         while (len > 0) {
-            int newseg = Read1(ptr), newangle = Read1(ptr), newpos = Read1(ptr);
-            sssegments::ObjectTypes newtype =
-                sssegments::ObjectTypes(Read1(ptr));
+            int  newseg   = Read1(ptr);
+            int  newangle = Read1(ptr);
+            int  newpos   = Read1(ptr);
+            auto newtype  = sssegments::ObjectTypes(Read1(ptr));
             len -= 4;
             selection.emplace(newseg, newangle, newpos, newtype);
         }

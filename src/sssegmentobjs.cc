@@ -23,15 +23,18 @@
 
 #include <s2ssedit/sssegmentobjs.hh>
 
-using namespace std;
+using std::istream;
+using std::ostream;
 
 void sssegments::read(istream& in, istream& lay) {
-    unsigned char geom = Read1(lay);
-    flip               = (geom & 0x80) != 0;
-    geometry           = static_cast<SegmentGeometry>(geom & 0x7f);
+    uint8_t geom = Read1(lay);
+    flip         = (geom & eFlipMask) != 0;
+    geometry     = static_cast<SegmentGeometry>(geom & eGeomMask);
 
     while (in.good()) {
-        unsigned char type = Read1(in), pos, angle;
+        uint8_t type = Read1(in);
+        uint8_t pos;
+        uint8_t angle;
         switch (type) {
         case eChaosEmerald:  // Emerald
         case eCheckpoint:    // Checkpoint
@@ -40,95 +43,36 @@ void sssegments::read(istream& in, istream& lay) {
             terminator = static_cast<SegmentTypes>(type);
             return;
         default: // Ring, bomb
-            pos = (type & 0x3f);
+            pos = (type & ePositionMask);
             // Not yet:
-            // pos = (type & 0x3f) + get_length();
-            type &= 0x40;
+            // pos = (type & ePositionMask) + get_length();
+            type &= eItemMask;
             angle = Read1(in);
             break;
         }
-        segobjs::mapped_type& posobjs = objects[pos];
+        auto& posobjs = objects[pos];
         posobjs.emplace(angle, ObjectTypes(type));
-        if ((angle & 0x80) == 0) {
-            numshadows++;
-        }
-        if (ObjectTypes(type) == eRing) {
-            numrings++;
-        } else {
-            numbombs++;
-        }
+        add_obj(angle, ObjectTypes(type));
     }
 }
 
 size_t sssegments::size() const {
-    size_t sz = 1; // Terminator
-    for (const auto& elem : objects) {
-        segobjs::mapped_type const& posobjs = elem.second;
-        sz += (2 * posobjs.size());
+    size_t sz = 0; // Terminator
+    for (auto const& elem : objects) {
+        sz += elem.second.size();
     }
-    return sz;
-}
-
-void sssegments::print() const {
-    char buf[0x103];
-    buf[0] = buf[0x101] = '|';
-    buf[0x102]          = 0;
-    memset(buf + 1, '-', sizeof(buf) - 3);
-    switch (terminator) {
-    case 0xfc: { // Message
-        char const   msg[] = "====== Message  ======";
-        size_t const len   = strlen(msg);
-        memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
-        break;
-    }
-    case 0xfd: { // Emerald
-        char const   msg[] = "====== Emerald  ======";
-        size_t const len   = strlen(msg);
-        memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
-        break;
-    }
-    case 0xfe: { // Checkpoint
-        char const   msg[] = "====== Checkpoint ======";
-        size_t const len   = strlen(msg);
-        memcpy(buf + (sizeof(buf) - len - 1) / 2, msg, len);
-        break;
-    }
-    default: // Ring, bomb, normal segment terminator
-        break;
-    }
-
-    cout << buf << endl;
-    for (size_t i = 0; i < 0x40; i++) {
-        memset(buf + 1, ' ', sizeof(buf) - 3);
-        auto it0 = objects.find(i);
-        if (it0 != objects.end()) {
-            segobjs::mapped_type const& posobjs = it0->second;
-            for (const auto& posobj : posobjs) {
-                size_t angle = ((posobj.first + 0x40) & 0xff);
-                switch ((posobj.second)) {
-                case eBomb: // Bomb
-                    buf[1 + angle] = '*';
-                    break;
-                default: // Ring
-                    buf[1 + angle] = 'o';
-                    break;
-                }
-            }
-        }
-        cout << buf << endl;
-    }
+    return 2 * sz + 1;
 }
 
 void sssegments::write(ostream& out, ostream& lay) const {
-    for (const auto& elem : objects) {
-        segobjs::mapped_type const& posobjs = elem.second;
-        unsigned char               pos     = elem.first;
-        for (const auto& posobj : posobjs) {
-            Write1(out, ((posobj.second) | pos));
-            Write1(out, (posobj.first));
+    for (auto const& elem : objects) {
+        auto const& posobjs = elem.second;
+        uint8_t     pos     = elem.first;
+        for (auto const& posobj : posobjs) {
+            Write1(out, (posobj.second) | pos);
+            Write1(out, posobj.first);
         }
     }
     Write1(out, terminator);
-
-    Write1(lay, (flip ? 0x80 : 0) | geometry);
+    Write1(lay, get_flip_geom());
 }

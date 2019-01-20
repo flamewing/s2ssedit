@@ -18,7 +18,8 @@
 
 #include <s2ssedit/sslevelobjs.hh>
 
-using namespace std;
+using std::istream;
+using std::ostream;
 
 void sslevels::read(istream& in, istream& lay, int term, int term2) {
     while (in.tellg() < term && lay.tellg() < term2) {
@@ -30,20 +31,14 @@ void sslevels::read(istream& in, istream& lay, int term, int term2) {
 
 size_t sslevels::size() const {
     size_t sz = 0;
-    for (const auto& sd : segments) {
+    for (auto const& sd : segments) {
         sz += sd.size();
     }
     return sz;
 }
 
-void sslevels::print() const {
-    for (const auto& sd : segments) {
-        sd.print();
-    }
-}
-
 void sslevels::write(ostream& out, ostream& lay) const {
-    for (const auto& sd : segments) {
+    for (auto const& sd : segments) {
         sd.write(out, lay);
     }
 }

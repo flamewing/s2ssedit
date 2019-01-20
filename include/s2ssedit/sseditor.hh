@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SSEDITOR_H
-#define __SSEDITOR_H
+#ifndef SSEDITOR_H
+#define SSEDITOR_H
 
+#include <array>
 #include <deque>
 #include <memory>
 #include <set>
@@ -34,38 +35,49 @@
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wctor-dtor-privacy"
-#pragma GCC diagnostic ignored "-Wuseless-cast"
 #pragma GCC diagnostic ignored "-Wunused-const-variable"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wextra-semi"
+#ifndef __clang__
+#    pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #include <gtkmm.h>
 #pragma GCC diagnostic pop
 
-#define IMAGE_SIZE 16
+#define IMAGE_SIZE 16U
+#define HALF_IMAGE_SIZE 8
+#define QUARTER_IMAGE_SIZE 4
 
-static inline int angle_simple(int angle) { return ((angle + 0x40) & 0xff); }
+constexpr const unsigned center_x    = 0x40U;
+constexpr const unsigned right_angle = 0x80U;
 
-static inline int angle_normal(int angle) { return ((angle + 0xc0) & 0xff); }
+inline uint8_t angle_simple(uint8_t angle) { return angle + center_x; }
 
-static inline int angle_to_x(int angle) {
-    return ((angle + 0x40) & 0xff) * 2 + 4;
+inline uint8_t angle_normal(uint8_t angle) {
+    return angle + center_x + right_angle;
 }
 
-static inline int x_to_angle(int x) {
-    return (((x + (x & 1) - 4) / 2) + 0xc0) & 0xff;
+inline uint8_t angle_to_x(uint8_t angle) {
+    return (angle + center_x) * 2U + 4U;
 }
 
-static inline int x_to_angle_constrained(int x, int constr = 2) {
-    int angle = x + (x & 1) - 4;
+inline uint8_t x_to_angle(uint8_t x) {
+    return ((x + (x & 1U) - 4U) / 2U) + center_x + right_angle;
+}
+
+inline uint8_t x_to_angle_constrained(uint8_t x, uint8_t constr = 2U) {
+    uint8_t angle = x + (x & 1U) - 4U;
     angle -= (angle % (IMAGE_SIZE / constr));
-    return ((angle / 2) + 0xc0) & 0xff;
+    return (angle / 2U) + center_x + right_angle;
 }
 
-static inline int x_constrained(int x, int constr = 2) {
-    int pos = x + (x & 1) - 4;
-    return pos - (pos % (IMAGE_SIZE / constr)) + 4;
+inline unsigned x_constrained(unsigned x, unsigned constr = 2) {
+    unsigned pos = x + (x & 1U) - 4U;
+    return pos - (pos % (IMAGE_SIZE / constr)) + 4U;
 }
 
-static inline int y_constrained(int y, int off) {
-    int ty = y + off;
+inline unsigned y_constrained(unsigned y, unsigned off) {
+    unsigned ty = y + off;
     ty -= (ty % IMAGE_SIZE);
     ty -= off;
     return ty;
@@ -73,16 +85,17 @@ static inline int y_constrained(int y, int off) {
 
 class sseditor {
 private:
-    static sseditor* instance;
-    bool             update_in_progress;
-    bool             dragging, drop_enabled;
+    bool update_in_progress;
+    bool dragging, drop_enabled;
 
     // State variables.
     std::shared_ptr<ssobj_file> specialstages;
-    unsigned                    currstage, currsegment;
-    int                         draw_width, draw_height;
-    int                         mouse_x, mouse_y;
-    guint                       state;
+
+    unsigned currstage, currsegment;
+    int      draw_width, draw_height;
+    int      mouse_x, mouse_y;
+    guint    state;
+
     enum EditModes {
         eSelectMode = 0,
         eInsertRingMode,
@@ -101,18 +114,25 @@ private:
         eTriangle,
         eNumInsertModes
     };
-    InsertModes      ringmode, bombmode;
+
+    InsertModes ringmode, bombmode;
+
     std::set<object> selection, hotstack, insertstack, sourcestack, copystack;
-    object           hotspot, lastclick, selclear, boxcorner;
+
+    object hotspot, lastclick, selclear, boxcorner;
+
     std::shared_ptr<sslevels>   copylevel;
     std::shared_ptr<sssegments> copyseg;
-    int                         copypos;
-    bool                        drawbox;
-    bool                        snaptogrid;
+
+    int  copypos;
+    bool drawbox;
+    bool snaptogrid;
 
     std::deque<std::shared_ptr<abstract_action>> undostack, redostack;
-    std::vector<size_t>                          segpos;
-    size_t                                       endpos;
+
+    std::vector<size_t> segpos;
+
+    size_t endpos;
 
     // GUI variables.
     Gtk::Window*               main_win;
@@ -138,14 +158,14 @@ private:
     // Main toolbar
     Gtk::ToolButton *popenfilebutton, *psavefilebutton, *prevertfilebutton,
         *pundobutton, *predobutton, *phelpbutton, *paboutbutton, *pquitbutton;
-    Gtk::RadioToolButton*  pmodebuttons[eNumModes];
-    Gtk::ToggleToolButton* psnapgridbutton;
+    std::array<Gtk::RadioToolButton*, eNumModes> pmodebuttons;
+    Gtk::ToggleToolButton*                       psnapgridbutton;
     // Selection toolbar
     Gtk::ToolButton *pcutbutton, *pcopybutton, *ppastebutton, *pdeletebutton;
     // Insert ring toolbar
-    Gtk::RadioToolButton* pringmodebuttons[eNumInsertModes];
+    std::array<Gtk::RadioToolButton*, eNumInsertModes> pringmodebuttons;
     // Insert bomb toolbar
-    Gtk::RadioToolButton* pbombmodebuttons[eNumInsertModes];
+    std::array<Gtk::RadioToolButton*, eNumInsertModes> pbombmodebuttons;
     // Special stage toolbar
     Gtk::Toolbar*    pstage_toolbar;
     Gtk::ToolButton *pfirst_stage_button, *pprevious_stage_button,
@@ -172,45 +192,45 @@ private:
     Gtk::Button *     pmoveup, *pmovedown, *pmoveleft, *pmoveright;
     Gtk::RadioButton *pringtype, *pbombtype;
 
-    sseditor();
-    sseditor(sseditor const& other);
-    sseditor(int argc, char* argv[], char const* uifile);
-
-    bool move_object(int dx, int dy);
-    void render();
-    void show();
-    void
-    draw_outlines(std::set<object>& col, Cairo::RefPtr<Cairo::Context> cr) {
-        for (const auto& elem : col) {
-            int tx = angle_to_x(elem.get_angle()) - IMAGE_SIZE / 2;
-            int ty = (segpos[elem.get_segment()] + elem.get_pos() -
-                      pvscrollbar->get_value()) *
-                     IMAGE_SIZE;
+    bool   move_object(int dx, int dy);
+    void   render();
+    void   show();
+    double get_obj_x(const object& obj) {
+        return static_cast<double>(
+            angle_to_x(obj.get_angle()) - HALF_IMAGE_SIZE);
+    }
+    double get_obj_y(const object& obj) {
+        return (static_cast<double>(segpos[obj.get_segment()] + obj.get_pos()) -
+                pvscrollbar->get_value()) *
+               IMAGE_SIZE;
+    }
+    void draw_outlines(
+        std::set<object>& col, Cairo::RefPtr<Cairo::Context> const& cr) {
+        for (auto const& elem : col) {
+            auto tx = get_obj_x(elem);
+            auto ty = get_obj_y(elem);
             cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
             cr->stroke();
         }
     }
     void draw_outlines(
         std::set<object>& col1, std::set<object>& col2,
-        Cairo::RefPtr<Cairo::Context> cr) {
-        for (const auto& elem : col1) {
+        Cairo::RefPtr<Cairo::Context> const& cr) {
+        for (auto const& elem : col1) {
             if (col2.find(elem) != col2.end()) {
                 continue;
             }
-            int tx = angle_to_x(elem.get_angle()) - IMAGE_SIZE / 2;
-            int ty = (segpos[elem.get_segment()] + elem.get_pos() -
-                      pvscrollbar->get_value()) *
-                     IMAGE_SIZE;
+            auto tx = get_obj_x(elem);
+            auto ty = get_obj_y(elem);
             cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
             cr->stroke();
         }
     }
-    void draw_x(std::set<object>& col1, Cairo::RefPtr<Cairo::Context> cr) {
-        for (const auto& elem : col1) {
-            int tx = angle_to_x(elem.get_angle()) - IMAGE_SIZE / 2;
-            int ty = (segpos[elem.get_segment()] + elem.get_pos() -
-                      pvscrollbar->get_value()) *
-                     IMAGE_SIZE;
+    void
+    draw_x(std::set<object>& col1, Cairo::RefPtr<Cairo::Context> const& cr) {
+        for (auto const& elem : col1) {
+            auto tx = get_obj_x(elem);
+            auto ty = get_obj_y(elem);
             cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
             cr->move_to(tx, ty);
             cr->line_to(tx + IMAGE_SIZE, ty + IMAGE_SIZE);
@@ -219,18 +239,19 @@ private:
             cr->stroke();
         }
     }
-    void draw_objects(std::set<object>& col, Cairo::RefPtr<Cairo::Context> cr) {
-        for (const auto& elem : col) {
+    void draw_objects(
+        std::set<object>& col, Cairo::RefPtr<Cairo::Context> const& cr) {
+        for (auto const& elem : col) {
             Glib::RefPtr<Gdk::Pixbuf> image =
                 (elem.get_type() == sssegments::eBomb) ? bombimg : ringimg;
-            int tx = angle_to_x(elem.get_angle()) - IMAGE_SIZE / 2;
-            int ty = (segpos[elem.get_segment()] + elem.get_pos() -
-                      pvscrollbar->get_value()) *
-                     IMAGE_SIZE;
+            auto tx = get_obj_x(elem);
+            auto ty = get_obj_y(elem);
             Gdk::Cairo::set_source_pixbuf(cr, image, tx, ty);
-            cr->paint_with_alpha(0.5);
+            constexpr const double half_transparency = 0.5;
+            cr->paint_with_alpha(half_transparency);
 
-            cr->set_line_width(2.0);
+            constexpr const double thick_line = 2.0;
+            cr->set_line_width(thick_line);
             cr->set_source_rgb(1.0, 1.0, 0.0);
             cr->rectangle(tx, ty, image->get_width(), image->get_height());
             cr->stroke();
@@ -246,14 +267,11 @@ private:
         currsegment = seg;
         pvscrollbar->set_value(segpos[seg]);
     }
-    void do_action(std::shared_ptr<abstract_action> act) {
+    void do_action(std::shared_ptr<abstract_action> const& act) {
         redostack.clear();
         abstract_action::MergeResult ret;
-        if (!undostack.size() || (ret = undostack.front()->merge(act)) ==
+        if (undostack.empty() || (ret = undostack.front()->merge(act)) ==
                                      abstract_action::eNoMerge) {
-            if (undostack.size() == 100) {
-                undostack.pop_back();
-            }
             undostack.push_front(act);
         } else if (ret == abstract_action::eDeleteAction) {
             undostack.pop_front();
@@ -262,15 +280,9 @@ private:
     }
 
 public:
-    static sseditor*
-    create_instance(int argc, char* argv[], char const* uifile) {
-        if (!instance) {
-            instance = new sseditor(argc, argv, uifile);
-        }
-        return instance;
-    }
-    static sseditor* get_instance() { return instance; }
-    void             run();
+    sseditor(int argc, char* argv[], char const* uifile);
+
+    void run();
 
     bool on_specialstageobjs_configure_event(GdkEventConfigure* event);
     void on_specialstageobjs_drag_data_received(
@@ -436,7 +448,7 @@ public:
 
         std::set<object> temp;
         // sslevels *currlvl = specialstages->get_stage(currstage);
-        for (const auto& elem : selection) {
+        for (auto const& elem : selection) {
             // sssegments *currseg = currlvl->get_segment(it->get_segment());
             temp.emplace(
                 elem.get_segment(), elem.get_angle(), elem.get_pos(), N);
@@ -450,6 +462,11 @@ public:
 
 protected:
     void update();
+    void disable_scroll() {
+        constexpr const double no_scroll = 0.1;
+        pvscrollbar->set_value(0.0);
+        pvscrollbar->set_range(0.0, no_scroll);
+    }
 };
 
-#endif // __SSEDITOR_H
+#endif // SSEDITOR_H

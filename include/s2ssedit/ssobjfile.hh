@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SSOBJFILE_H
-#define __SSOBJFILE_H
+#ifndef SSOBJFILE_H
+#define SSOBJFILE_H
 
 #include <algorithm>
 #include <istream>
@@ -33,28 +33,20 @@
 
 class ssobj_file {
 private:
-    ssobj_file();
     void read_internal(std::istream& objfile, std::istream& layfile);
     void write_internal(std::ostream& objfile, std::ostream& layfile) const;
 
-protected:
     std::vector<sslevels> stages;
-    std::string           layoutfile, objectfile;
+    std::string           layoutfile;
+    std::string           objectfile;
     bool                  error;
 
 public:
-    ssobj_file(std::string dir);
+    explicit ssobj_file(std::string const& dir);
     size_t size() const;
 
-    void print() const;
-    void print(size_t i) const;
-
     void read();
-    void read_backup(int i);
-    void read_snapshot(int i);
     void write() const;
-    void write_backup() const;
-    void write_snapshot(int i) const;
 
     size_t    num_stages() const { return stages.size(); }
     sslevels* get_stage(size_t s) { return &(stages[s]); }
@@ -90,4 +82,4 @@ public:
     bool good() const { return !error; }
 };
 
-#endif // __SSOBJFILE_H
+#endif // SSOBJFILE_H
