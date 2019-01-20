@@ -7,6 +7,7 @@ ui_DATA = s2ssedit.ui \
 	bomb.svg \
 	bomb-22.png \
 	ring-22.png \
+	s2ssanim.png \
 	s2ssedit.png \
 	ring-diamond.png \
 	ring-line.png \

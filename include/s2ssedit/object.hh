@@ -23,8 +23,9 @@
 
 class object {
 private:
-    int segment = -1;
-    unsigned pos = 0, angle = 0;
+    int32_t segment = -1;
+    int32_t pos     = 0;
+    int32_t angle   = 0;
 
     sssegments::ObjectTypes type = sssegments::eRing;
 
@@ -34,11 +35,11 @@ public:
     object() noexcept = default;
     sssegments::ObjectTypes get_type() const { return type; }
 
-    int  get_segment() const { return segment; }
-    unsigned  get_pos() const { return pos; }
-    unsigned  get_angle() const { return angle; }
-    bool valid() const { return segment != -1; }
-    bool operator<(object const& other) const {
+    int32_t get_segment() const { return segment; }
+    int32_t get_pos() const { return pos; }
+    int32_t get_angle() const { return angle; }
+    bool    valid() const { return segment != -1; }
+    bool    operator<(object const& other) const {
         if (segment < other.segment) {
             return true;
         }

@@ -217,8 +217,7 @@ sseditor::sseditor(int argc, char* argv[], char const* uifile)
     builder->get_widget("ringtype", pringtype);
     builder->get_widget("bombtype", pbombtype);
 
-    pfilefilter->add_pattern(SS_OBJECT_FILE);
-    pfilefilter->add_pattern(SS_LAYOUT_FILE);
+    pfilefilter->add_pattern("*");
 
     pspecialstageobjs->signal_configure_event().connect(
         sigc::mem_fun(this, &sseditor::on_specialstageobjs_configure_event));
@@ -887,8 +886,7 @@ void sseditor::on_pastebutton_clicked() {
 
     selection.clear();
     for (auto const& elem : copystack) {
-        int newpos = delta + static_cast<int>(
-                                 segpos[elem.get_segment()] + elem.get_pos());
+        int newpos = delta + get_obj_pos<int>(elem);
         if (newpos < 0) {
             newpos = 0;
         } else if (newpos > maxpos) {
@@ -1207,8 +1205,8 @@ bool sseditor::move_object(int dx, int dy) {
 
     for (auto const& elem : selection) {
         int  oldseg = elem.get_segment();
-        auto oldx   = static_cast<int>(elem.get_angle());
-        auto oldy   = static_cast<int>(elem.get_pos());
+        auto oldx   = elem.get_angle();
+        auto oldy   = elem.get_pos();
         // sssegments::ObjectTypes oldtype = it->get_type();
 
         if (oldseg >= numsegments) {
@@ -1222,18 +1220,18 @@ bool sseditor::move_object(int dx, int dy) {
             continue;
         }
 
-        constexpr const int max_angle = 0x40;
+        constexpr const int max_y = 0x40;
 
-        int newx = static_cast<uint8_t>(oldx + dx);
-        int newy = (oldy + dy) % max_angle;
-        int cnt  = max_angle;
+        int newx = static_cast<int8_t>(oldx + dx);
+        int newy = (oldy + dy) % max_y;
+        int cnt  = max_y;
 
         while (cnt > 0 && currseg->exists(newy, newx, type) &&
                selection.find(object(oldseg, newx, newy, type)) ==
                    selection.end()) {
-            newx = static_cast<uint8_t>(newx + dx);
+            newx = static_cast<int8_t>(newx + dx);
             newy += dy;
-            newy %= max_angle;
+            newy %= max_y;
             cnt--;
         }
 
@@ -1441,7 +1439,8 @@ void sseditor::render() {
                 (elem.second == sssegments::eBomb) ? bombimg : ringimg;
 
             int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE,
-                tx = angle_to_x(elem.first) - image->get_width() / 2;
+                tx = angle_to_x(elem.first) -
+                     image->get_width() / 2;
             Gdk::Cairo::set_source_pixbuf(cr, image, tx, ty);
             cr->paint();
         }
@@ -1490,7 +1489,8 @@ void sseditor::show() {
         auto const& row     = currseg->get_row(i - segpos[seg]);
         for (auto const& elem : row) {
             int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE,
-                tx = angle_to_x(elem.first) - HALF_IMAGE_SIZE;
+                tx = angle_to_x(static_cast<int8_t>(elem.first)) -
+                     HALF_IMAGE_SIZE;
 
             if (mouse_x >= tx && mouse_y >= ty &&
                 mouse_x < tx + static_cast<int>(IMAGE_SIZE) &&
@@ -1510,8 +1510,7 @@ void sseditor::show() {
             cr->set_source_rgb(1.0, 1.0, 0.0);
             cr->set_line_width(2.0);
             int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
-            int ty = (segpos[hotspot.get_segment()] + hotspot.get_pos() -
-                      pvscrollbar->get_value()) *
+            int ty = (get_obj_pos<int>(hotspot) - pvscrollbar->get_value()) *
                      IMAGE_SIZE;
             cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
             cr->stroke();
@@ -1521,9 +1520,9 @@ void sseditor::show() {
         }
         if (drawbox) {
             int tx0 = angle_to_x(lastclick.get_angle()),
-                ty0 = segpos[lastclick.get_segment()] + lastclick.get_pos();
+                ty0 = get_obj_pos<int>(lastclick);
             int tx1 = angle_to_x(boxcorner.get_angle()),
-                ty1 = segpos[boxcorner.get_segment()] + boxcorner.get_pos();
+                ty1 = get_obj_pos<int>(boxcorner);
             int dx = tx1 - tx0, dy = ty1 - ty0;
             if (dx < 0) {
                 swap(tx0, tx1);
@@ -1549,9 +1548,9 @@ void sseditor::show() {
             cr->set_source_rgb(1.0, 0.0, 0.0);
             draw_x(hotstack, cr);
             int tx0 = angle_to_x(lastclick.get_angle()),
-                ty0 = segpos[lastclick.get_segment()] + lastclick.get_pos();
+                ty0 = get_obj_pos<int>(lastclick);
             int tx1 = angle_to_x(boxcorner.get_angle()),
-                ty1 = segpos[boxcorner.get_segment()] + boxcorner.get_pos();
+                ty1 = get_obj_pos<int>(boxcorner);
             int dx = tx1 - tx0, dy = ty1 - ty0;
             if (dx < 0) {
                 swap(tx0, tx1);
@@ -1572,8 +1571,7 @@ void sseditor::show() {
             cr->stroke();
         } else if (hotspot.valid()) {
             int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
-            int ty = (segpos[hotspot.get_segment()] + hotspot.get_pos() -
-                      pvscrollbar->get_value()) *
+            int ty = (get_obj_pos<int>(hotspot) - pvscrollbar->get_value()) *
                      IMAGE_SIZE;
             cr->set_line_width(2.0);
             cr->set_source_rgb(1.0, 0.0, 0.0);
@@ -1614,14 +1612,12 @@ bool sseditor::on_specialstageobjs_key_press_event(GdkEventKey* event) {
 
     case GDK_KEY_Left:
     case GDK_KEY_KP_Left: {
-        bool ctrl = snaptogrid ^ ((event->state & GDK_CONTROL_MASK) != 0);
-        return move_object(ctrl ? -4 : -1, 0);
+        return move_object(want_snap_to_grid(event->state) ? -4 : -1, 0);
     }
 
     case GDK_KEY_Right:
     case GDK_KEY_KP_Right: {
-        bool ctrl = snaptogrid ^ ((event->state & GDK_CONTROL_MASK) != 0);
-        return move_object(ctrl ? 4 : 1, 0);
+        return move_object(want_snap_to_grid(event->state) ? 4 : 1, 0);
     }
 
     case GDK_KEY_Page_Up:
@@ -1660,8 +1656,7 @@ bool sseditor::on_specialstageobjs_button_press_event(GdkEventButton* event) {
     int pos = event->y / IMAGE_SIZE + pvscrollbar->get_value(),
         seg = get_segment(pos);
     lastclick.set(
-        seg, x_to_angle_constrained(event->x), pos - segpos[seg],
-        sssegments::eRing);
+        seg, x_to_angle(event->x, true), pos - segpos[seg], sssegments::eRing);
 
     selclear.reset();
     if (mode == eSelectMode) {
@@ -1695,16 +1690,11 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         drawbox = false;
     }
 
-    size_t angle, pos, seg;
+    int angle, pos, seg;
     if (!hotspot.valid()) {
-        if (snaptogrid ^ ((state & GDK_CONTROL_MASK) != 0)) {
-            angle = x_to_angle_constrained(event->x + QUARTER_IMAGE_SIZE);
-        } else {
-            angle = x_to_angle(event->x);
-        }
-
-        pos = event->y / IMAGE_SIZE + pvscrollbar->get_value();
-        seg = get_segment(pos);
+        angle = x_to_angle(event->x, want_snap_to_grid(state), 4U);
+        pos   = event->y / IMAGE_SIZE + pvscrollbar->get_value();
+        seg   = get_segment(pos);
         pos -= segpos[seg];
     } else {
         angle = hotspot.get_angle();
@@ -1713,7 +1703,7 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
     }
 
     sslevels* currlvl     = specialstages->get_stage(currstage);
-    size_t    numsegments = segpos.size();
+    int       numsegments = segpos.size();
 
     if (seg >= numsegments) {
         return true;
@@ -1929,15 +1919,15 @@ void sseditor::object_triangle(
 
             for (int j = 4 * delta * cnt; j >= min; j -= dj) {
                 double jang = j / (4.0 * cnt);
-                tx          = angle_normal(static_cast<uint8_t>(angle - jang));
+                tx          = angle_normal(static_cast<int8_t>(angle - jang));
                 insertstack.emplace(seg, tx, pos, type);
-                tx = angle_normal(static_cast<uint8_t>(angle + jang));
+                tx = angle_normal(static_cast<int8_t>(angle + jang));
                 insertstack.emplace(seg, tx, pos, type);
             }
         } else {
-            tx = angle_normal(static_cast<uint8_t>(angle - delta));
+            tx = angle_normal(static_cast<int8_t>(angle - delta));
             insertstack.emplace(seg, tx, pos, type);
-            tx = angle_normal(static_cast<uint8_t>(angle + delta));
+            tx = angle_normal(static_cast<int8_t>(angle + delta));
             insertstack.emplace(seg, tx, pos, type);
         }
         delta += dx;
@@ -1969,21 +1959,15 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
         }
         int angle1, pos1;
         if (!hotspot.valid()) {
-            if (snaptogrid ^ ((event->state & GDK_CONTROL_MASK) != 0)) {
-                angle1 = x_to_angle_constrained(event->x + QUARTER_IMAGE_SIZE);
-            } else {
-                angle1 = x_to_angle(event->x);
-            }
-
-            pos1 = event->y / IMAGE_SIZE + pvscrollbar->get_value();
+            angle1 = x_to_angle(event->x, want_snap_to_grid(state), 4U);
+            pos1   = event->y / IMAGE_SIZE + pvscrollbar->get_value();
         } else {
             angle1 = hotspot.get_angle();
-            pos1   = segpos[hotspot.get_segment()] + hotspot.get_pos();
+            pos1   = get_obj_pos<int>(hotspot);
         }
-        int angle0 = lastclick.get_angle(),
-            pos0   = segpos[lastclick.get_segment()] + lastclick.get_pos();
-        angle0     = angle_simple(angle0);
-        angle1     = angle_simple(angle1);
+        int angle0 = lastclick.get_angle(), pos0 = get_obj_pos<int>(lastclick);
+        angle0           = angle_simple(angle0);
+        angle1           = angle_simple(angle1);
         int       dangle = angle1 - angle0, dpos = pos1 - pos0;
         sslevels* currlvl     = specialstages->get_stage(currstage);
         int       numsegments = segpos.size();
@@ -1999,7 +1983,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
             if (dangle || dpos) {
                 int seg1 = get_segment(pos1);
                 boxcorner.set(
-                    seg1, static_cast<uint8_t>(angle1 + 0xc0),
+                    seg1, static_cast<int8_t>(angle1 + 0xc0),
                     pos1 - segpos[seg1], sssegments::eRing);
                 if (dpos < 0) {
                     swap(pos0, pos1);
@@ -2014,7 +1998,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                         continue;
                     }
                     for (int j = angle0; j <= angle1; j++) {
-                        int         angle   = static_cast<uint8_t>(j + 0xc0);
+                        int         angle   = static_cast<int8_t>(j + 0xc0);
                         sssegments* currseg = currlvl->get_segment(seg);
                         sssegments::ObjectTypes type;
                         if (currseg->exists(pos, angle, type)) {
@@ -2049,7 +2033,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
             if (submode == eLine) {
                 angledelta /= (dpos > 0 ? dpos : -dpos);
             }
-            if (snaptogrid ^ ((event->state & GDK_CONTROL_MASK) != 0)) {
+            if (want_snap_to_grid(event->state)) {
                 angledelta += (angledelta >= 0 ? 3 : -3);
                 angledelta /= 4;
                 angledelta *= 4;
@@ -2068,7 +2052,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                     }
 
                     insertstack.emplace(seg, angle_normal(angle), pos, type);
-                    angle = static_cast<uint8_t>(angle + angledelta);
+                    angle = static_cast<int8_t>(angle + angledelta);
                 } while (i != pos1 + delta);
                 break;
             }
@@ -2077,7 +2061,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                 int    nobj;
                 double delta;
                 if (dy != 0) {
-                    if (snaptogrid ^ ((event->state & GDK_CONTROL_MASK) != 0)) {
+                    if (want_snap_to_grid(event->state)) {
                         if (angledelta >= 0 && angledelta < 4) {
                             angledelta = 4;
                         } else if (angledelta < 0 && angledelta > -4) {
@@ -2108,7 +2092,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                         continue;
                     }
                     insertstack.emplace(
-                        seg, angle_normal(static_cast<uint8_t>(angle)), pos,
+                        seg, angle_normal(static_cast<int8_t>(angle)), pos,
                         type);
                     angle += delta;
                 }
@@ -2131,7 +2115,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                     }
 
                     insertstack.emplace(seg, angle_normal(angle), pos, type);
-                    angle      = static_cast<uint8_t>(angle + angledelta);
+                    angle      = static_cast<int8_t>(angle + angledelta);
                     angledelta = -angledelta;
                 } while (i != pos1 + delta);
                 break;
@@ -2166,9 +2150,9 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
                     }
 
                     int tx =
-                        angle_normal(static_cast<uint8_t>(angle - angledelta));
+                        angle_normal(static_cast<int8_t>(angle - angledelta));
                     insertstack.emplace(seg, tx, pos, type);
-                    tx = angle_normal(static_cast<uint8_t>(angle + angledelta));
+                    tx = angle_normal(static_cast<int8_t>(angle + angledelta));
                     insertstack.emplace(seg, tx, pos, type);
                 }
                 break;
@@ -2271,22 +2255,15 @@ bool sseditor::on_drag_motion(
     int dangle;
     int dpos;
     if (hotspot.valid()) {
-        dangle = static_cast<int>(hotspot.get_angle());
-        dpos =
-            static_cast<int>(segpos[hotspot.get_segment()] + hotspot.get_pos());
+        dangle = hotspot.get_angle();
+        dpos   = get_obj_pos<int>(hotspot);
     } else {
-        if (snaptogrid) {
-            dangle = x_to_angle_constrained(x);
-        } else {
-            dangle = x_to_angle(x);
-        }
-
-        dpos = static_cast<int>(y / IMAGE_SIZE) +
+        dangle = x_to_angle(x, snaptogrid);
+        dpos   = static_cast<int>(y / IMAGE_SIZE) +
                static_cast<int>(pvscrollbar->get_value());
     }
-    dangle = static_cast<uint8_t>(dangle - lastclick.get_angle());
-    dpos -=
-        static_cast<int>(segpos[lastclick.get_segment()] + lastclick.get_pos());
+    dangle = static_cast<int8_t>(dangle - lastclick.get_angle());
+    dpos -= get_obj_pos<int>(lastclick);
 
     insertstack.clear();
 
@@ -2296,17 +2273,8 @@ bool sseditor::on_drag_motion(
         // sslevels *currlvl = specialstages->get_stage(currstage);
         int maxpos = static_cast<int>(endpos) - 1;
         for (auto obj : sourcestack) {
-            obj.set_angle(static_cast<uint8_t>(obj.get_angle() + dangle));
-            int pos =
-                static_cast<int>(segpos[obj.get_segment()] + obj.get_pos()) +
-                dpos;
-
-            if (pos < 0) {
-                pos = 0;
-            } else if (pos > maxpos) {
-                pos = maxpos;
-            }
-
+            obj.set_angle(static_cast<int8_t>(obj.get_angle() + dangle));
+            int pos = clamp(get_obj_pos<int>(obj) + dpos, 0, maxpos);
             int seg = get_segment(pos);
             obj.set_pos(pos - segpos[seg]);
             obj.set_segment(seg);

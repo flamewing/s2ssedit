@@ -48,39 +48,47 @@
 #define HALF_IMAGE_SIZE 8
 #define QUARTER_IMAGE_SIZE 4
 
-constexpr const unsigned center_x    = 0x40U;
-constexpr const unsigned right_angle = 0x80U;
+constexpr const int32_t center_x    = 0x40;
+constexpr const int32_t right_angle = 0x80;
 
-inline uint8_t angle_simple(uint8_t angle) { return angle + center_x; }
+inline int32_t angle_simple(int angle) { return (angle + center_x) & 0xff; }
 
-inline uint8_t angle_normal(uint8_t angle) {
-    return angle + center_x + right_angle;
+inline int32_t angle_normal(int angle) {
+    return (angle + center_x + right_angle) & 0xff;
 }
 
-inline uint8_t angle_to_x(uint8_t angle) {
-    return (angle + center_x) * 2U + 4U;
+inline int angle_to_x(int angle) { return ((angle + center_x) & 0xff) * 2 + 4; }
+
+inline uint8_t x_to_angle(int32_t x, bool constrain, int32_t snapoff = 0U) {
+    int32_t angle = x + (x % 2) - 4;
+    if (constrain) {
+        angle += snapoff;
+        angle -= (angle % (IMAGE_SIZE / 2U));
+    }
+    return static_cast<uint8_t>(angle / 2U) + center_x + right_angle;
 }
 
-inline uint8_t x_to_angle(uint8_t x) {
-    return ((x + (x & 1U) - 4U) / 2U) + center_x + right_angle;
+inline int32_t x_constrained(int32_t x, int32_t constr = 2) {
+    unsigned pos = x + (x % 2) - 4;
+    return pos - (pos % (IMAGE_SIZE / constr)) + 4;
 }
 
-inline uint8_t x_to_angle_constrained(uint8_t x, uint8_t constr = 2U) {
-    uint8_t angle = x + (x & 1U) - 4U;
-    angle -= (angle % (IMAGE_SIZE / constr));
-    return (angle / 2U) + center_x + right_angle;
-}
-
-inline unsigned x_constrained(unsigned x, unsigned constr = 2) {
-    unsigned pos = x + (x & 1U) - 4U;
-    return pos - (pos % (IMAGE_SIZE / constr)) + 4U;
-}
-
-inline unsigned y_constrained(unsigned y, unsigned off) {
+inline int32_t y_constrained(int32_t y, int32_t off) {
     unsigned ty = y + off;
     ty -= (ty % IMAGE_SIZE);
     ty -= off;
     return ty;
+}
+
+template <typename T>
+T clamp(T val, T min, T max) {
+    if (val < min) {
+        return min;
+    }
+    if (val > max) {
+        return max;
+    }
+    return val;
 }
 
 class sseditor {
@@ -200,8 +208,7 @@ private:
             angle_to_x(obj.get_angle()) - HALF_IMAGE_SIZE);
     }
     double get_obj_y(const object& obj) {
-        return (static_cast<double>(segpos[obj.get_segment()] + obj.get_pos()) -
-                pvscrollbar->get_value()) *
+        return (get_obj_pos<double>(obj) - pvscrollbar->get_value()) *
                IMAGE_SIZE;
     }
     void draw_outlines(
@@ -327,6 +334,9 @@ public:
     }
     void on_snapgridbutton_toggled() {
         snaptogrid = psnapgridbutton->get_active();
+    }
+    bool want_snap_to_grid(guint state) const noexcept {
+        return snaptogrid != (state & GDK_CONTROL_MASK);
     }
     void on_helpdialog_response(int response_id);
     void on_helpbutton_clicked();
@@ -458,6 +468,10 @@ public:
         render();
         update();
         show();
+    }
+    template <typename T>
+    T get_obj_pos(object obj) const {
+        return static_cast<T>(segpos[obj.get_segment()] + obj.get_pos());
     }
 
 protected:
