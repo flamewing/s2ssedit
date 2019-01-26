@@ -137,6 +137,10 @@ public:
     void set_direction(bool tf) noexcept { flip = tf; }
 
     auto const& get_row(uint8_t row) noexcept { return objects[row]; }
+    bool exists(uint8_t row, uint8_t angle) const noexcept {
+        ObjectTypes type;
+        return exists(row, angle, type);
+    }
     bool exists(uint8_t row, uint8_t angle, ObjectTypes& type) const noexcept {
         auto it = objects.find(row);
         if (it == objects.end()) {

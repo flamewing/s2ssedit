@@ -42,6 +42,9 @@
 #    pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif
 #include <gtkmm.h>
+#define GDK_BUTTON_LEFT 1
+#define GDK_BUTTON_MIDDLE 2
+#define GDK_BUTTON_RIGHT 3
 #pragma GCC diagnostic pop
 
 #define IMAGE_SIZE 16U
@@ -93,6 +96,7 @@ T clamp(T val, T min, T max) {
 
 class sseditor {
 private:
+    using ObjectTypes = sssegments::ObjectTypes;
     bool update_in_progress;
     bool dragging, drop_enabled;
 
@@ -269,14 +273,17 @@ private:
         bool fill, std::set<object>& col);
     void   update_segment_positions(bool setpos);
     size_t get_current_segment() const;
-    size_t get_segment(size_t pos) const;
+    size_t find_segment(size_t pos) const;
     void   goto_segment(unsigned seg) {
         currsegment = seg;
         pvscrollbar->set_value(segpos[seg]);
     }
-    void do_action(std::shared_ptr<abstract_action> const& act) {
+    template <typename Act, typename... Args>
+    void do_action(Args&&... args) {
+        using MergeResult = abstract_action::MergeResult;
         redostack.clear();
-        abstract_action::MergeResult ret;
+        auto        act = std::make_shared<Act>(std::forward<Args>(args)...);
+        MergeResult ret;
         if (undostack.empty() || (ret = undostack.front()->merge(act)) ==
                                      abstract_action::eNoMerge) {
             undostack.push_front(act);
@@ -399,10 +406,9 @@ public:
         // size_t numsegments = currlvl->num_segments();
         sssegments* currseg = currlvl->get_segment(currsegment);
 
-        auto act = std::make_shared<alter_segment_action>(
+        do_action<alter_segment_action>(
             currstage, currsegment, *currseg, currseg->get_direction(), N,
             currseg->get_geometry());
-        do_action(act);
     }
     template <sssegments::SegmentGeometry N, Gtk::RadioButton* sseditor::*btn>
     void on_segment_segmentgeometry_toggled() {
@@ -416,10 +422,9 @@ public:
         // size_t numsegments = currlvl->num_segments();
         sssegments* currseg = currlvl->get_segment(currsegment);
 
-        auto act = std::make_shared<alter_segment_action>(
+        do_action<alter_segment_action>(
             currstage, currsegment, *currseg, currseg->get_direction(),
             currseg->get_type(), N);
-        do_action(act);
         update_segment_positions(false);
     }
     template <bool tf, Gtk::RadioButton* sseditor::*btn>
@@ -434,10 +439,9 @@ public:
         // size_t numsegments = currlvl->num_segments();
         sssegments* currseg = currlvl->get_segment(currsegment);
 
-        auto act = std::make_shared<alter_segment_action>(
+        do_action<alter_segment_action>(
             currstage, currsegment, *currseg, tf, currseg->get_type(),
             currseg->get_geometry());
-        do_action(act);
     }
     // Object flags
     template <int dx, int dy>
@@ -452,10 +456,7 @@ public:
         if (!(this->*btn)->get_active()) {
             return;
         }
-        auto act =
-            std::make_shared<alter_selection_action>(currstage, N, selection);
-        do_action(act);
-
+        do_action<alter_selection_action>(currstage, N, selection);
         std::set<object> temp;
         // sslevels *currlvl = specialstages->get_stage(currstage);
         for (auto const& elem : selection) {
@@ -469,10 +470,23 @@ public:
         update();
         show();
     }
+
+private:
     template <typename T>
     T get_obj_pos(object obj) const {
         return static_cast<T>(segpos[obj.get_segment()] + obj.get_pos());
     }
+    void delete_set(std::set<object>& toDel);
+    void delete_set(std::set<object>&& toDel);
+    void delete_existing_object(int seg, unsigned pos, unsigned angle);
+    void delete_object(int seg, unsigned x, unsigned y, ObjectTypes t) {
+        delete_set({object(seg, x, y, t)});
+    }
+    void cycle_object_type(int seg, unsigned pos, unsigned angle);
+    void finalize_selection();
+    void insert_set();
+
+    sssegments* get_segment(int seg);
 
 protected:
     void update();
