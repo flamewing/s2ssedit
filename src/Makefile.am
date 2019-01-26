@@ -36,6 +36,7 @@ bin_PROGRAMS = s2ssedit
 s2ssedit_SOURCES = \
 	main.cc   \
 	sseditor.cc   \
+	drag.cc   \
 	signals.cc   \
 	sssegmentobjs.cc   \
 	sslevelobjs.cc   \
