@@ -1224,6 +1224,76 @@ bool sseditor::on_specialstageobjs_configure_event(GdkEventConfigure* event) {
     return true;
 }
 
+void sseditor::cleanup_render(Cairo::RefPtr<Cairo::Context> cr) {
+    if (drawimg) {
+        drawimg->unreference();
+    }
+    drawimg = cr->pop_group();
+}
+
+void sseditor::draw_objects(
+    Cairo::RefPtr<Cairo::Context> cr, int start, int end) {
+    for (int i = start; i <= end; i++) {
+        int         seg     = find_segment(i);
+        sssegments* currseg = get_segment(seg);
+        if (currseg == nullptr) {
+            return;
+        }
+
+        auto const& row = currseg->get_row(i - segpos[seg]);
+        for (auto const& elem : row) {
+            Glib::RefPtr<Gdk::Pixbuf> image =
+                (elem.second == sssegments::eBomb) ? bombimg : ringimg;
+
+            int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE,
+                tx = angle_to_x(elem.first) - image->get_width() / 2;
+            Gdk::Cairo::set_source_pixbuf(cr, image, tx, ty);
+            cr->paint();
+        }
+    }
+}
+
+bool sseditor::want_checkerboard(int row, int seg, sssegments* currseg) {
+    return (seg == 2 &&
+            (row - segpos[seg] == (currseg->get_length() - 1) / 2)) ||
+           ((currseg->get_type() == sssegments::eCheckpoint ||
+             currseg->get_type() == sssegments::eChaosEmerald) &&
+            (row - segpos[seg]) == currseg->get_length() - 1);
+}
+
+void sseditor::draw_balls(Cairo::RefPtr<Cairo::Context> cr, int ty) {
+    for (int iangle = 0; iangle < 3; iangle++) {
+        double angle = (iangle * 64.0) / 3.0;
+        cr->set_source_rgb(180.0 / 256.0, 108.0 / 256.0, 36.0 / 256.0);
+        cr->arc(
+            angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
+            0.0, 2.0 * G_PI);
+        cr->begin_new_sub_path();
+        cr->arc(
+            angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
+            0.0, 2.0 * G_PI);
+        cr->fill();
+        cr->set_source_rgb(216.0 / 256.0, 144.0 / 256.0, 36.0 / 256.00);
+        cr->arc(
+            angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty - 1.5,
+            HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
+        cr->begin_new_sub_path();
+        cr->arc(
+            angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty - 1.5,
+            HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
+        cr->fill();
+        cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
+        cr->arc(
+            angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty - 3.0,
+            HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
+        cr->begin_new_sub_path();
+        cr->arc(
+            angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty - 3.0,
+            HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
+        cr->fill();
+    }
+}
+
 void sseditor::render() {
     Glib::RefPtr<Gdk::Window> window = pspecialstageobjs->get_window();
 
@@ -1238,10 +1308,7 @@ void sseditor::render() {
     cr->paint();
 
     if (!specialstages) {
-        if (drawimg) {
-            drawimg->unreference();
-        }
-        drawimg = cr->pop_group();
+        cleanup_render(cr);
         return;
     }
 
@@ -1272,52 +1339,23 @@ void sseditor::render() {
     cr->line_to(angle_to_x(0x50 + 4), draw_height);
     cr->stroke();
 
-    for (int i = start; i <= end; i++) {
-        int         seg     = find_segment(i);
+    for (int ii = start; ii <= end; ii++) {
+        int         seg     = find_segment(ii);
         sssegments* currseg = get_segment(seg);
         if (currseg == nullptr) {
             break;
         }
 
-        if ((i + 1) % 4 == 0) {
+        int ty = (ii - pvscrollbar->get_value()) * IMAGE_SIZE;
+        if ((ii + 1) % 4 == 0) {
             cr->set_line_width(HALF_IMAGE_SIZE);
             cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
             // Horizontal beams.
-            int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE;
             cr->move_to(angle_to_x(0x00), ty);
             cr->line_to(angle_to_x(0x80), ty);
             cr->stroke();
             // Horizontal balls.
-            for (int iangle = 0; iangle < 3; iangle++) {
-                double angle = (iangle * 64.0) / 3.0;
-                cr->set_source_rgb(180.0 / 256.0, 108.0 / 256.0, 36.0 / 256.0);
-                cr->arc(
-                    angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty,
-                    HALF_IMAGE_SIZE, 0.0, 2.0 * G_PI);
-                cr->begin_new_sub_path();
-                cr->arc(
-                    angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty,
-                    HALF_IMAGE_SIZE, 0.0, 2.0 * G_PI);
-                cr->fill();
-                cr->set_source_rgb(216.0 / 256.0, 144.0 / 256.0, 36.0 / 256.00);
-                cr->arc(
-                    angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty - 1.5,
-                    HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
-                cr->begin_new_sub_path();
-                cr->arc(
-                    angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty - 1.5,
-                    HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
-                cr->fill();
-                cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
-                cr->arc(
-                    angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty - 3.0,
-                    HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
-                cr->begin_new_sub_path();
-                cr->arc(
-                    angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty - 3.0,
-                    HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
-                cr->fill();
-            }
+            draw_balls(cr, ty);
             // Yellow beams.
             cr->set_line_width(QUARTER_IMAGE_SIZE);
             cr->set_source_rgb(1.0, 1.0, 0.0);
@@ -1332,16 +1370,9 @@ void sseditor::render() {
             cr->stroke();
         }
 
-        if ((seg == 2 &&
-             (i - segpos[seg] == (currseg->get_length() - 1) / 2)) ||
-            ((currseg->get_type() == sssegments::eCheckpoint ||
-              currseg->get_type() == sssegments::eChaosEmerald) &&
-             (i - segpos[seg]) == currseg->get_length() - 1)) {
+        if (want_checkerboard(ii, seg, currseg)) {
             cr->save();
-            vector<double> dash;
-            dash.push_back(8.0);
-            int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE;
-            cr->set_dash(dash, 0.0);
+            cr->set_dash(vector<double>{8.0}, 0.0);
             cr->set_source_rgb(1.0, 1.0, 1.0);
             cr->set_line_width(HALF_IMAGE_SIZE);
             cr->move_to(angle_to_x(0x00), ty - HALF_IMAGE_SIZE);
@@ -1374,51 +1405,49 @@ void sseditor::render() {
         }
     }
 
-    for (int i = start; i <= end; i++) {
-        int         seg     = find_segment(i);
-        sssegments* currseg = get_segment(seg);
-        if (currseg == nullptr) {
-            break;
-        }
-
-        auto const& row = currseg->get_row(i - segpos[seg]);
-        for (auto const& elem : row) {
-            Glib::RefPtr<Gdk::Pixbuf> image =
-                (elem.second == sssegments::eBomb) ? bombimg : ringimg;
-
-            int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE,
-                tx = angle_to_x(elem.first) - image->get_width() / 2;
-            Gdk::Cairo::set_source_pixbuf(cr, image, tx, ty);
-            cr->paint();
-        }
-    }
-
-    if (drawimg) {
-        drawimg->unreference();
-    }
-    drawimg = cr->pop_group();
+    draw_objects(cr, start, end);
+    cleanup_render(cr);
 }
 
-void sseditor::show() {
-    if (!drawimg) {
-        render();
+void sseditor::draw_box(Cairo::RefPtr<Cairo::Context> cr) {
+    if (mode == eDeleteMode) {
+        cr->set_line_width(2.0);
+        cr->set_source_rgb(1.0, 0.0, 0.0);
+        draw_x(hotstack, cr);
     }
-
-    Glib::RefPtr<Gdk::Window> window = pspecialstageobjs->get_window();
-
-    if (!window) {
-        return;
+    int tx0 = angle_to_x(lastclick.get_angle()),
+        ty0 = get_obj_pos<int>(lastclick);
+    int tx1 = angle_to_x(boxcorner.get_angle()),
+        ty1 = get_obj_pos<int>(boxcorner);
+    int dx = tx1 - tx0, dy = ty1 - ty0;
+    if (dx < 0) {
+        swap(tx0, tx1);
     }
-
-    Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
-
-    cr->set_source(drawimg);
-    cr->paint();
-
-    if (!specialstages) {
-        return;
+    if (dy < 0) {
+        swap(ty0, ty1);
     }
+    ty0 -= pvscrollbar->get_value();
+    ty1 -= pvscrollbar->get_value();
+    ty0 *= IMAGE_SIZE;
+    ty1 *= IMAGE_SIZE;
+    ty1 += IMAGE_SIZE;
+    if (mode == eSelectMode) {
+        cr->set_source_rgba(0.0, 1.0, 0.0, 0.25);
+    } else {
+        cr->set_source_rgba(1.0, 0.0, 0.0, 0.25);
+    }
+    cr->rectangle(tx0, ty0, tx1 - tx0, ty1 - ty0);
+    cr->fill_preserve();
+    if (mode == eSelectMode) {
+        cr->set_source_rgb(0.0, 1.0, 0.0);
+    } else {
+        cr->set_source_rgb(1.0, 0.0, 0.0);
+    }
+    cr->set_line_width(1.0);
+    cr->stroke();
+}
 
+void sseditor::select_hotspot() {
     hotspot.reset();
     int start = pvscrollbar->get_value(),
         end   = start + (draw_height + IMAGE_SIZE - 1) / IMAGE_SIZE;
@@ -1444,6 +1473,29 @@ void sseditor::show() {
             }
         }
     }
+}
+
+void sseditor::show() {
+    if (!drawimg) {
+        render();
+    }
+
+    Glib::RefPtr<Gdk::Window> window = pspecialstageobjs->get_window();
+
+    if (!window) {
+        return;
+    }
+
+    Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
+
+    cr->set_source(drawimg);
+    cr->paint();
+
+    if (!specialstages) {
+        return;
+    }
+
+    select_hotspot();
 
     if (mode == eSelectMode) {
         cr->set_source_rgb(0.0, 0.0, 0.0);
@@ -1463,56 +1515,11 @@ void sseditor::show() {
             draw_objects(insertstack, cr);
         }
         if (drawbox) {
-            int tx0 = angle_to_x(lastclick.get_angle()),
-                ty0 = get_obj_pos<int>(lastclick);
-            int tx1 = angle_to_x(boxcorner.get_angle()),
-                ty1 = get_obj_pos<int>(boxcorner);
-            int dx = tx1 - tx0, dy = ty1 - ty0;
-            if (dx < 0) {
-                swap(tx0, tx1);
-            }
-            if (dy < 0) {
-                swap(ty0, ty1);
-            }
-            ty0 -= pvscrollbar->get_value();
-            ty1 -= pvscrollbar->get_value();
-            ty0 *= IMAGE_SIZE;
-            ty1 *= IMAGE_SIZE;
-            ty1 += IMAGE_SIZE;
-            cr->set_source_rgba(0.0, 1.0, 0.0, 0.25);
-            cr->rectangle(tx0, ty0, tx1 - tx0, ty1 - ty0);
-            cr->fill_preserve();
-            cr->set_source_rgb(0.0, 1.0, 0.0);
-            cr->set_line_width(1.0);
-            cr->stroke();
+            draw_box(cr);
         }
     } else if (mode == eDeleteMode) {
         if (drawbox) {
-            cr->set_line_width(2.0);
-            cr->set_source_rgb(1.0, 0.0, 0.0);
-            draw_x(hotstack, cr);
-            int tx0 = angle_to_x(lastclick.get_angle()),
-                ty0 = get_obj_pos<int>(lastclick);
-            int tx1 = angle_to_x(boxcorner.get_angle()),
-                ty1 = get_obj_pos<int>(boxcorner);
-            int dx = tx1 - tx0, dy = ty1 - ty0;
-            if (dx < 0) {
-                swap(tx0, tx1);
-            }
-            if (dy < 0) {
-                swap(ty0, ty1);
-            }
-            ty0 -= pvscrollbar->get_value();
-            ty1 -= pvscrollbar->get_value();
-            ty0 *= IMAGE_SIZE;
-            ty1 *= IMAGE_SIZE;
-            ty1 += IMAGE_SIZE;
-            cr->set_source_rgba(1.0, 0.0, 0.0, 0.25);
-            cr->rectangle(tx0, ty0, tx1 - tx0, ty1 - ty0);
-            cr->fill_preserve();
-            cr->set_source_rgb(1.0, 0.0, 0.0);
-            cr->set_line_width(1.0);
-            cr->stroke();
+            draw_box(cr);
         } else if (hotspot.valid()) {
             int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
             int ty = (get_obj_pos<int>(hotspot) - pvscrollbar->get_value()) *
@@ -1540,6 +1547,13 @@ bool sseditor::on_specialstageobjs_expose_event(GdkEventExpose* event) {
     return true;
 }
 
+static inline int get_angle_delta(bool grid) { return grid ? 4 : 1; }
+
+static inline double get_scroll_delta(guint state) {
+    bool fast = (state & GDK_SHIFT_MASK) != 0;
+    return fast ? 32.0 : 4.0;
+}
+
 bool sseditor::on_specialstageobjs_key_press_event(GdkEventKey* event) {
     if (!specialstages) {
         return true;
@@ -1556,18 +1570,19 @@ bool sseditor::on_specialstageobjs_key_press_event(GdkEventKey* event) {
 
     case GDK_KEY_Left:
     case GDK_KEY_KP_Left: {
-        return move_object(want_snap_to_grid(event->state) ? -4 : -1, 0);
+        bool grid = want_snap_to_grid(event->state);
+        return move_object(-get_angle_delta(grid), 0);
     }
 
     case GDK_KEY_Right:
     case GDK_KEY_KP_Right: {
-        return move_object(want_snap_to_grid(event->state) ? 4 : 1, 0);
+        bool grid = want_snap_to_grid(event->state);
+        return move_object(get_angle_delta(grid), 0);
     }
 
     case GDK_KEY_Page_Up:
     case GDK_KEY_KP_Page_Up: {
-        bool   shift = (event->state & GDK_SHIFT_MASK) != 0;
-        double delta = shift ? 32 : 4;
+        double delta = get_scroll_delta(event->state);
         pvscrollbar->set_value(pvscrollbar->get_value() - delta);
         render();
         show();
@@ -1576,8 +1591,7 @@ bool sseditor::on_specialstageobjs_key_press_event(GdkEventKey* event) {
 
     case GDK_KEY_Page_Down:
     case GDK_KEY_KP_Page_Down: {
-        bool   shift = (event->state & GDK_SHIFT_MASK) != 0;
-        double delta = shift ? 32 : 4;
+        double delta = get_scroll_delta(event->state);
         pvscrollbar->set_value(pvscrollbar->get_value() + delta);
         render();
         show();

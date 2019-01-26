@@ -595,6 +595,13 @@ private:
         }
     }
 
+    void cleanup_render(Cairo::RefPtr<Cairo::Context> cr);
+    void draw_objects(Cairo::RefPtr<Cairo::Context> cr, int start, int end);
+    void draw_balls(Cairo::RefPtr<Cairo::Context> cr, int ty);
+    bool want_checkerboard(int row, int seg, sssegments* currseg);
+    void draw_box(Cairo::RefPtr<Cairo::Context> cr);
+    void select_hotspot();
+
 protected:
     void update();
     void disable_scroll() {
