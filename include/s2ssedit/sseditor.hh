@@ -95,6 +95,16 @@ T clamp(T val, T min, T max) {
     return val;
 }
 
+template <typename T>
+T signum(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
+template <typename T>
+T sigplus(T val) {
+    return (T(0) <= val) - (val < T(0));
+}
+
 class sseditor {
 private:
     using ObjectTypes = sssegments::ObjectTypes;
@@ -643,7 +653,6 @@ private:
     }
     Gtk::RadioButton* direction_button(bool dir) {
         return dir ? psegment_left : psegment_right;
-
     }
     std::pair<size_t, size_t> count_objects(std::set<object>& objs) {
         size_t nrings = 0;
@@ -657,6 +666,25 @@ private:
         }
         return std::pair<size_t, size_t>{nrings, nbombs};
     }
+    std::pair<int, int> get_motion_loc(GdkEventMotion* event) {
+        int angle, pos;
+        if (!hotspot.valid()) {
+            angle = x_to_angle(event->x, want_snap_to_grid(state), 4U);
+            pos   = event->y / IMAGE_SIZE + pvscrollbar->get_value();
+        } else {
+            angle = hotspot.get_angle();
+            pos   = get_obj_pos<int>(hotspot);
+        }
+        return std::pair<int, int>{angle_simple(angle), pos};
+    }
+    std::pair<ObjectTypes, InsertModes> get_obj_type() const noexcept {
+        if (mode == eInsertBombMode) {
+            return std::pair<ObjectTypes, InsertModes>{sssegments::eBomb, bombmode};
+        }
+        return std::pair<ObjectTypes, InsertModes>{sssegments::eRing, ringmode};
+    }
+
+    void scroll_into_view(GdkEventMotion* event);
 
 protected:
     void update();
