@@ -679,11 +679,29 @@ private:
     }
     std::pair<ObjectTypes, InsertModes> get_obj_type() const noexcept {
         if (mode == eInsertBombMode) {
-            return std::pair<ObjectTypes, InsertModes>{sssegments::eBomb, bombmode};
+            return std::pair<ObjectTypes, InsertModes>{sssegments::eBomb,
+                                                       bombmode};
         }
         return std::pair<ObjectTypes, InsertModes>{sssegments::eRing, ringmode};
     }
 
+    void motion_update_selection(
+        int dangle, int dpos, int pos0, int pos1, int angle0, int angle1);
+    void motion_update_insertion(
+        int dangle, int dpos, int pos0, int pos1, int angle0, int angle1,
+        bool grid, bool lbutton_pressed);
+    void motion_update_line(
+        int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+        int angledelta);
+    void motion_update_loop(
+        int dpos, int pos0, int angle0, ObjectTypes type,
+        int angledelta, bool grid);
+    void motion_update_zigzag(
+        int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+        int angledelta);
+    void motion_update_diamond(
+        int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+        int angledelta);
     void scroll_into_view(GdkEventMotion* event);
 
 protected:

@@ -1838,6 +1838,193 @@ void sseditor::scroll_into_view(GdkEventMotion* event) {
     }
 }
 
+void sseditor::motion_update_selection(
+    int dangle, int dpos, int pos0, int pos1, int angle0, int angle1) {
+    hotstack.clear();
+    if (dangle == 0 && dpos == 0) {
+        return;
+    }
+    int seg1 = find_segment(pos1);
+    boxcorner.set(
+        seg1, static_cast<int8_t>(angle1 + 0xc0), pos1 - segpos[seg1],
+        sssegments::eRing);
+    drawbox = true;
+    for (int i = min(pos0, pos1); i <= max(pos0, pos1); i++) {
+        int         seg = find_segment(i), pos = i - segpos[seg];
+        sssegments* currseg = get_segment(seg);
+        if (currseg == nullptr) {
+            for (int j = min(angle0, angle1); j <= max(angle0, angle1); j++) {
+                int         angle = static_cast<int8_t>(j + 0xc0);
+                ObjectTypes type;
+                if (currseg->exists(pos, angle, type)) {
+                    hotstack.emplace(seg, angle, pos, type);
+                }
+            }
+        }
+    }
+}
+
+void sseditor::motion_update_line(
+    int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+    int angledelta) {
+    int const numsegments = segpos.size();
+    int const delta       = sigplus(dpos);
+    do {
+        int seg = find_segment(pos0), pos = pos0 - segpos[seg];
+        pos0 += delta;
+        if (seg < numsegments) {
+            insertstack.emplace(
+                seg, angle_normal(static_cast<int8_t>(angle0)), pos, type);
+            angle0 = static_cast<int8_t>(angle0 + angledelta);
+        }
+    } while (pos0 != pos1 + delta);
+}
+
+void sseditor::motion_update_loop(
+    int dpos, int pos0, int angle0, ObjectTypes type, int angledelta,
+    bool grid) {
+    int    dy = signum(dpos);
+    int    nobj;
+    double delta;
+    if (dy != 0) {
+        if (angledelta == 0) {
+            angledelta = get_angle_delta(grid);
+        }
+        int sign = sigplus(angledelta);
+        int dx   = abs(angledelta);
+        nobj     = 0x100 / dx;
+        delta    = sign * (double(0x100) / nobj);
+    } else {
+        angledelta = clamp(
+            abs(angledelta), HALF_IMAGE_SIZE, std::numeric_limits<int>::max());
+        nobj  = (0x100 - angledelta) / angledelta;
+        delta = double(0x100 - angledelta) / nobj;
+    }
+
+    int const numsegments = segpos.size();
+    for (int ii = 0; ii <= nobj; ii++, pos0 += dy) {
+        int seg = find_segment(pos0), pos = pos0 - segpos[seg];
+        if (seg < numsegments) {
+            insertstack.emplace(
+                seg, angle_normal(static_cast<int8_t>(angle0)), pos, type);
+            angle0 += delta;
+        }
+    }
+}
+
+void sseditor::motion_update_zigzag(
+    int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+    int angledelta) {
+    int const delta = sigplus(dpos);
+    angledelta      = clamp(angledelta, -HALF_IMAGE_SIZE, HALF_IMAGE_SIZE);
+    int const numsegments = segpos.size();
+    do {
+        int seg = find_segment(pos0), pos = pos0 - segpos[seg];
+        pos0 += delta;
+        if (seg < numsegments) {
+            insertstack.emplace(seg, angle_normal(angle0), pos, type);
+            angle0     = static_cast<int8_t>(angle0 + angledelta);
+            angledelta = -angledelta;
+        }
+    } while (pos0 != pos1 + delta);
+}
+
+void sseditor::motion_update_diamond(
+    int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+    int angledelta) {
+    int const delta       = sigplus(dpos);
+    int const numsegments = segpos.size();
+    angledelta = clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
+    int angle  = angle0;
+    int ii     = pos0 + delta;
+    int seg = find_segment(pos0), pos = pos0 - segpos[seg];
+    if (seg < numsegments) {
+        insertstack.emplace(seg, angle_normal(angle), pos, type);
+    }
+    seg = find_segment(pos1);
+    pos = pos1 - segpos[seg];
+    if (seg < numsegments) {
+        insertstack.emplace(seg, angle_normal(angle), pos, type);
+    }
+    while (ii != pos1) {
+        seg = find_segment(ii);
+        pos = ii - segpos[seg];
+        ii += delta;
+        if (seg < numsegments) {
+            insertstack.emplace(
+                seg, angle_normal(static_cast<int8_t>(angle - angledelta)), pos,
+                type);
+            insertstack.emplace(
+                seg, angle_normal(static_cast<int8_t>(angle + angledelta)), pos,
+                type);
+        }
+    }
+}
+
+void sseditor::motion_update_insertion(
+    int dangle, int dpos, int pos0, int pos1, int angle0, int angle1, bool grid,
+    bool lbutton_pressed) {
+    insertstack.clear();
+    ObjectTypes type;
+    InsertModes submode;
+    tie(type, submode) = get_obj_type();
+
+    if (submode == eSingle || (submode != eLoop && !dpos) || !lbutton_pressed) {
+        int seg1 = find_segment(pos1);
+        insertstack.emplace(
+            seg1, angle_normal(angle1), pos1 - segpos[seg1], type);
+        return;
+    }
+
+    int angledelta = dangle;
+    if (submode == eLine) {
+        angledelta /= abs(dpos);
+    }
+    if (grid) {
+        angledelta += 3 * sigplus(angledelta);
+        angledelta /= 4;
+        angledelta *= 4;
+    }
+
+    switch (submode) {
+    case eLine:
+        motion_update_line(dpos, pos0, pos1, angle0, type, angledelta);
+        break;
+    case eLoop:
+        motion_update_loop(dpos, pos0, angle0, type, angledelta, grid);
+        break;
+    case eZigzag:
+        motion_update_zigzag(dpos, pos0, pos1, angle0, type, angledelta);
+        break;
+    case eDiamond:
+        motion_update_diamond(dpos, pos0, pos1, angle0, type, angledelta);
+        break;
+    case eLozenge:
+    case eStar: {
+        bool      fill  = submode == eLozenge;
+        angledelta =
+            clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
+        int off0 = dpos >= 0;
+        int off1 = dpos < 0;
+        object_triangle(
+            angle0, pos0, angledelta, sigplus(dpos), (dpos + off0) / 2, type, fill,
+            insertstack);
+        object_triangle(
+            angle0, pos1, angledelta, -sigplus(dpos), (-dpos + off1) / 2, type, fill,
+            insertstack);
+        break;
+    }
+    case eTriangle:
+        angledelta =
+            clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
+        object_triangle(
+            angle0, pos1, angledelta, -sigplus(dpos), -dpos, type, true, insertstack);
+        break;
+    default:
+        __builtin_unreachable();
+    }
+}
+
 bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
     if (!specialstages) {
         return true;
@@ -1857,7 +2044,6 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
         scroll_into_view(event);
         int angle1, pos1;
         tie(angle1, pos1) = get_motion_loc(event);
-        int numsegments   = segpos.size();
 
         int angle0 = angle_simple(lastclick.get_angle());
         int pos0   = get_obj_pos<int>(lastclick);
@@ -1867,178 +2053,15 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
         switch (mode) {
         case eSelectMode:
         case eDeleteMode:
-            hotstack.clear();
-            if (dangle || dpos) {
-                int seg1 = find_segment(pos1);
-                boxcorner.set(
-                    seg1, static_cast<int8_t>(angle1 + 0xc0),
-                    pos1 - segpos[seg1], sssegments::eRing);
-                drawbox = true;
-                for (int i = min(pos0, pos1); i <= max(pos0, pos1); i++) {
-                    int         seg = find_segment(i), pos = i - segpos[seg];
-                    sssegments* currseg = get_segment(seg);
-                    if (currseg == nullptr) {
-                        continue;
-                    }
-                    for (int j = min(angle0, angle1); j <= max(angle0, angle1);
-                         j++) {
-                        int         angle = static_cast<int8_t>(j + 0xc0);
-                        ObjectTypes type;
-                        if (currseg->exists(pos, angle, type)) {
-                            hotstack.emplace(seg, angle, pos, type);
-                        }
-                    }
-                }
-            }
+            motion_update_selection(dangle, dpos, pos0, pos1, angle0, angle1);
             break;
 
         case eInsertRingMode:
-        case eInsertBombMode: {
-            insertstack.clear();
-            ObjectTypes type;
-            InsertModes submode;
-            tie(type, submode) = get_obj_type();
-
-            if (submode == eSingle || (submode != eLoop && !dpos) ||
-                !lbutton_pressed) {
-                int seg1 = find_segment(pos1);
-                insertstack.emplace(
-                    seg1, angle_normal(angle1), pos1 - segpos[seg1], type);
-                break;
-            }
-
-            int angledelta = dangle;
-            if (submode == eLine) {
-                angledelta /= abs(dpos);
-            }
-            bool grid = want_snap_to_grid(event->state);
-            if (grid) {
-                angledelta += 3 * sigplus(angledelta);
-                angledelta /= 4;
-                angledelta *= 4;
-            }
-
-            switch (submode) {
-            case eLine: {
-                int const delta = sigplus(dpos);
-                do {
-                    int seg = find_segment(pos0), pos = pos0 - segpos[seg];
-                    pos0 += delta;
-                    if (seg < numsegments) {
-                        insertstack.emplace(
-                            seg, angle_normal(angle0), pos, type);
-                        angle0 = static_cast<int8_t>(angle0 + angledelta);
-                    }
-                } while (pos0 != pos1 + delta);
-                break;
-            }
-            case eLoop: {
-                int    dy = signum(dpos);
-                int    nobj;
-                double delta;
-                if (dy != 0) {
-                    if (angledelta == 0) {
-                        angledelta = get_angle_delta(grid);
-                    }
-                    int sign = sigplus(angledelta);
-                    int dx   = abs(angledelta);
-                    nobj     = 0x100 / dx;
-                    delta    = sign * (double(0x100) / nobj);
-                } else {
-                    angledelta = clamp(
-                        abs(angledelta), HALF_IMAGE_SIZE,
-                        std::numeric_limits<int>::max());
-                    nobj  = (0x100 - angledelta) / angledelta;
-                    delta = double(0x100 - angledelta) / nobj;
-                }
-
-                for (int ii = 0; ii <= nobj; ii++, pos0 += dy) {
-                    int seg = find_segment(pos0), pos = pos0 - segpos[seg];
-                    if (seg < numsegments) {
-                        insertstack.emplace(
-                            seg, angle_normal(static_cast<int8_t>(angle0)), pos,
-                            type);
-                        angle0 += delta;
-                    }
-                }
-                break;
-            }
-            case eZigzag: {
-                int const delta = sigplus(dpos);
-                angledelta =
-                    clamp(angledelta, -HALF_IMAGE_SIZE, HALF_IMAGE_SIZE);
-                do {
-                    int seg = find_segment(pos0), pos = pos0 - segpos[seg];
-                    pos0 += delta;
-                    if (seg < numsegments) {
-                        insertstack.emplace(
-                            seg, angle_normal(angle0), pos, type);
-                        angle0     = static_cast<int8_t>(angle0 + angledelta);
-                        angledelta = -angledelta;
-                    }
-                } while (pos0 != pos1 + delta);
-                break;
-            }
-            case eDiamond: {
-                int const delta = sigplus(dpos);
-                angledelta =
-                    clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
-                int angle = angle0;
-                int ii    = pos0 + delta;
-                int seg = find_segment(pos0), pos = pos0 - segpos[seg];
-                if (seg < numsegments) {
-                    insertstack.emplace(seg, angle_normal(angle), pos, type);
-                }
-                seg = find_segment(pos1);
-                pos = pos1 - segpos[seg];
-                if (seg < numsegments) {
-                    insertstack.emplace(seg, angle_normal(angle), pos, type);
-                }
-                while (ii != pos1) {
-                    seg = find_segment(ii);
-                    pos = ii - segpos[seg];
-                    ii += delta;
-                    if (seg < numsegments) {
-                        int tx = angle_normal(
-                            static_cast<int8_t>(angle - angledelta));
-                        insertstack.emplace(seg, tx, pos, type);
-                        tx = angle_normal(
-                            static_cast<int8_t>(angle + angledelta));
-                        insertstack.emplace(seg, tx, pos, type);
-                    }
-                }
-                break;
-            }
-            case eLozenge:
-            case eStar: {
-                bool      fill  = submode == eLozenge;
-                int const delta = sigplus(dpos);
-                angledelta =
-                    clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
-                int off0 = dpos >= 0;
-                int off1 = dpos < 0;
-                object_triangle(
-                    angle0, pos0, angledelta, delta, (dpos + off0) / 2, type,
-                    fill, insertstack);
-                object_triangle(
-                    angle0, pos1, angledelta, -delta, (-dpos + off1) / 2, type,
-                    fill, insertstack);
-                break;
-            }
-            case eTriangle: {
-                int const delta = sigplus(dpos);
-                angledelta =
-                    clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
-                object_triangle(
-                    angle0, pos1, angledelta, -delta, -dpos, type, true,
-                    insertstack);
-                break;
-            }
-            default:
-                __builtin_unreachable();
-            }
+        case eInsertBombMode:
+            motion_update_insertion(
+                dangle, dpos, pos0, pos1, angle0, angle1,
+                want_snap_to_grid(event->state), lbutton_pressed);
             break;
-        }
 
         default:
             __builtin_unreachable();
