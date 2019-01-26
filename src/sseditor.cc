@@ -1726,7 +1726,7 @@ tuple<int, int, int> sseditor::get_mouseup_loc(GdkEventButton* event) {
         pos   = hotspot.get_pos();
         seg   = hotspot.get_segment();
     }
-    return {angle, pos, seg};
+    return tuple<int, int, int>{angle, pos, seg};
 }
 
 bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
