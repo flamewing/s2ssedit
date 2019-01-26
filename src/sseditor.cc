@@ -1853,12 +1853,13 @@ void sseditor::motion_update_selection(
         int         seg = find_segment(i), pos = i - segpos[seg];
         sssegments* currseg = get_segment(seg);
         if (currseg == nullptr) {
-            for (int j = min(angle0, angle1); j <= max(angle0, angle1); j++) {
-                int         angle = static_cast<int8_t>(j + 0xc0);
-                ObjectTypes type;
-                if (currseg->exists(pos, angle, type)) {
-                    hotstack.emplace(seg, angle, pos, type);
-                }
+            continue;
+        }
+        for (int j = min(angle0, angle1); j <= max(angle0, angle1); j++) {
+            int         angle = static_cast<int8_t>(j + 0xc0);
+            ObjectTypes type;
+            if (currseg->exists(pos, angle, type)) {
+                hotstack.emplace(seg, angle, pos, type);
             }
         }
     }
@@ -2001,24 +2002,25 @@ void sseditor::motion_update_insertion(
         break;
     case eLozenge:
     case eStar: {
-        bool      fill  = submode == eLozenge;
+        bool fill = submode == eLozenge;
         angledelta =
             clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
         int off0 = dpos >= 0;
         int off1 = dpos < 0;
         object_triangle(
-            angle0, pos0, angledelta, sigplus(dpos), (dpos + off0) / 2, type, fill,
-            insertstack);
+            angle0, pos0, angledelta, sigplus(dpos), (dpos + off0) / 2, type,
+            fill, insertstack);
         object_triangle(
-            angle0, pos1, angledelta, -sigplus(dpos), (-dpos + off1) / 2, type, fill,
-            insertstack);
+            angle0, pos1, angledelta, -sigplus(dpos), (-dpos + off1) / 2, type,
+            fill, insertstack);
         break;
     }
     case eTriangle:
         angledelta =
             clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
         object_triangle(
-            angle0, pos1, angledelta, -sigplus(dpos), -dpos, type, true, insertstack);
+            angle0, pos1, angledelta, -sigplus(dpos), -dpos, type, true,
+            insertstack);
         break;
     default:
         __builtin_unreachable();
