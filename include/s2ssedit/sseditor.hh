@@ -601,6 +601,62 @@ private:
     bool want_checkerboard(int row, int seg, sssegments* currseg);
     void draw_box(Cairo::RefPtr<Cairo::Context> cr);
     void select_hotspot();
+    void fix_stage(unsigned numstages) {
+        if (numstages == 0) {
+            currstage = 0;
+        } else if (currstage >= numstages) {
+            currstage = numstages - 1;
+        }
+    }
+    void fix_segment(unsigned numsegments) {
+        if (numsegments == 0) {
+            currsegment = 0;
+        } else if (currstage >= numsegments) {
+            currsegment = numsegments - 1;
+        }
+    }
+    Gtk::RadioButton* segment_type_button(sssegments::SegmentTypes type) {
+        switch (type) {
+        case sssegments::eRingsMessage:
+            return pring_message;
+        case sssegments::eCheckpoint:
+            return pcheckpoint;
+        case sssegments::eChaosEmerald:
+            return pchaos_emerald;
+        default:
+            return pnormal_segment;
+        }
+    }
+    Gtk::RadioButton* geometry_button(sssegments::SegmentGeometry type) {
+        switch (type) {
+        case sssegments::eTurnThenDrop:
+            return psegment_turnthendrop;
+        case sssegments::eTurnThenStraight:
+            return psegment_turnthenstraight;
+        case sssegments::eStraight:
+            return psegment_straight;
+        case sssegments::eStraightThenTurn:
+            return psegment_straightthenturn;
+        default:
+            return psegment_turnthenrise;
+        }
+    }
+    Gtk::RadioButton* direction_button(bool dir) {
+        return dir ? psegment_left : psegment_right;
+
+    }
+    std::pair<size_t, size_t> count_objects(std::set<object>& objs) {
+        size_t nrings = 0;
+        size_t nbombs = 0;
+        for (auto const& elem : objs) {
+            if (elem.get_type() == sssegments::eBomb) {
+                ++nbombs;
+            } else {
+                ++nrings;
+            }
+        }
+        return std::pair<size_t, size_t>{nrings, nbombs};
+    }
 
 protected:
     void update();

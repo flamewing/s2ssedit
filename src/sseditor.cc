@@ -48,6 +48,7 @@
 #    endif
 #endif
 
+using std::array;
 using std::cout;
 using std::endl;
 using std::ifstream;
@@ -456,6 +457,13 @@ void sseditor::update_segment_positions(bool setpos) {
     }
 }
 
+template <size_t N>
+void update_array(array<Gtk::RadioToolButton*, N>& buttons, bool state) {
+    for (auto& elem : buttons) {
+        elem->set_sensitive(state);
+    }
+}
+
 void sseditor::update() {
     if (update_in_progress) {
         return;
@@ -467,9 +475,7 @@ void sseditor::update() {
         psavefilebutton->set_sensitive(false);
         prevertfilebutton->set_sensitive(false);
 
-        for (auto& elem : pmodebuttons) {
-            elem->set_sensitive(false);
-        }
+        update_array(pmodebuttons, false);
 
         pmodenotebook->set_sensitive(false);
         pstage_toolbar->set_sensitive(false);
@@ -491,40 +497,23 @@ void sseditor::update() {
         pundobutton->set_sensitive(!undostack.empty());
         predobutton->set_sensitive(!redostack.empty());
 
-        for (auto& elem : pmodebuttons) {
-            elem->set_sensitive(true);
-        }
+        update_array(pmodebuttons, true);
 
         pmodenotebook->set_sensitive(true);
         pstage_toolbar->set_sensitive(true);
 
         unsigned numstages = specialstages->num_stages();
+        fix_stage(numstages);
 
-        if (numstages == 0 || currstage == numstages - 1 ||
-            numstages <= currstage) {
-            if (numstages == 0) {
-                currstage = 0;
-            } else {
-                currstage = numstages - 1;
-            }
-            pnext_stage_button->set_sensitive(false);
-            plast_stage_button->set_sensitive(false);
-            pswap_stage_next_button->set_sensitive(false);
-        } else {
-            pnext_stage_button->set_sensitive(true);
-            plast_stage_button->set_sensitive(true);
-            pswap_stage_next_button->set_sensitive(true);
-        }
+        bool have_next_stage = numstages > 0 && currstage < numstages - 1;
+        pnext_stage_button->set_sensitive(have_next_stage);
+        plast_stage_button->set_sensitive(have_next_stage);
+        pswap_stage_next_button->set_sensitive(have_next_stage);
 
-        if (currstage == 0 || numstages == 0) {
-            pfirst_stage_button->set_sensitive(false);
-            pprevious_stage_button->set_sensitive(false);
-            pswap_stage_prev_button->set_sensitive(false);
-        } else {
-            pfirst_stage_button->set_sensitive(true);
-            pprevious_stage_button->set_sensitive(true);
-            pswap_stage_prev_button->set_sensitive(true);
-        }
+        bool have_prev_stage = currstage > 0;
+        pfirst_stage_button->set_sensitive(have_prev_stage);
+        pprevious_stage_button->set_sensitive(have_prev_stage);
+        pswap_stage_prev_button->set_sensitive(have_prev_stage);
 
         if (numstages == 0) {
             pcutbutton->set_sensitive(false);
@@ -562,32 +551,18 @@ void sseditor::update() {
 
             sslevels* currlvl     = specialstages->get_stage(currstage);
             unsigned  numsegments = segpos.size();
+            fix_segment(numsegments);
 
-            if (numsegments == 0 || currsegment == numsegments - 1 ||
-                numsegments <= currsegment) {
-                if (numsegments == 0) {
-                    currsegment = 0;
-                } else {
-                    currsegment = numsegments - 1;
-                }
-                pnext_segment_button->set_sensitive(false);
-                plast_segment_button->set_sensitive(false);
-                pswap_segment_next_button->set_sensitive(false);
-            } else {
-                pnext_segment_button->set_sensitive(true);
-                plast_segment_button->set_sensitive(true);
-                pswap_segment_next_button->set_sensitive(true);
-            }
+            bool have_next_segment =
+                numsegments > 0 && currsegment < numsegments - 1;
+            pnext_segment_button->set_sensitive(have_next_segment);
+            plast_segment_button->set_sensitive(have_next_segment);
+            pswap_segment_next_button->set_sensitive(have_next_segment);
 
-            if (currsegment == 0 || numsegments == 0) {
-                pfirst_segment_button->set_sensitive(false);
-                pprevious_segment_button->set_sensitive(false);
-                pswap_segment_prev_button->set_sensitive(false);
-            } else {
-                pfirst_segment_button->set_sensitive(true);
-                pprevious_segment_button->set_sensitive(true);
-                pswap_segment_prev_button->set_sensitive(true);
-            }
+            bool have_prev_segment = currsegment > 0;
+            pfirst_segment_button->set_sensitive(have_prev_segment);
+            pprevious_segment_button->set_sensitive(have_prev_segment);
+            pswap_segment_prev_button->set_sensitive(have_prev_segment);
 
             if (numsegments == 0) {
                 pcutbutton->set_sensitive(false);
@@ -639,72 +614,23 @@ void sseditor::update() {
                 pimagecurrsegwarn->set_visible(
                     currseg->get_totalobjs() > max_safe_num_objs);
 
-                switch (currseg->get_type()) {
-                case sssegments::eRingsMessage:
-                    pring_message->set_active(true);
-                    break;
-                case sssegments::eCheckpoint:
-                    pcheckpoint->set_active(true);
-                    break;
-                case sssegments::eChaosEmerald:
-                    pchaos_emerald->set_active(true);
-                    break;
-                default:
-                    pnormal_segment->set_active(true);
-                    break;
-                }
-                switch (currseg->get_geometry()) {
-                case sssegments::eTurnThenDrop:
-                    psegment_turnthendrop->set_active(true);
-                    break;
-                case sssegments::eTurnThenStraight:
-                    psegment_turnthenstraight->set_active(true);
-                    break;
-                case sssegments::eStraight:
-                    psegment_straight->set_active(true);
-                    break;
-                case sssegments::eStraightThenTurn:
-                    psegment_straightthenturn->set_active(true);
-                    break;
-                default:
-                    psegment_turnthenrise->set_active(true);
-                    break;
-                }
-                if (currseg->get_direction()) {
-                    psegment_left->set_active(true);
-                } else {
-                    psegment_right->set_active(true);
-                }
+                segment_type_button(currseg->get_type())->set_active(true);
+                geometry_button(currseg->get_geometry())->set_active(true);
+                direction_button(currseg->get_direction())->set_active(true);
 
-                if (selection.empty()) {
-                    pringtype->set_inconsistent(true);
-                    pbombtype->set_inconsistent(true);
-                    pobject_expander->set_sensitive(false);
-                } else {
-                    size_t nrings = 0;
-                    size_t nbombs = 0;
-                    for (auto const& elem : selection) {
-                        if (elem.get_type() == sssegments::eBomb) {
-                            ++nbombs;
-                        } else {
-                            ++nrings;
-                        }
-                    }
-                    pobject_expander->set_sensitive(true);
-                    if ((nbombs > 0 && nrings > 0) ||
-                        (nbombs == 0 && nrings == 0)) {
-                        pringtype->set_inconsistent(true);
-                        pbombtype->set_inconsistent(true);
-                    } else if (nbombs > 0) {
-                        pringtype->set_inconsistent(false);
-                        pbombtype->set_inconsistent(false);
-                        pbombtype->set_active(true);
-                    } else {
-                        pringtype->set_inconsistent(false);
-                        pbombtype->set_inconsistent(false);
-                        pringtype->set_active(true);
-                    }
+                size_t nrings, nbombs;
+                tie(nrings, nbombs) = count_objects(selection);
+                bool empty          = nrings == 0 && nbombs == 0;
+                bool inconsistent   = empty || (nrings > 0 && nbombs > 0);
+                pobject_expander->set_sensitive(!empty);
+                pobject_expander->set_sensitive(true);
+                if (nbombs > 0) {
+                    pbombtype->set_active(true);
+                } else if (nrings > 0) {
+                    pringtype->set_active(true);
                 }
+                pringtype->set_inconsistent(inconsistent);
+                pbombtype->set_inconsistent(inconsistent);
             }
         }
     }
