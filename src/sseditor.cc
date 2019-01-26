@@ -1676,7 +1676,7 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         if (event->button == GDK_BUTTON_LEFT) {
             finalize_selection();
         } else if (event->button == GDK_BUTTON_RIGHT) {
-            cycle_object_type(seg, angle, pos);
+            cycle_object_type(seg, pos, angle);
         }
         break;
 
@@ -1684,7 +1684,7 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         if (!hotstack.empty()) {
             delete_set(hotstack);
         } else {
-            delete_existing_object(seg, angle, pos);
+            delete_existing_object(seg, pos, angle);
         }
         break;
     }
@@ -1693,7 +1693,7 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         if (event->button == GDK_BUTTON_LEFT) {
             insert_set();
         } else if (event->button == GDK_BUTTON_RIGHT) {
-            delete_existing_object(seg, angle, pos);
+            delete_existing_object(seg, pos, angle);
         }
         break;
     }
