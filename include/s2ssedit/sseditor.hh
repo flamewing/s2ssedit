@@ -685,6 +685,8 @@ private:
         return std::pair<ObjectTypes, InsertModes>{sssegments::eRing, ringmode};
     }
 
+    void
+         motion_update_select_insert(GdkEventMotion* event);
     void motion_update_selection(
         int dangle, int dpos, int pos0, int pos1, int angle0, int angle1);
     void motion_update_insertion(
@@ -694,8 +696,8 @@ private:
         int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
         int angledelta);
     void motion_update_loop(
-        int dpos, int pos0, int angle0, ObjectTypes type,
-        int angledelta, bool grid);
+        int dpos, int pos0, int angle0, ObjectTypes type, int angledelta,
+        bool grid);
     void motion_update_zigzag(
         int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
         int angledelta);

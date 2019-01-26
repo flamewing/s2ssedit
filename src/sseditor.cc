@@ -2027,22 +2027,12 @@ void sseditor::motion_update_insertion(
     }
 }
 
-bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
-    if (!specialstages) {
-        return true;
-    }
-
+void sseditor::motion_update_select_insert(GdkEventMotion* event) {
     bool lbutton_pressed = (event->state & GDK_BUTTON1_MASK) != 0;
-    bool dragging =
-        hotspot.valid() && selection.find(hotspot) != selection.end();
-
-    state   = event->state;
-    mouse_x = event->x;
-    mouse_y = event->y;
-    drawbox = drawbox && lbutton_pressed;
-
-    if (drawbox || mode == eInsertRingMode || mode == eInsertBombMode ||
-        (lbutton_pressed && (!dragging))) {
+    bool want_update     = drawbox || mode == eInsertRingMode ||
+                       mode == eInsertBombMode ||
+                       (lbutton_pressed && (!dragging));
+    if (want_update) {
         scroll_into_view(event);
         int angle1, pos1;
         tie(angle1, pos1) = get_motion_loc(event);
@@ -2069,10 +2059,27 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
             __builtin_unreachable();
         }
     }
+}
+
+bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
+    if (!specialstages) {
+        return true;
+    }
+
+    bool lbutton_pressed = (event->state & GDK_BUTTON1_MASK) != 0;
+    bool dragging =
+        hotspot.valid() && selection.find(hotspot) != selection.end();
+
+    state   = event->state;
+    mouse_x = event->x;
+    mouse_y = event->y;
+    drawbox = drawbox && lbutton_pressed;
 
     update();
 
-    if (mode != eSelectMode || drawbox || !lbutton_pressed || !dragging) {
+    bool no_dragdrop =
+        (mode != eSelectMode || drawbox || !lbutton_pressed || !dragging);
+    if (no_dragdrop) {
         return true;
     }
 
