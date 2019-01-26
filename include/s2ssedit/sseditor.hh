@@ -538,20 +538,28 @@ private:
         switch (ins) {
         case eSingle:
             ins = eLine;
+            break;
         case eLine:
             ins = eLoop;
+            break;
         case eLoop:
             ins = eZigzag;
+            break;
         case eZigzag:
             ins = eDiamond;
+            break;
         case eDiamond:
             ins = eLozenge;
+            break;
         case eLozenge:
             ins = eStar;
+            break;
         case eStar:
             ins = eTriangle;
+            break;
         case eTriangle:
             ins = eSingle;
+            break;
         default:
             __builtin_unreachable();
         }
@@ -560,20 +568,28 @@ private:
         switch (ins) {
         case eSingle:
             ins = eTriangle;
+            break;
         case eLine:
             ins = eSingle;
+            break;
         case eLoop:
             ins = eLine;
+            break;
         case eZigzag:
             ins = eLoop;
+            break;
         case eDiamond:
             ins = eZigzag;
+            break;
         case eLozenge:
             ins = eDiamond;
+            break;
         case eStar:
             ins = eLozenge;
+            break;
         case eTriangle:
             ins = eStar;
+            break;
         default:
             __builtin_unreachable();
         }
