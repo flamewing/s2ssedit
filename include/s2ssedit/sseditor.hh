@@ -491,9 +491,93 @@ private:
             drawbox = false;
         }
     }
-    std::tuple<int,int,int> get_mouseup_loc(GdkEventButton* event);
-
     sssegments* get_segment(int seg);
+
+    std::tuple<int, int, int> get_mouseup_loc(GdkEventButton* event);
+
+    void increment_mode(bool ctrl);
+    void decrement_mode(bool ctrl);
+    void increment_editmode() {
+        switch (mode) {
+        case eSelectMode:
+            mode = eInsertRingMode;
+            break;
+        case eInsertRingMode:
+            mode = eInsertBombMode;
+            break;
+        case eInsertBombMode:
+            mode = eDeleteMode;
+            break;
+        case eDeleteMode:
+            mode = eSelectMode;
+            break;
+        default:
+            __builtin_unreachable();
+        }
+    }
+    void decrement_editmode() {
+        switch (mode) {
+        case eSelectMode:
+            mode = eDeleteMode;
+            break;
+        case eInsertRingMode:
+            mode = eSelectMode;
+            break;
+        case eInsertBombMode:
+            mode = eInsertRingMode;
+            break;
+        case eDeleteMode:
+            mode = eInsertBombMode;
+            break;
+        default:
+            __builtin_unreachable();
+        }
+    }
+
+    void increment_insertmode(InsertModes& ins) {
+        switch (ins) {
+        case eSingle:
+            ins = eLine;
+        case eLine:
+            ins = eLoop;
+        case eLoop:
+            ins = eZigzag;
+        case eZigzag:
+            ins = eDiamond;
+        case eDiamond:
+            ins = eLozenge;
+        case eLozenge:
+            ins = eStar;
+        case eStar:
+            ins = eTriangle;
+        case eTriangle:
+            ins = eSingle;
+        default:
+            __builtin_unreachable();
+        }
+    }
+    void decrement_insertmode(InsertModes& ins) {
+        switch (ins) {
+        case eSingle:
+            ins = eTriangle;
+        case eLine:
+            ins = eSingle;
+        case eLoop:
+            ins = eLine;
+        case eZigzag:
+            ins = eLoop;
+        case eDiamond:
+            ins = eZigzag;
+        case eLozenge:
+            ins = eDiamond;
+        case eStar:
+            ins = eLozenge;
+        case eTriangle:
+            ins = eStar;
+        default:
+            __builtin_unreachable();
+        }
+    }
 
 protected:
     void update();

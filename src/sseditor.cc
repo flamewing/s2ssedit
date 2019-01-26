@@ -58,8 +58,8 @@ using std::shared_ptr;
 using std::string;
 using std::stringstream;
 using std::swap;
-using std::to_string;
 using std::tie;
+using std::to_string;
 using std::tuple;
 using std::vector;
 
@@ -1700,7 +1700,7 @@ void sseditor::insert_set() {
     }
 }
 
-tuple<int,int,int> sseditor::get_mouseup_loc(GdkEventButton* event) {
+tuple<int, int, int> sseditor::get_mouseup_loc(GdkEventButton* event) {
     int angle, pos, seg;
     if (!hotspot.valid()) {
         angle = x_to_angle(event->x, want_snap_to_grid(state), 4U);
@@ -1758,11 +1758,41 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         break;
     }
     default:
-        assert(false);
+        __builtin_unreachable();
     }
     render();
     update();
     return true;
+}
+
+void sseditor::increment_mode(bool ctrl) {
+    if (ctrl) {
+        if (mode == eInsertRingMode) {
+            increment_insertmode(ringmode);
+            pringmodebuttons[ringmode]->set_active(true);
+        } else if (mode == eInsertBombMode) {
+            increment_insertmode(bombmode);
+            pbombmodebuttons[bombmode]->set_active(true);
+        }
+    } else {
+        increment_editmode();
+        pmodebuttons[mode]->set_active(true);
+    }
+}
+
+void sseditor::decrement_mode(bool ctrl) {
+    if (ctrl) {
+        if (mode == eInsertRingMode) {
+            decrement_insertmode(ringmode);
+            pringmodebuttons[ringmode]->set_active(true);
+        } else if (mode == eInsertBombMode) {
+            decrement_insertmode(bombmode);
+            pbombmodebuttons[bombmode]->set_active(true);
+        }
+    } else {
+        decrement_editmode();
+        pmodebuttons[mode]->set_active(true);
+    }
 }
 
 bool sseditor::on_specialstageobjs_scroll_event(GdkEventScroll* event) {
@@ -1784,39 +1814,11 @@ bool sseditor::on_specialstageobjs_scroll_event(GdkEventScroll* event) {
         break;
 
     case GDK_SCROLL_LEFT:
-        if (ctrl) {
-            if (mode == eInsertRingMode) {
-                ringmode = InsertModes(
-                    (int(ringmode) + int(eNumInsertModes) - 1) %
-                    int(eNumInsertModes));
-                pringmodebuttons[ringmode]->set_active(true);
-            } else if (mode == eInsertBombMode) {
-                bombmode = InsertModes(
-                    (int(bombmode) + int(eNumInsertModes) - 1) %
-                    int(eNumInsertModes));
-                pbombmodebuttons[bombmode]->set_active(true);
-            }
-        } else {
-            mode = EditModes((int(mode) + int(eNumModes) - 1) % int(eNumModes));
-            pmodebuttons[mode]->set_active(true);
-        }
+        decrement_mode(ctrl);
         break;
 
     case GDK_SCROLL_RIGHT:
-        if (ctrl) {
-            if (mode == eInsertRingMode) {
-                ringmode =
-                    InsertModes((int(ringmode) + 1) % int(eNumInsertModes));
-                pringmodebuttons[ringmode]->set_active(true);
-            } else if (mode == eInsertBombMode) {
-                bombmode =
-                    InsertModes((int(bombmode) + 1) % int(eNumInsertModes));
-                pbombmodebuttons[bombmode]->set_active(true);
-            }
-        } else {
-            mode = EditModes((int(mode) + 1) % int(eNumModes));
-            pmodebuttons[mode]->set_active(true);
-        }
+        increment_mode(ctrl);
         break;
     }
 
