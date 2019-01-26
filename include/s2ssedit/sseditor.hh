@@ -23,6 +23,7 @@
 #include <deque>
 #include <memory>
 #include <set>
+#include <tuple>
 
 #include <s2ssedit/abstractaction.hh>
 #include <s2ssedit/object.hh>
@@ -485,6 +486,12 @@ private:
     void cycle_object_type(int seg, unsigned pos, unsigned angle);
     void finalize_selection();
     void insert_set();
+    void finish_drag_box(GdkEventButton* event) {
+        if (event->button == GDK_BUTTON_LEFT && drawbox) {
+            drawbox = false;
+        }
+    }
+    std::tuple<int,int,int> get_mouseup_loc(GdkEventButton* event);
 
     sssegments* get_segment(int seg);
 

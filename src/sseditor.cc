@@ -59,6 +59,8 @@ using std::string;
 using std::stringstream;
 using std::swap;
 using std::to_string;
+using std::tie;
+using std::tuple;
 using std::vector;
 
 sseditor::sseditor(int argc, char* argv[], char const* uifile)
@@ -1698,16 +1700,7 @@ void sseditor::insert_set() {
     }
 }
 
-bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
-    state = event->state;
-    if (!specialstages) {
-        return true;
-    }
-
-    if (event->button == GDK_BUTTON_LEFT && drawbox) {
-        drawbox = false;
-    }
-
+tuple<int,int,int> sseditor::get_mouseup_loc(GdkEventButton* event) {
     int angle, pos, seg;
     if (!hotspot.valid()) {
         angle = x_to_angle(event->x, want_snap_to_grid(state), 4U);
@@ -1719,6 +1712,19 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         pos   = hotspot.get_pos();
         seg   = hotspot.get_segment();
     }
+    return {angle, pos, seg};
+}
+
+bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
+    state = event->state;
+    if (!specialstages) {
+        return true;
+    }
+
+    finish_drag_box(event);
+
+    int angle, pos, seg;
+    tie(angle, pos, seg) = get_mouseup_loc(event);
 
     sssegments* currseg = get_segment(seg);
     if (currseg == nullptr) {
@@ -1735,9 +1741,6 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         break;
 
     case eDeleteMode: {
-        if (event->button != GDK_BUTTON_LEFT) {
-            break;
-        }
         if (!hotstack.empty()) {
             delete_set(hotstack);
         } else {
