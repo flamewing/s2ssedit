@@ -10,6 +10,7 @@ Checks: "-*\
 ,cert-msc50-cpp\
 ,cert-msc51-cpp\
 ,clang-diagnostic-*\
+,-clang-diagnostic-implicit-fallthrough\
 ,-clang-diagnostic-weak-template-vtables\
 ,clang-analyzer-*\
 ,-clang-analyzer-alpha*\

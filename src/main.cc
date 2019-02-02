@@ -65,7 +65,6 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-
 sseditor::sseditor(int argc, char* argv[], char const* uifile)
     : update_in_progress(false), dragging(false), drop_enabled(false),
       currstage(0), currsegment(0), draw_width(0), draw_height(0), mouse_x(0),
@@ -424,7 +423,6 @@ sseditor::sseditor(int argc, char* argv[], char const* uifile)
     update();
 }
 
-
 template <size_t N>
 void update_array(array<Gtk::RadioToolButton*, N>& buttons, bool state) {
     for (auto& elem : buttons) {
@@ -586,7 +584,8 @@ void sseditor::update() {
                 geometry_button(currseg->get_geometry())->set_active(true);
                 direction_button(currseg->get_direction())->set_active(true);
 
-                size_t nrings, nbombs;
+                size_t nrings;
+                size_t nbombs;
                 tie(nrings, nbombs) = count_objects(selection);
                 bool empty          = nrings == 0 && nbombs == 0;
                 bool inconsistent   = empty || (nrings > 0 && nbombs > 0);

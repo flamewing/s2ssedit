@@ -126,9 +126,9 @@ public:
         //*/
         return eTurnThenRiseLen;
     }
-    uint32_t get_length() const noexcept { return get_length(geometry); }
-    bool     get_direction() const noexcept { return flip; }
-    uint8_t  get_flip_geom() const noexcept {
+    int32_t get_length() const noexcept { return get_length(geometry); }
+    bool    get_direction() const noexcept { return flip; }
+    uint8_t get_flip_geom() const noexcept {
         return static_cast<uint8_t>(flip ? eFlipMask : eNoFlip) |
                static_cast<uint8_t>(geometry);
     }
@@ -137,7 +137,7 @@ public:
     void set_direction(bool tf) noexcept { flip = tf; }
 
     auto const& get_row(uint8_t row) noexcept { return objects[row]; }
-    bool exists(uint8_t row, uint8_t angle) const noexcept {
+    bool        exists(uint8_t row, uint8_t angle) const noexcept {
         ObjectTypes type;
         return exists(row, angle, type);
     }

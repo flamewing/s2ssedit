@@ -36,9 +36,10 @@ using std::tuple;
 using std::vector;
 
 bool sseditor::on_specialstageobjs_configure_event(GdkEventConfigure* event) {
-    draw_width  = event->width;
-    draw_height = event->height;
-    pvscrollbar->set_range(0.0, endpos + 9 - (draw_height / IMAGE_SIZE));
+    draw_width      = event->width;
+    draw_height     = event->height;
+    int half_height = draw_height / SIMAGE_SIZE;
+    pvscrollbar->set_range(0.0, endpos + 9 - half_height);
     if (!drop_enabled) {
         drop_enabled = true;
         vector<Gtk::TargetEntry> vec;
@@ -56,11 +57,14 @@ bool sseditor::on_specialstageobjs_configure_event(GdkEventConfigure* event) {
 }
 
 tuple<int, int, int> sseditor::get_mouseup_loc(GdkEventButton* event) {
-    int angle, pos, seg;
+    int angle;
+    int pos;
+    int seg;
     if (!hotspot.valid()) {
         angle = x_to_angle(event->x, want_snap_to_grid(state), 4U);
-        pos   = event->y / IMAGE_SIZE + pvscrollbar->get_value();
-        seg   = find_segment(pos);
+        pos =
+            static_cast<int>(event->y / IMAGE_SIZE + pvscrollbar->get_value());
+        seg = find_segment(pos);
         pos -= segpos[seg];
     } else {
         angle = hotspot.get_angle();
@@ -78,7 +82,9 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
 
     finish_drag_box(event);
 
-    int angle, pos, seg;
+    int angle;
+    int pos;
+    int seg;
     tie(angle, pos, seg) = get_mouseup_loc(event);
 
     sssegments* currseg = get_segment(seg);
@@ -112,7 +118,7 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
         }
         break;
     }
-    default:
+    case eNumModes:
         __builtin_unreachable();
     }
     render();
@@ -186,12 +192,14 @@ void sseditor::object_triangle(
     ignore_unused_variable_warning(col);
     int numsegments = segpos.size();
     int angle       = x;
-    int seg = find_segment(y), pos = y - segpos[seg];
+    int seg         = find_segment(y);
+    int pos         = y - segpos[seg];
     if (seg < numsegments) {
         insertstack.emplace(seg, angle_normal(angle), pos, type);
     }
     int delta;
-    int i, last;
+    int i;
+    int last;
     if (h > 0) {
         delta = dx;
         i     = y + dy;
@@ -214,11 +222,11 @@ void sseditor::object_triangle(
 
         int tx;
         if (fill) {
-            int const cnt    = (2 * delta) / HALF_IMAGE_SIZE,
-                      middle = (cnt & 1) == 0;
+            int const cnt    = (2 * delta) / HALF_IMAGE_SIZE;
+            int const middle = static_cast<int>((cnt & 1) == 0);
             int const dj     = 8 * delta;
-            int const min    = middle ? cnt * IMAGE_SIZE : 0;
-            if (middle) {
+            int const min    = middle != 0 ? cnt * SIMAGE_SIZE : 0;
+            if (middle != 0) {
                 insertstack.emplace(seg, angle_normal(angle), pos, type);
             }
 
@@ -262,7 +270,9 @@ void sseditor::motion_update_selection(
         sssegments::eRing);
     drawbox = true;
     for (int i = min(pos0, pos1); i <= max(pos0, pos1); i++) {
-        int         seg = find_segment(i), pos = i - segpos[seg];
+        int seg = find_segment(i);
+        int pos = i - segpos[seg];
+
         sssegments* currseg = get_segment(seg);
         if (currseg == nullptr) {
             continue;
@@ -283,7 +293,8 @@ void sseditor::motion_update_line(
     int const numsegments = segpos.size();
     int const delta       = sigplus(dpos);
     do {
-        int seg = find_segment(pos0), pos = pos0 - segpos[seg];
+        int seg = find_segment(pos0);
+        int pos = pos0 - segpos[seg];
         pos0 += delta;
         if (seg < numsegments) {
             insertstack.emplace(
@@ -318,11 +329,12 @@ void sseditor::motion_update_loop(
 
     int const numsegments = segpos.size();
     for (int ii = 0; ii <= nobj; ii++, pos0 += dy) {
-        int seg = find_segment(pos0), pos = pos0 - segpos[seg];
+        int seg = find_segment(pos0);
+        int pos = pos0 - segpos[seg];
         if (seg < numsegments) {
             insertstack.emplace(
                 seg, angle_normal(static_cast<int8_t>(angle0)), pos, type);
-            angle0 += delta;
+            angle0 += static_cast<int>(delta);
         }
     }
 }
@@ -334,7 +346,8 @@ void sseditor::motion_update_zigzag(
     angledelta      = clamp(angledelta, -HALF_IMAGE_SIZE, HALF_IMAGE_SIZE);
     int const numsegments = segpos.size();
     do {
-        int seg = find_segment(pos0), pos = pos0 - segpos[seg];
+        int seg = find_segment(pos0);
+        int pos = pos0 - segpos[seg];
         pos0 += delta;
         if (seg < numsegments) {
             insertstack.emplace(seg, angle_normal(angle0), pos, type);
@@ -352,7 +365,8 @@ void sseditor::motion_update_diamond(
     angledelta = clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
     int angle  = angle0;
     int ii     = pos0 + delta;
-    int seg = find_segment(pos0), pos = pos0 - segpos[seg];
+    int seg    = find_segment(pos0);
+    int pos    = pos0 - segpos[seg];
     if (seg < numsegments) {
         insertstack.emplace(seg, angle_normal(angle), pos, type);
     }
@@ -384,7 +398,8 @@ void sseditor::motion_update_insertion(
     InsertModes submode;
     tie(type, submode) = get_obj_type();
 
-    if (submode == eSingle || (submode != eLoop && !dpos) || !lbutton_pressed) {
+    if (submode == eSingle || (submode != eLoop && dpos == 0) ||
+        !lbutton_pressed) {
         int seg1 = find_segment(pos1);
         insertstack.emplace(
             seg1, angle_normal(angle1), pos1 - segpos[seg1], type);
@@ -419,8 +434,8 @@ void sseditor::motion_update_insertion(
         bool fill = submode == eLozenge;
         angledelta =
             clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
-        int off0 = dpos >= 0;
-        int off1 = dpos < 0;
+        int off0 = static_cast<int>(dpos >= 0);
+        int off1 = static_cast<int>(dpos < 0);
         object_triangle(
             angle0, pos0, angledelta, sigplus(dpos), (dpos + off0) / 2, type,
             fill, insertstack);
@@ -436,7 +451,8 @@ void sseditor::motion_update_insertion(
             angle0, pos1, angledelta, -sigplus(dpos), -dpos, type, true,
             insertstack);
         break;
-    default:
+    case eSingle:
+    case eNumInsertModes:
         __builtin_unreachable();
     }
 }
@@ -448,7 +464,8 @@ void sseditor::motion_update_select_insert(GdkEventMotion* event) {
                        (lbutton_pressed && (!dragging));
     if (want_update) {
         scroll_into_view(event);
-        int angle1, pos1;
+        int angle1;
+        int pos1;
         tie(angle1, pos1) = get_motion_loc(event);
 
         int angle0 = angle_simple(lastclick.get_angle());
@@ -469,7 +486,7 @@ void sseditor::motion_update_select_insert(GdkEventMotion* event) {
                 want_snap_to_grid(event->state), lbutton_pressed);
             break;
 
-        default:
+        case eNumModes:
             __builtin_unreachable();
         }
     }
@@ -481,7 +498,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
     }
 
     bool lbutton_pressed = (event->state & GDK_BUTTON1_MASK) != 0;
-    bool dragging =
+    bool isdragging =
         hotspot.valid() && selection.find(hotspot) != selection.end();
 
     state   = event->state;
@@ -492,7 +509,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
     update();
 
     bool no_dragdrop =
-        (mode != eSelectMode || drawbox || !lbutton_pressed || !dragging);
+        (mode != eSelectMode || drawbox || !lbutton_pressed || !isdragging);
     if (no_dragdrop) {
         return true;
     }
@@ -533,8 +550,7 @@ bool sseditor::on_drag_motion(
         dpos   = get_obj_pos<int>(hotspot);
     } else {
         dangle = x_to_angle(x, snaptogrid);
-        dpos   = static_cast<int>(y / IMAGE_SIZE) +
-               static_cast<int>(pvscrollbar->get_value());
+        dpos   = y / SIMAGE_SIZE + get_scroll();
     }
     dangle = static_cast<int8_t>(dangle - lastclick.get_angle());
     dpos -= get_obj_pos<int>(lastclick);
@@ -544,7 +560,7 @@ bool sseditor::on_drag_motion(
     if (dangle == 0 && dpos == 0) {
         insertstack = sourcestack;
     } else {
-        int maxpos = static_cast<int>(endpos) - 1;
+        int maxpos = endpos - 1;
         for (auto obj : sourcestack) {
             obj.set_angle(static_cast<int8_t>(obj.get_angle() + dangle));
             int pos = clamp(get_obj_pos<int>(obj) + dpos, 0, maxpos);

@@ -35,7 +35,7 @@ public:
     void read(std::istream& in, std::istream& lay, int term, int term2);
     void write(std::ostream& out, std::ostream& lay) const;
 
-    size_t fill_position_array(std::vector<size_t>& segpos) const {
+    size_t fill_position_array(std::vector<int>& segpos) const {
         segpos.clear();
         segpos.reserve(segments.size());
         size_t tally = 0;

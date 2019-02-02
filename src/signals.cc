@@ -173,7 +173,7 @@ void sseditor::on_quitbutton_clicked() { kit->quit(); }
 
 void sseditor::on_cutbutton_clicked() {
     copystack = selection;
-    copypos   = static_cast<int>(pvscrollbar->get_value());
+    copypos   = get_scroll();
     do_action<cut_selection_action>(currstage, copystack);
     selection.clear();
     render();
@@ -182,13 +182,13 @@ void sseditor::on_cutbutton_clicked() {
 
 void sseditor::on_copybutton_clicked() {
     copystack = selection;
-    copypos   = static_cast<int>(pvscrollbar->get_value());
+    copypos   = get_scroll();
     update();
 }
 
 void sseditor::on_pastebutton_clicked() {
-    int maxpos = static_cast<int>(endpos) - 1;
-    int delta  = static_cast<int>(pvscrollbar->get_value()) - copypos;
+    int maxpos = endpos - 1;
+    int delta  = get_scroll() - copypos;
 
     selection.clear();
     for (auto const& elem : copystack) {
@@ -200,7 +200,7 @@ void sseditor::on_pastebutton_clicked() {
         }
 
         int newseg = static_cast<int>(find_segment(newpos));
-        int newy   = newpos - static_cast<int>(segpos[newseg]);
+        int newy   = newpos - segpos[newseg];
         selection.emplace(newseg, elem.get_angle(), newy, elem.get_type());
     }
 

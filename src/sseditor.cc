@@ -35,7 +35,7 @@ size_t sseditor::get_current_segment() const {
     return find_segment(pos);
 }
 
-size_t sseditor::find_segment(size_t pos) const {
+size_t sseditor::find_segment(int pos) const {
     auto   it  = lower_bound(segpos.begin(), segpos.end(), pos);
     size_t seg = size_t(it - segpos.begin());
     if (*it == pos) {
@@ -98,10 +98,11 @@ bool sseditor::move_object(int dx, int dy) {
             cnt--;
         }
 
-        int pos = (newy + segpos[oldseg]) * IMAGE_SIZE,
-            loc = pvscrollbar->get_value() * IMAGE_SIZE;
+        int pos = (newy + segpos[oldseg]) * SIMAGE_SIZE;
+        int loc = get_scroll() * SIMAGE_SIZE;
         if (pos < loc || pos >= loc + draw_height) {
-            pvscrollbar->set_value(pos / IMAGE_SIZE);
+            int newpos = pos / SIMAGE_SIZE;
+            pvscrollbar->set_value(newpos);
         }
 
         temp.emplace(elem.get_segment(), newx, newy, elem.get_type());
@@ -114,7 +115,7 @@ bool sseditor::move_object(int dx, int dy) {
     return true;
 }
 
-void sseditor::cleanup_render(Cairo::RefPtr<Cairo::Context> cr) {
+void sseditor::cleanup_render(Cairo::RefPtr<Cairo::Context> const& cr) {
     if (drawimg) {
         drawimg->unreference();
     }
@@ -135,8 +136,8 @@ void sseditor::draw_objects(
             Glib::RefPtr<Gdk::Pixbuf> image =
                 (elem.second == sssegments::eBomb) ? bombimg : ringimg;
 
-            int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE,
-                tx = angle_to_x(elem.first) - image->get_width() / 2;
+            int ty = (i - get_scroll()) * SIMAGE_SIZE;
+            int tx = angle_to_x(elem.first) - image->get_width() / 2;
             Gdk::Cairo::set_source_pixbuf(cr, image, tx, ty);
             cr->paint();
         }
@@ -151,34 +152,35 @@ bool sseditor::want_checkerboard(int row, int seg, sssegments* currseg) {
             (row - segpos[seg]) == currseg->get_length() - 1);
 }
 
-void sseditor::draw_balls(Cairo::RefPtr<Cairo::Context> cr, int ty) {
+void sseditor::draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty) {
     for (int iangle = 0; iangle < 3; iangle++) {
-        double angle = (iangle * 64.0) / 3.0;
+        double angle  = (iangle * 64.0) / 3.0;
+        int    mangle = static_cast<int>(angle);
         cr->set_source_rgb(180.0 / 256.0, 108.0 / 256.0, 36.0 / 256.0);
         cr->arc(
-            angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
+            angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
             0.0, 2.0 * G_PI);
         cr->begin_new_sub_path();
         cr->arc(
-            angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
+            angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
             0.0, 2.0 * G_PI);
         cr->fill();
         cr->set_source_rgb(216.0 / 256.0, 144.0 / 256.0, 36.0 / 256.00);
         cr->arc(
-            angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty - 1.5,
+            angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty - 1.5,
             HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
         cr->begin_new_sub_path();
         cr->arc(
-            angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty - 1.5,
+            angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty - 1.5,
             HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
         cr->fill();
         cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
         cr->arc(
-            angle_to_x(angle + 0x80) + HALF_IMAGE_SIZE, ty - 3.0,
+            angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty - 3.0,
             HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
         cr->begin_new_sub_path();
         cr->arc(
-            angle_to_x(0x00 - angle) - HALF_IMAGE_SIZE, ty - 3.0,
+            angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty - 3.0,
             HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
         cr->fill();
     }
@@ -202,8 +204,8 @@ void sseditor::render() {
         return;
     }
 
-    int start    = pvscrollbar->get_value(),
-        end      = start + (draw_height + IMAGE_SIZE - 1) / IMAGE_SIZE;
+    int start    = get_scroll();
+    int end      = start + (draw_height + SIMAGE_SIZE - 1) / SIMAGE_SIZE;
     int last_seg = -1;
 
     cr->set_source_rgb(36.0 / 256.0, 108.0 / 256.0, 144.0 / 256.0);
@@ -236,7 +238,7 @@ void sseditor::render() {
             break;
         }
 
-        int ty = (ii - pvscrollbar->get_value()) * IMAGE_SIZE;
+        int ty = (ii - get_scroll()) * SIMAGE_SIZE;
         if ((ii + 1) % 4 == 0) {
             cr->set_line_width(HALF_IMAGE_SIZE);
             cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
@@ -288,9 +290,9 @@ void sseditor::render() {
             last_seg = seg;
             cr->set_line_width(4.0);
             cr->set_source_rgb(1.0, 1.0, 1.0);
-            int ty = (segpos[seg] - pvscrollbar->get_value()) * IMAGE_SIZE;
-            cr->move_to(0, ty);
-            cr->line_to(draw_width, ty);
+            int my = (segpos[seg] - get_scroll()) * SIMAGE_SIZE;
+            cr->move_to(0, my);
+            cr->line_to(draw_width, my);
             cr->stroke();
         }
     }
@@ -299,25 +301,26 @@ void sseditor::render() {
     cleanup_render(cr);
 }
 
-void sseditor::draw_box(Cairo::RefPtr<Cairo::Context> cr) {
+void sseditor::draw_box(Cairo::RefPtr<Cairo::Context> const& cr) {
     if (mode == eDeleteMode) {
         cr->set_line_width(2.0);
         cr->set_source_rgb(1.0, 0.0, 0.0);
         draw_x(hotstack, cr);
     }
-    int tx0 = angle_to_x(lastclick.get_angle()),
-        ty0 = get_obj_pos<int>(lastclick);
-    int tx1 = angle_to_x(boxcorner.get_angle()),
-        ty1 = get_obj_pos<int>(boxcorner);
-    int dx = tx1 - tx0, dy = ty1 - ty0;
+    int tx0 = angle_to_x(lastclick.get_angle());
+    int ty0 = get_obj_pos<int>(lastclick);
+    int tx1 = angle_to_x(boxcorner.get_angle());
+    int ty1 = get_obj_pos<int>(boxcorner);
+    int dx  = tx1 - tx0;
+    int dy  = ty1 - ty0;
     if (dx < 0) {
         swap(tx0, tx1);
     }
     if (dy < 0) {
         swap(ty0, ty1);
     }
-    ty0 -= pvscrollbar->get_value();
-    ty1 -= pvscrollbar->get_value();
+    ty0 -= get_scroll();
+    ty1 -= get_scroll();
     ty0 *= IMAGE_SIZE;
     ty1 *= IMAGE_SIZE;
     ty1 += IMAGE_SIZE;
@@ -339,8 +342,8 @@ void sseditor::draw_box(Cairo::RefPtr<Cairo::Context> cr) {
 
 void sseditor::select_hotspot() {
     hotspot.reset();
-    int start = pvscrollbar->get_value(),
-        end   = start + (draw_height + IMAGE_SIZE - 1) / IMAGE_SIZE;
+    int start = get_scroll();
+    int end   = start + (draw_height + SIMAGE_SIZE - 1) / SIMAGE_SIZE;
 
     for (int i = start; i <= end && !hotspot.valid(); i++) {
         int         seg     = find_segment(i);
@@ -351,9 +354,9 @@ void sseditor::select_hotspot() {
 
         auto const& row = currseg->get_row(i - segpos[seg]);
         for (auto const& elem : row) {
-            int ty = (i - pvscrollbar->get_value()) * IMAGE_SIZE,
-                tx = angle_to_x(static_cast<int8_t>(elem.first)) -
-                     HALF_IMAGE_SIZE;
+            int ty = (i - get_scroll()) * SIMAGE_SIZE;
+            int tx =
+                angle_to_x(static_cast<int8_t>(elem.first)) - HALF_IMAGE_SIZE;
 
             if (mouse_x >= tx && mouse_y >= ty &&
                 mouse_x < tx + static_cast<int>(IMAGE_SIZE) &&
@@ -396,8 +399,7 @@ void sseditor::show() {
             cr->set_source_rgb(1.0, 1.0, 0.0);
             cr->set_line_width(2.0);
             int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
-            int ty = (get_obj_pos<int>(hotspot) - pvscrollbar->get_value()) *
-                     IMAGE_SIZE;
+            int ty = (get_obj_pos<int>(hotspot) - get_scroll()) * SIMAGE_SIZE;
             cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
             cr->stroke();
         }
@@ -411,9 +413,8 @@ void sseditor::show() {
         if (drawbox) {
             draw_box(cr);
         } else if (hotspot.valid()) {
-            int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
-            int ty = (get_obj_pos<int>(hotspot) - pvscrollbar->get_value()) *
-                     IMAGE_SIZE;
+            int  tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
+            auto ty = (get_obj_pos<int>(hotspot) - get_scroll()) * SIMAGE_SIZE;
             cr->set_line_width(2.0);
             cr->set_source_rgb(1.0, 0.0, 0.0);
             cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
@@ -501,8 +502,8 @@ bool sseditor::on_specialstageobjs_button_press_event(GdkEventButton* event) {
     if (event->button != GDK_BUTTON_LEFT) {
         return true;
     }
-    int pos = event->y / IMAGE_SIZE + pvscrollbar->get_value(),
-        seg = find_segment(pos);
+    int pos = static_cast<int>(event->y) / SIMAGE_SIZE + get_scroll();
+    int seg = find_segment(pos);
     lastclick.set(
         seg, x_to_angle(event->x, true), pos - segpos[seg], sssegments::eRing);
 

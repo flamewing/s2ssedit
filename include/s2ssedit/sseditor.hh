@@ -48,6 +48,7 @@
 #define GDK_BUTTON_RIGHT 3
 #pragma GCC diagnostic pop
 
+#define SIMAGE_SIZE 16
 #define IMAGE_SIZE 16U
 #define HALF_IMAGE_SIZE 8
 #define QUARTER_IMAGE_SIZE 4
@@ -153,9 +154,9 @@ private:
 
     std::deque<std::shared_ptr<abstract_action>> undostack, redostack;
 
-    std::vector<size_t> segpos;
+    std::vector<int> segpos;
 
-    size_t endpos;
+    int endpos;
 
     // GUI variables.
     Gtk::Window*               main_win;
@@ -224,14 +225,14 @@ private:
     }
     double get_obj_y(const object& obj) {
         return (get_obj_pos<double>(obj) - pvscrollbar->get_value()) *
-               IMAGE_SIZE;
+               SIMAGE_SIZE;
     }
     void draw_outlines(
         std::set<object>& col, Cairo::RefPtr<Cairo::Context> const& cr) {
         for (auto const& elem : col) {
             auto tx = get_obj_x(elem);
             auto ty = get_obj_y(elem);
-            cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
+            cr->rectangle(tx, ty, SIMAGE_SIZE, SIMAGE_SIZE);
             cr->stroke();
         }
     }
@@ -244,7 +245,7 @@ private:
             }
             auto tx = get_obj_x(elem);
             auto ty = get_obj_y(elem);
-            cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
+            cr->rectangle(tx, ty, SIMAGE_SIZE, SIMAGE_SIZE);
             cr->stroke();
         }
     }
@@ -253,11 +254,11 @@ private:
         for (auto const& elem : col1) {
             auto tx = get_obj_x(elem);
             auto ty = get_obj_y(elem);
-            cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
+            cr->rectangle(tx, ty, SIMAGE_SIZE, SIMAGE_SIZE);
             cr->move_to(tx, ty);
-            cr->line_to(tx + IMAGE_SIZE, ty + IMAGE_SIZE);
-            cr->move_to(tx + IMAGE_SIZE, ty);
-            cr->line_to(tx, ty + IMAGE_SIZE);
+            cr->line_to(tx + SIMAGE_SIZE, ty + SIMAGE_SIZE);
+            cr->move_to(tx + SIMAGE_SIZE, ty);
+            cr->line_to(tx, ty + SIMAGE_SIZE);
             cr->stroke();
         }
     }
@@ -284,7 +285,7 @@ private:
         bool fill, std::set<object>& col);
     void   update_segment_positions(bool setpos);
     size_t get_current_segment() const;
-    size_t find_segment(size_t pos) const;
+    size_t find_segment(int pos) const;
     void   goto_segment(unsigned seg) {
         currsegment = seg;
         pvscrollbar->set_value(segpos[seg]);
@@ -295,13 +296,19 @@ private:
         redostack.clear();
         auto        act = std::make_shared<Act>(std::forward<Args>(args)...);
         MergeResult ret;
-        if (undostack.empty() || (ret = undostack.front()->merge(act)) ==
-                                     abstract_action::eNoMerge) {
+        if (undostack.empty()) {
+            undostack.push_front(act);
+        } else if (
+            (ret = undostack.front()->merge(act)) ==
+            abstract_action::eNoMerge) {
             undostack.push_front(act);
         } else if (ret == abstract_action::eDeleteAction) {
             undostack.pop_front();
         }
         act->apply(specialstages, static_cast<std::set<object>*>(nullptr));
+    }
+    int get_scroll() const {
+        return static_cast<int>(pvscrollbar->get_value());
     }
 
 public:
@@ -353,8 +360,9 @@ public:
     void on_snapgridbutton_toggled() {
         snaptogrid = psnapgridbutton->get_active();
     }
-    bool want_snap_to_grid(guint state) const noexcept {
-        return snaptogrid != (state & GDK_CONTROL_MASK);
+    bool want_snap_to_grid(guint istate) const noexcept {
+        return static_cast<unsigned int>(snaptogrid) !=
+               (istate & GDK_CONTROL_MASK);
     }
     void on_helpdialog_response(int response_id);
     void on_helpbutton_clicked();
@@ -521,7 +529,7 @@ private:
         case eDeleteMode:
             mode = eSelectMode;
             break;
-        default:
+        case eNumModes:
             __builtin_unreachable();
         }
     }
@@ -539,7 +547,7 @@ private:
         case eDeleteMode:
             mode = eInsertBombMode;
             break;
-        default:
+        case eNumModes:
             __builtin_unreachable();
         }
     }
@@ -570,7 +578,7 @@ private:
         case eTriangle:
             ins = eSingle;
             break;
-        default:
+        case eNumInsertModes:
             __builtin_unreachable();
         }
     }
@@ -600,16 +608,16 @@ private:
         case eTriangle:
             ins = eStar;
             break;
-        default:
+        case eNumInsertModes:
             __builtin_unreachable();
         }
     }
 
-    void cleanup_render(Cairo::RefPtr<Cairo::Context> cr);
+    void cleanup_render(Cairo::RefPtr<Cairo::Context> const& cr);
     void draw_objects(Cairo::RefPtr<Cairo::Context> cr, int start, int end);
-    void draw_balls(Cairo::RefPtr<Cairo::Context> cr, int ty);
+    void draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty);
     bool want_checkerboard(int row, int seg, sssegments* currseg);
-    void draw_box(Cairo::RefPtr<Cairo::Context> cr);
+    void draw_box(Cairo::RefPtr<Cairo::Context> const& cr);
     void select_hotspot();
     void fix_stage(unsigned numstages) {
         if (numstages == 0) {
@@ -633,9 +641,10 @@ private:
             return pcheckpoint;
         case sssegments::eChaosEmerald:
             return pchaos_emerald;
-        default:
+        case sssegments::eNormalSegment:
             return pnormal_segment;
         }
+        __builtin_unreachable();
     }
     Gtk::RadioButton* geometry_button(sssegments::SegmentGeometry type) {
         switch (type) {
@@ -647,9 +656,10 @@ private:
             return psegment_straight;
         case sssegments::eStraightThenTurn:
             return psegment_straightthenturn;
-        default:
+        case sssegments::eTurnThenRise:
             return psegment_turnthenrise;
         }
+        __builtin_unreachable();
     }
     Gtk::RadioButton* direction_button(bool dir) {
         return dir ? psegment_left : psegment_right;
@@ -667,10 +677,12 @@ private:
         return std::pair<size_t, size_t>{nrings, nbombs};
     }
     std::pair<int, int> get_motion_loc(GdkEventMotion* event) {
-        int angle, pos;
+        int angle;
+        int pos;
         if (!hotspot.valid()) {
             angle = x_to_angle(event->x, want_snap_to_grid(state), 4U);
-            pos   = event->y / IMAGE_SIZE + pvscrollbar->get_value();
+            pos   = static_cast<int>(
+                event->y / SIMAGE_SIZE + pvscrollbar->get_value());
         } else {
             angle = hotspot.get_angle();
             pos   = get_obj_pos<int>(hotspot);
@@ -685,8 +697,7 @@ private:
         return std::pair<ObjectTypes, InsertModes>{sssegments::eRing, ringmode};
     }
 
-    void
-         motion_update_select_insert(GdkEventMotion* event);
+    void motion_update_select_insert(GdkEventMotion* event);
     void motion_update_selection(
         int dangle, int dpos, int pos0, int pos1, int angle0, int angle1);
     void motion_update_insertion(
