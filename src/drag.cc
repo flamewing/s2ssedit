@@ -433,7 +433,7 @@ void sseditor::motion_update_insertion(
     }
 
     const int angledelta =
-        motion_compute_angledelta(dpos, submode, grid, r dangle);
+        motion_compute_angledelta(dpos, submode, grid, dangle);
 
     switch (submode) {
     case eLine:
