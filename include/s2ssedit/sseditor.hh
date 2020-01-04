@@ -715,6 +715,11 @@ private:
     void motion_update_diamond(
         int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
         int angledelta);
+    void motion_update_star_lozenge(
+        int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+        int angledelta, bool fill);
+    int motion_compute_angledelta(
+        int dpos, InsertModes submode, bool grid, int angledelta);
     void scroll_into_view(GdkEventMotion* event);
 
 protected:

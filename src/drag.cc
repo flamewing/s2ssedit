@@ -390,6 +390,32 @@ void sseditor::motion_update_diamond(
     }
 }
 
+void sseditor::motion_update_star_lozenge(
+    int dpos, int pos0, int pos1, int angle0, ObjectTypes type, int angledelta,
+    bool fill) {
+    int off0 = dpos >= 0;
+    int off1 = dpos < 0;
+    object_triangle(
+        angle0, pos0, angledelta, sigplus(dpos), (dpos + off0) / 2, type, fill,
+        insertstack);
+    object_triangle(
+        angle0, pos1, angledelta, -sigplus(dpos), (-dpos + off1) / 2, type,
+        fill, insertstack);
+}
+
+int sseditor::motion_compute_angledelta(
+    int dpos, InsertModes submode, bool grid, int angledelta) {
+    if (submode == eLine) {
+        angledelta /= abs(dpos);
+    }
+    if (grid) {
+        angledelta += 3 * sigplus(angledelta);
+        angledelta /= 4;
+        angledelta *= 4;
+    }
+    return angledelta;
+}
+
 void sseditor::motion_update_insertion(
     int dangle, int dpos, int pos0, int pos1, int angle0, int angle1, bool grid,
     bool lbutton_pressed) {
@@ -406,15 +432,8 @@ void sseditor::motion_update_insertion(
         return;
     }
 
-    int angledelta = dangle;
-    if (submode == eLine) {
-        angledelta /= abs(dpos);
-    }
-    if (grid) {
-        angledelta += 3 * sigplus(angledelta);
-        angledelta /= 4;
-        angledelta *= 4;
-    }
+    const int angledelta =
+        motion_compute_angledelta(dpos, submode, grid, r dangle);
 
     switch (submode) {
     case eLine:
@@ -431,25 +450,17 @@ void sseditor::motion_update_insertion(
         break;
     case eLozenge:
     case eStar: {
-        bool fill = submode == eLozenge;
-        angledelta =
-            clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
-        int off0 = static_cast<int>(dpos >= 0);
-        int off1 = static_cast<int>(dpos < 0);
-        object_triangle(
-            angle0, pos0, angledelta, sigplus(dpos), (dpos + off0) / 2, type,
-            fill, insertstack);
-        object_triangle(
-            angle0, pos1, angledelta, -sigplus(dpos), (-dpos + off1) / 2, type,
-            fill, insertstack);
+        motion_update_star_lozenge(
+            dpos, pos0, pos1, angle0, type,
+            clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE),
+            submode == eLozenge);
         break;
     }
     case eTriangle:
-        angledelta =
-            clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE);
         object_triangle(
-            angle0, pos1, angledelta, -sigplus(dpos), -dpos, type, true,
-            insertstack);
+            angle0, pos1,
+            clamp(abs(angledelta), QUARTER_IMAGE_SIZE, HALF_IMAGE_SIZE),
+            -sigplus(dpos), -dpos, type, true, insertstack);
         break;
     case eSingle:
     case eNumInsertModes:
