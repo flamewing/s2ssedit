@@ -29,6 +29,8 @@ AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
+	-I$(srcdir)/../include \
+	-I$(srcdir)/../mdcomp/include \
 	$(S2SSEDIT_CFLAGS)
 
 bin_PROGRAMS = s2ssedit
@@ -43,8 +45,6 @@ s2ssedit_SOURCES = \
 	ssobjfile.cc
 
 s2ssedit_CXXFLAGS = \
-	-I$(srcdir)/../include \
-	-I$(srcdir)/../mdcomp/include \
 	$(EXTRA_FLAGS)
 
 s2ssedit_LDFLAGS = -lkosinski -lnemesis
