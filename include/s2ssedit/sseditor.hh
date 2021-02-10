@@ -56,13 +56,13 @@
 constexpr const int32_t center_x    = 0x40;
 constexpr const int32_t right_angle = 0x80;
 
-inline int32_t angle_simple(int angle) { return (angle + center_x) & 0xff; }
+inline int32_t angle_simple(int angle) { return (angle + center_x) % 256; }
 
 inline int32_t angle_normal(int angle) {
-    return (angle + center_x + right_angle) & 0xff;
+    return (angle + center_x + right_angle) % 256;
 }
 
-inline int angle_to_x(int angle) { return ((angle + center_x) & 0xff) * 2 + 4; }
+inline int angle_to_x(int angle) { return ((angle + center_x) % 256) * 2 + 4; }
 
 inline uint8_t x_to_angle(int32_t x, bool constrain, int32_t snapoff = 0U) {
     int32_t angle = x + (x % 2) - 4;

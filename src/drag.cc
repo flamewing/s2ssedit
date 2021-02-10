@@ -223,7 +223,7 @@ void sseditor::object_triangle(
         int tx;
         if (fill) {
             int const cnt    = (2 * delta) / HALF_IMAGE_SIZE;
-            int const middle = static_cast<int>((cnt & 1) == 0);
+            int const middle = static_cast<int>((cnt % 2) == 0);
             int const dj     = 8 * delta;
             int const min    = middle != 0 ? cnt * SIMAGE_SIZE : 0;
             if (middle != 0) {
