@@ -56,7 +56,7 @@ using std::to_string;
 
 int main(int argc, char* argv[]) {
     try {
-        sseditor Editor(argc, argv, UI_FILE);
+        sseditor Editor(make_shared<Gtk::Main>(argc, argv), UI_FILE);
         Editor.run();
     } catch (const Glib::FileError& ex) {
         cerr << ex.what() << endl;
@@ -65,13 +65,14 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-sseditor::sseditor(int argc, char* argv[], char const* uifile)
+sseditor::sseditor(std::shared_ptr<Gtk::Main>&& application, char const* uifile)
     : update_in_progress(false), dragging(false), drop_enabled(false),
       currstage(0), currsegment(0), draw_width(0), draw_height(0), mouse_x(0),
       mouse_y(0), state(0), mode(eSelectMode), ringmode(eSingle),
       bombmode(eSingle), copypos(0), drawbox(false), snaptogrid(true),
-      endpos(0), main_win(nullptr), helpdlg(nullptr), aboutdlg(nullptr),
-      filedlg(nullptr), pspecialstageobjs(nullptr), pmodenotebook(nullptr),
+      endpos(0), main_win(nullptr), kit(std::move(application)),
+      helpdlg(nullptr), aboutdlg(nullptr), filedlg(nullptr),
+      pspecialstageobjs(nullptr), pmodenotebook(nullptr),
       plabelcurrentstage(nullptr), plabeltotalstages(nullptr),
       plabelcurrentsegment(nullptr), plabeltotalsegments(nullptr),
       plabelcurrsegrings(nullptr), plabelcurrsegbombs(nullptr),
@@ -104,8 +105,6 @@ sseditor::sseditor(int argc, char* argv[], char const* uifile)
       psegment_left(nullptr), pobject_expander(nullptr), pmoveup(nullptr),
       pmovedown(nullptr), pmoveleft(nullptr), pmoveright(nullptr),
       pringtype(nullptr), pbombtype(nullptr) {
-    kit = make_shared<Gtk::Main>(argc, argv);
-
     ringimg = Gdk::Pixbuf::create_from_file(RINGFILE);
     bombimg = Gdk::Pixbuf::create_from_file(BOMBFILE);
 

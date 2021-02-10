@@ -313,7 +313,7 @@ private:
     }
 
 public:
-    sseditor(int argc, char* argv[], char const* uifile);
+    sseditor(std::shared_ptr<Gtk::Main>&& application, char const* uifile);
 
     void run();
 
