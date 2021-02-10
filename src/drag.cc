@@ -393,8 +393,8 @@ void sseditor::motion_update_diamond(
 void sseditor::motion_update_star_lozenge(
     int dpos, int pos0, int pos1, int angle0, ObjectTypes type, int angledelta,
     bool fill) {
-    int off0 = dpos >= 0;
-    int off1 = dpos < 0;
+    int off0 = static_cast<int>(dpos >= 0);
+    int off1 = static_cast<int>(dpos < 0);
     object_triangle(
         angle0, pos0, angledelta, sigplus(dpos), (dpos + off0) / 2, type, fill,
         insertstack);

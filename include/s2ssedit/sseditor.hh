@@ -216,10 +216,11 @@ private:
     Gtk::Button *     pmoveup, *pmovedown, *pmoveleft, *pmoveright;
     Gtk::RadioButton *pringtype, *pbombtype;
 
-    bool   move_object(int dx, int dy);
-    void   render();
-    void   show();
-    double get_obj_x(const object& obj) {
+    bool move_object(int dx, int dy);
+    void render();
+    void show();
+
+    static double get_obj_x(const object& obj) {
         return static_cast<double>(
             angle_to_x(obj.get_angle()) - HALF_IMAGE_SIZE);
     }
@@ -294,16 +295,16 @@ private:
     void do_action(Args&&... args) {
         using MergeResult = abstract_action::MergeResult;
         redostack.clear();
-        auto        act = std::make_shared<Act>(std::forward<Args>(args)...);
-        MergeResult ret;
+        auto act = std::make_shared<Act>(std::forward<Args>(args)...);
         if (undostack.empty()) {
             undostack.push_front(act);
-        } else if (
-            (ret = undostack.front()->merge(act)) ==
-            abstract_action::eNoMerge) {
-            undostack.push_front(act);
-        } else if (ret == abstract_action::eDeleteAction) {
-            undostack.pop_front();
+        } else {
+            const MergeResult ret = undostack.front()->merge(act);
+            if (ret == abstract_action::eNoMerge) {
+                undostack.push_front(act);
+            } else if (ret == abstract_action::eDeleteAction) {
+                undostack.pop_front();
+            }
         }
         act->apply(specialstages, static_cast<std::set<object>*>(nullptr));
     }
@@ -334,7 +335,7 @@ public:
     void on_specialstageobjs_drag_data_delete(
         Glib::RefPtr<Gdk::DragContext> const& context);
     void
-         on_specialstageobjs_drag_end(Glib::RefPtr<Gdk::DragContext> const& context);
+    on_specialstageobjs_drag_end(Glib::RefPtr<Gdk::DragContext> const& context);
     bool on_drag_motion(
         Glib::RefPtr<Gdk::DragContext> const& context, int x, int y,
         guint time);
@@ -552,7 +553,7 @@ private:
         }
     }
 
-    void increment_insertmode(InsertModes& ins) {
+    static void increment_insertmode(InsertModes& ins) {
         switch (ins) {
         case eSingle:
             ins = eLine;
@@ -582,7 +583,7 @@ private:
             __builtin_unreachable();
         }
     }
-    void decrement_insertmode(InsertModes& ins) {
+    static void decrement_insertmode(InsertModes& ins) {
         switch (ins) {
         case eSingle:
             ins = eTriangle;
@@ -613,9 +614,10 @@ private:
         }
     }
 
+    static void draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty);
+
     void cleanup_render(Cairo::RefPtr<Cairo::Context> const& cr);
     void draw_objects(Cairo::RefPtr<Cairo::Context> cr, int start, int end);
-    void draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty);
     bool want_checkerboard(int row, int seg, sssegments* currseg);
     void draw_box(Cairo::RefPtr<Cairo::Context> const& cr);
     void select_hotspot();
@@ -664,7 +666,7 @@ private:
     Gtk::RadioButton* direction_button(bool dir) {
         return dir ? psegment_left : psegment_right;
     }
-    std::pair<size_t, size_t> count_objects(std::set<object>& objs) {
+    static std::pair<size_t, size_t> count_objects(std::set<object>& objs) {
         size_t nrings = 0;
         size_t nbombs = 0;
         for (auto const& elem : objs) {
@@ -691,8 +693,8 @@ private:
     }
     std::pair<ObjectTypes, InsertModes> get_obj_type() const noexcept {
         if (mode == eInsertBombMode) {
-            return std::pair<ObjectTypes, InsertModes>{sssegments::eBomb,
-                                                       bombmode};
+            return std::pair<ObjectTypes, InsertModes>{
+                sssegments::eBomb, bombmode};
         }
         return std::pair<ObjectTypes, InsertModes>{sssegments::eRing, ringmode};
     }
@@ -718,9 +720,10 @@ private:
     void motion_update_star_lozenge(
         int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
         int angledelta, bool fill);
-    int motion_compute_angledelta(
-        int dpos, InsertModes submode, bool grid, int angledelta);
     void scroll_into_view(GdkEventMotion* event);
+
+    static int motion_compute_angledelta(
+        int dpos, InsertModes submode, bool grid, int angledelta);
 
 protected:
     void update();

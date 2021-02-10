@@ -319,8 +319,8 @@ private:
     unsigned   stage, seg;
 
 public:
-    delete_segment_action(int s, int sg, sssegments const& sgm)
-        : segment(sgm), stage(s), seg(sg) {}
+    delete_segment_action(int s, int sg, sssegments sgm)
+        : segment(std::move(sgm)), stage(s), seg(sg) {}
     void apply(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
         if (seg >= currlvl->num_segments()) {
