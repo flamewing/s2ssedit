@@ -266,5 +266,6 @@ AC_SUBST(ICON_FILE)
 AC_OUTPUT([
 Makefile
 src/Makefile
+src/lib/Makefile
 ])
 

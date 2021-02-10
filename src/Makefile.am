@@ -1,3 +1,5 @@
+SUBDIRS = lib
+
 uidir = $(datadir)/s2ssedit/ui
 ui_DATA = s2ssedit.ui \
 	phoenix.png \
@@ -27,10 +29,10 @@ ui_DATA = s2ssedit.ui \
 
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
-	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
+	-DPACKAGE_SRC_DIR=\""$(abs_top_srcdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
-	-I$(srcdir)/../include \
-	-I$(srcdir)/../mdcomp/include \
+	-I$(abs_top_srcdir)/include \
+	-I$(abs_top_srcdir)/mdcomp/include \
 	$(S2SSEDIT_CFLAGS)
 
 bin_PROGRAMS = s2ssedit
@@ -50,20 +52,20 @@ s2ssedit_CXXFLAGS = \
 s2ssedit_LDFLAGS = -lkosinski -lnemesis
 
 if BUILD_ICON
-s2ssedit_DEPENDENCIES = $(builddir)/$(ICON_FILE)
-s2ssedit_LDADD = $(S2SSEDIT_LIBS) $(builddir)/$(ICON_FILE)
+s2ssedit_DEPENDENCIES = $(abs_top_builddir)/$(ICON_FILE)
+s2ssedit_LDADD = $(S2SSEDIT_LIBS) $(abs_top_builddir)/$(ICON_FILE)
 else !BUILD_ICON
 s2ssedit_DEPENDENCIES = $(ICON_FILE)
 s2ssedit_LDADD = $(S2SSEDIT_LIBS)
 endif
-s2ssedit_LDADD += -L$(srcdir)/../mdcomp/src/lib/.libs
+s2ssedit_LDADD += -L$(abs_top_srcdir)/mdcomp/src/lib/.libs
 
 EXTRA_DIST = $(ui_DATA)
 
 AM_CXXFLAGS =
 
-$(builddir)/s2sseditico.o: $(srcdir)/ssedit.rc $(srcdir)/s2ssedit.ico
-	windres --include-dir $(srcdir) $(srcdir)/ssedit.rc $(builddir)/s2sseditico.o
+$(abs_top_builddir)/s2sseditico.o: $(abs_top_srcdir)/src/ssedit.rc $(abs_top_srcdir)/src/s2ssedit.ico
+	windres --include-dir $(abs_top_srcdir)/src $(abs_top_srcdir)/src/ssedit.rc $(abs_top_builddir)/s2sseditico.o
 
 # Remove ui directory on uninstall
 uninstall-local:
