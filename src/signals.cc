@@ -32,7 +32,6 @@ void sseditor::on_vscrollbar_value_changed() {
         return;
     }
     currsegment = get_current_segment();
-    render();
     update();
 }
 
@@ -58,7 +57,6 @@ void sseditor::on_filedialog_response(int response_id) {
         sourcestack.clear();
         currstage = currsegment = 0;
         update_segment_positions(true);
-        render();
         update();
     }
     filedlg->hide();
@@ -101,7 +99,6 @@ void sseditor::on_revertfilebutton_clicked() {
     specialstages->read();
     currstage = currsegment = 0;
     update_segment_positions(true);
-    render();
     update();
 }
 
@@ -122,7 +119,6 @@ void sseditor::on_undobutton_clicked() {
         goto_segment(segpos.size() - 1);
     }
 
-    render();
     update();
 }
 
@@ -143,7 +139,6 @@ void sseditor::on_redobutton_clicked() {
         goto_segment(segpos.size() - 1);
     }
 
-    render();
     update();
 }
 
@@ -176,7 +171,6 @@ void sseditor::on_cutbutton_clicked() {
     copypos   = get_scroll();
     do_action<cut_selection_action>(currstage, copystack);
     selection.clear();
-    render();
     update();
 }
 
@@ -205,13 +199,11 @@ void sseditor::on_pastebutton_clicked() {
     }
 
     do_action<paste_objects_action>(currstage, selection);
-    render();
     update();
 }
 
 void sseditor::on_deletebutton_clicked() {
     delete_set(selection);
-    render();
     update();
 }
 
@@ -221,7 +213,6 @@ void sseditor::on_first_stage_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -232,7 +223,6 @@ void sseditor::on_previous_stage_button_clicked() {
         if (currsegment >= segpos.size()) {
             goto_segment(segpos.size() - 1);
         }
-        render();
         update();
     }
 }
@@ -244,7 +234,6 @@ void sseditor::on_next_stage_button_clicked() {
         if (currsegment >= segpos.size()) {
             goto_segment(segpos.size() - 1);
         }
-        render();
         update();
     }
 }
@@ -255,7 +244,6 @@ void sseditor::on_last_stage_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -265,7 +253,6 @@ void sseditor::on_insert_stage_before_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -276,7 +263,6 @@ void sseditor::on_append_stage_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -291,7 +277,6 @@ void sseditor::on_cut_stage_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -311,7 +296,6 @@ void sseditor::on_paste_stage_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -325,7 +309,6 @@ void sseditor::on_delete_stage_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -338,7 +321,6 @@ void sseditor::on_swap_stage_prev_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -351,20 +333,17 @@ void sseditor::on_swap_stage_next_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
 void sseditor::on_first_segment_button_clicked() {
     goto_segment(0);
-    render();
     update();
 }
 
 void sseditor::on_previous_segment_button_clicked() {
     if (currsegment > 0) {
         goto_segment(currsegment - 1);
-        render();
         update();
     }
 }
@@ -372,21 +351,18 @@ void sseditor::on_previous_segment_button_clicked() {
 void sseditor::on_next_segment_button_clicked() {
     if (currsegment + 1 < segpos.size()) {
         goto_segment(currsegment + 1);
-        render();
         update();
     }
 }
 
 void sseditor::on_last_segment_button_clicked() {
     goto_segment(segpos.size() - 1);
-    render();
     update();
 }
 
 void sseditor::on_insert_segment_before_button_clicked() {
     do_action<insert_segment_action>(currstage, currsegment, sssegments());
     update_segment_positions(true);
-    render();
     update();
 }
 
@@ -395,7 +371,6 @@ void sseditor::on_append_segment_button_clicked() {
     do_action<insert_segment_action>(currstage, cs, sssegments());
     update_segment_positions(false);
     goto_segment(segpos.size() - 1);
-    render();
     update();
 }
 
@@ -408,7 +383,6 @@ void sseditor::on_cut_segment_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -426,7 +400,6 @@ void sseditor::on_paste_segment_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -438,7 +411,6 @@ void sseditor::on_delete_segment_button_clicked() {
     if (currsegment >= segpos.size()) {
         goto_segment(segpos.size() - 1);
     }
-    render();
     update();
 }
 
@@ -448,7 +420,6 @@ void sseditor::on_swap_segment_prev_button_clicked() {
     assert(currsegment != 0);
     currsegment--;
     update_segment_positions(true);
-    render();
     update();
 }
 
@@ -458,6 +429,5 @@ void sseditor::on_swap_segment_next_button_clicked() {
     assert(currsegment + 1 < segpos.size());
     currsegment++;
     update_segment_positions(true);
-    render();
     update();
 }

@@ -110,7 +110,6 @@ bool sseditor::move_object(int dx, int dy) {
 
     do_action<move_objects_action>(currstage, selection, temp);
     selection.swap(temp);
-    render();
     update();
     return true;
 }
@@ -123,7 +122,7 @@ void sseditor::cleanup_render(Cairo::RefPtr<Cairo::Context> const& cr) {
 }
 
 void sseditor::draw_objects(
-    Cairo::RefPtr<Cairo::Context> cr, int start, int end) {
+    Cairo::RefPtr<Cairo::Context> const& cr, int start, int end) {
     for (int i = start; i <= end; i++) {
         int         seg     = find_segment(i);
         sssegments* currseg = get_segment(seg);
@@ -186,22 +185,13 @@ void sseditor::draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty) {
     }
 }
 
-void sseditor::render() {
-    Glib::RefPtr<Gdk::Window> window = pspecialstageobjs->get_window();
-
-    if (!window) {
-        return;
-    }
-
-    Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
-
-    cr->push_group();
+bool sseditor::on_specialstageobjs_expose_event(
+    const Cairo::RefPtr<Cairo::Context>& cr) {
     cr->set_source_rgb(0.0, 180.0 / 256.0, 216.0 / 256.0);
     cr->paint();
 
     if (!specialstages) {
-        cleanup_render(cr);
-        return;
+        return true;
     }
 
     int start    = get_scroll();
@@ -297,8 +287,49 @@ void sseditor::render() {
         }
     }
 
+    if (mode == eSelectMode) {
+        cr->set_source_rgb(0.0, 0.0, 0.0);
+        cr->set_line_width(2.0);
+        draw_outlines(selection, hotstack, cr);
+        draw_outlines(hotstack, selection, cr);
+        if (hotspot.valid()) {
+            cr->set_source_rgb(1.0, 1.0, 0.0);
+            cr->set_line_width(2.0);
+            int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
+            int ty = (get_obj_pos<int>(hotspot) - get_scroll()) * SIMAGE_SIZE;
+            cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
+            cr->stroke();
+        }
+        if (dragging) {
+            draw_objects(insertstack, cr);
+        }
+        if (drawbox) {
+            draw_box(cr);
+        }
+    } else if (mode == eDeleteMode) {
+        if (drawbox) {
+            draw_box(cr);
+        } else if (hotspot.valid()) {
+            int  tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
+            auto ty = (get_obj_pos<int>(hotspot) - get_scroll()) * SIMAGE_SIZE;
+            cr->set_line_width(2.0);
+            cr->set_source_rgb(1.0, 0.0, 0.0);
+            cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
+            cr->stroke();
+            cr->move_to(tx, ty);
+            cr->line_to(tx + IMAGE_SIZE, ty + IMAGE_SIZE);
+            cr->move_to(tx + IMAGE_SIZE, ty);
+            cr->line_to(tx, ty + IMAGE_SIZE);
+            cr->stroke();
+        }
+    } else if (mode == eInsertRingMode || mode == eInsertBombMode) {
+        cr->set_source_rgb(1.0, 1.0, 0.0);
+        cr->set_line_width(2.0);
+        draw_objects(insertstack, cr);
+    }
+
     draw_objects(cr, start, end);
-    cleanup_render(cr);
+    return true;
 }
 
 void sseditor::draw_box(Cairo::RefPtr<Cairo::Context> const& cr) {
@@ -369,73 +400,17 @@ void sseditor::select_hotspot() {
 }
 
 void sseditor::show() {
-    if (!drawimg) {
-        render();
-    }
-
     Glib::RefPtr<Gdk::Window> window = pspecialstageobjs->get_window();
-
     if (!window) {
         return;
     }
-
-    Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
-
-    cr->set_source(drawimg);
-    cr->paint();
 
     if (!specialstages) {
         return;
     }
 
     select_hotspot();
-
-    if (mode == eSelectMode) {
-        cr->set_source_rgb(0.0, 0.0, 0.0);
-        cr->set_line_width(2.0);
-        draw_outlines(selection, hotstack, cr);
-        draw_outlines(hotstack, selection, cr);
-        if (hotspot.valid()) {
-            cr->set_source_rgb(1.0, 1.0, 0.0);
-            cr->set_line_width(2.0);
-            int tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
-            int ty = (get_obj_pos<int>(hotspot) - get_scroll()) * SIMAGE_SIZE;
-            cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
-            cr->stroke();
-        }
-        if (dragging) {
-            draw_objects(insertstack, cr);
-        }
-        if (drawbox) {
-            draw_box(cr);
-        }
-    } else if (mode == eDeleteMode) {
-        if (drawbox) {
-            draw_box(cr);
-        } else if (hotspot.valid()) {
-            int  tx = angle_to_x(hotspot.get_angle()) - HALF_IMAGE_SIZE;
-            auto ty = (get_obj_pos<int>(hotspot) - get_scroll()) * SIMAGE_SIZE;
-            cr->set_line_width(2.0);
-            cr->set_source_rgb(1.0, 0.0, 0.0);
-            cr->rectangle(tx, ty, IMAGE_SIZE, IMAGE_SIZE);
-            cr->stroke();
-            cr->move_to(tx, ty);
-            cr->line_to(tx + IMAGE_SIZE, ty + IMAGE_SIZE);
-            cr->move_to(tx + IMAGE_SIZE, ty);
-            cr->line_to(tx, ty + IMAGE_SIZE);
-            cr->stroke();
-        }
-    } else if (mode == eInsertRingMode || mode == eInsertBombMode) {
-        cr->set_source_rgb(1.0, 1.0, 0.0);
-        cr->set_line_width(2.0);
-        draw_objects(insertstack, cr);
-    }
-}
-
-bool sseditor::on_specialstageobjs_expose_event(GdkEventExpose* event) {
-    ignore_unused_variable_warning(event);
-    show();
-    return true;
+    render();
 }
 
 static inline int get_angle_delta(bool grid) { return grid ? 4 : 1; }
@@ -475,7 +450,6 @@ bool sseditor::on_specialstageobjs_key_press_event(GdkEventKey* event) {
     case GDK_KEY_KP_Page_Up: {
         double delta = get_scroll_delta(event->state);
         pvscrollbar->set_value(pvscrollbar->get_value() - delta);
-        render();
         show();
         break;
     }
@@ -484,7 +458,6 @@ bool sseditor::on_specialstageobjs_key_press_event(GdkEventKey* event) {
     case GDK_KEY_KP_Page_Down: {
         double delta = get_scroll_delta(event->state);
         pvscrollbar->set_value(pvscrollbar->get_value() + delta);
-        render();
         show();
         break;
     }
@@ -499,7 +472,7 @@ bool sseditor::on_specialstageobjs_button_press_event(GdkEventButton* event) {
         return true;
     }
 
-    if (event->button != GDK_BUTTON_LEFT) {
+    if (event->button != GDK_BUTTON_PRIMARY) {
         return true;
     }
     int pos = static_cast<int>(event->y) / SIMAGE_SIZE + get_scroll();

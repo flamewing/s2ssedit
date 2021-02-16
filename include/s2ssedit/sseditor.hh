@@ -29,24 +29,7 @@
 #include <s2ssedit/object.hh>
 #include <s2ssedit/ssobjfile.hh>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#pragma GCC diagnostic ignored "-Winline"
-#pragma GCC diagnostic ignored "-Wcast-qual"
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#pragma GCC diagnostic ignored "-Wctor-dtor-privacy"
-#pragma GCC diagnostic ignored "-Wunused-const-variable"
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-Wextra-semi"
-#ifndef __clang__
-#    pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif
 #include <gtkmm.h>
-#define GDK_BUTTON_LEFT 1
-#define GDK_BUTTON_MIDDLE 2
-#define GDK_BUTTON_RIGHT 3
-#pragma GCC diagnostic pop
 
 #define SIMAGE_SIZE 16
 #define IMAGE_SIZE 16U
@@ -159,13 +142,13 @@ private:
     int endpos;
 
     // GUI variables.
-    Gtk::Window*               main_win;
-    std::shared_ptr<Gtk::Main> kit;
-    Gtk::MessageDialog*        helpdlg;
-    Gtk::AboutDialog*          aboutdlg;
-    Gtk::FileChooserDialog*    filedlg;
-    Glib::RefPtr<Gtk::Builder> builder;
-    Glib::RefPtr<Gdk::Pixbuf>  ringimg, bombimg;
+    Gtk::Window*                   main_win;
+    Glib::RefPtr<Gtk::Application> kit;
+    Gtk::MessageDialog*            helpdlg;
+    Gtk::AboutDialog*              aboutdlg;
+    Gtk::FileChooserDialog*        filedlg;
+    Glib::RefPtr<Gtk::Builder>     builder;
+    Glib::RefPtr<Gdk::Pixbuf>      ringimg, bombimg;
 
     Cairo::RefPtr<Cairo::Pattern> drawimg;
 
@@ -178,7 +161,7 @@ private:
         *plabelcurrsegshadows, *plabelcurrsegtotal;
     Gtk::Image* pimagecurrsegwarn;
     // Scrollbar
-    Gtk::VScrollbar* pvscrollbar;
+    Gtk::Scrollbar* pvscrollbar;
     // Main toolbar
     Gtk::ToolButton *popenfilebutton, *psavefilebutton, *prevertfilebutton,
         *pundobutton, *predobutton, *phelpbutton, *paboutbutton, *pquitbutton;
@@ -206,18 +189,18 @@ private:
         *pdelete_segment_button, *pswap_segment_prev_button,
         *pswap_segment_next_button;
     // Segment flags
-    Gtk::Expander*    psegment_expander;
+    Gtk::Grid*        psegment_grid;
     Gtk::RadioButton *pnormal_segment, *pring_message, *pcheckpoint,
         *pchaos_emerald, *psegment_turnthenrise, *psegment_turnthendrop,
         *psegment_turnthenstraight, *psegment_straight,
         *psegment_straightthenturn, *psegment_right, *psegment_left;
     // Object flags
-    Gtk::Expander*    pobject_expander;
+    Gtk::Grid*        pobject_grid;
     Gtk::Button *     pmoveup, *pmovedown, *pmoveleft, *pmoveright;
     Gtk::RadioButton *pringtype, *pbombtype;
 
     bool move_object(int dx, int dy);
-    void render();
+    void render() const { pspecialstageobjs->queue_draw(); }
     void show();
 
     static double get_obj_x(const object& obj) {
@@ -313,7 +296,7 @@ private:
     }
 
 public:
-    sseditor(std::shared_ptr<Gtk::Main>&& application, char const* uifile);
+    sseditor(Glib::RefPtr<Gtk::Application> application, char const* uifile);
 
     void run();
 
@@ -321,7 +304,8 @@ public:
     void on_specialstageobjs_drag_data_received(
         Glib::RefPtr<Gdk::DragContext> const& context, int x, int y,
         Gtk::SelectionData const& selection_data, guint info, guint time);
-    bool on_specialstageobjs_expose_event(GdkEventExpose* event);
+    bool
+    on_specialstageobjs_expose_event(const Cairo::RefPtr<Cairo::Context>& cr);
     bool on_specialstageobjs_key_press_event(GdkEventKey* event);
     bool on_specialstageobjs_button_press_event(GdkEventButton* event);
     bool on_specialstageobjs_button_release_event(GdkEventButton* event);
@@ -506,7 +490,7 @@ private:
     void finalize_selection();
     void insert_set();
     void finish_drag_box(GdkEventButton* event) {
-        if (event->button == GDK_BUTTON_LEFT && drawbox) {
+        if (event->button == GDK_BUTTON_PRIMARY && drawbox) {
             drawbox = false;
         }
     }
@@ -617,7 +601,8 @@ private:
     static void draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty);
 
     void cleanup_render(Cairo::RefPtr<Cairo::Context> const& cr);
-    void draw_objects(Cairo::RefPtr<Cairo::Context> cr, int start, int end);
+    void
+    draw_objects(Cairo::RefPtr<Cairo::Context> const& cr, int start, int end);
     bool want_checkerboard(int row, int seg, sssegments* currseg);
     void draw_box(Cairo::RefPtr<Cairo::Context> const& cr);
     void select_hotspot();

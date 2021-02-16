@@ -14,10 +14,8 @@ addons:
       - ubuntu-toolchain-r-test
     packages: &common_depends
       - libboost-all-dev
-      - libgtkmm-2.4-dev
+      - libgtkmm-3.0-dev
       - libglibmm-2.4-dev
-      - libcairomm-1.0-dev
-      - libsigc++-2.0-dev
 
 env:
   global:

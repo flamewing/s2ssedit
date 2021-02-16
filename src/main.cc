@@ -50,13 +50,13 @@
 using std::array;
 using std::cerr;
 using std::endl;
-using std::make_shared;
 using std::tie;
 using std::to_string;
 
 int main(int argc, char* argv[]) {
     try {
-        sseditor Editor(make_shared<Gtk::Main>(argc, argv), UI_FILE);
+        auto app = Gtk::Application::create(argc, argv, "org.flamewing.s2ssedit");
+        sseditor Editor(app, UI_FILE);
         Editor.run();
     } catch (const Glib::FileError& ex) {
         cerr << ex.what() << endl;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-sseditor::sseditor(std::shared_ptr<Gtk::Main>&& application, char const* uifile)
+sseditor::sseditor(Glib::RefPtr<Gtk::Application> application, char const* uifile)
     : update_in_progress(false), dragging(false), drop_enabled(false),
       currstage(0), currsegment(0), draw_width(0), draw_height(0), mouse_x(0),
       mouse_y(0), state(0), mode(eSelectMode), ringmode(eSingle),
@@ -97,12 +97,12 @@ sseditor::sseditor(std::shared_ptr<Gtk::Main>&& application, char const* uifile)
       pcut_segment_button(nullptr), pcopy_segment_button(nullptr),
       ppaste_segment_button(nullptr), pdelete_segment_button(nullptr),
       pswap_segment_prev_button(nullptr), pswap_segment_next_button(nullptr),
-      psegment_expander(nullptr), pnormal_segment(nullptr),
-      pring_message(nullptr), pcheckpoint(nullptr), pchaos_emerald(nullptr),
+      psegment_grid(nullptr), pnormal_segment(nullptr), pring_message(nullptr),
+      pcheckpoint(nullptr), pchaos_emerald(nullptr),
       psegment_turnthenrise(nullptr), psegment_turnthendrop(nullptr),
       psegment_turnthenstraight(nullptr), psegment_straight(nullptr),
       psegment_straightthenturn(nullptr), psegment_right(nullptr),
-      psegment_left(nullptr), pobject_expander(nullptr), pmoveup(nullptr),
+      psegment_left(nullptr), pobject_grid(nullptr), pmoveup(nullptr),
       pmovedown(nullptr), pmoveleft(nullptr), pmoveright(nullptr),
       pringtype(nullptr), pbombtype(nullptr) {
     ringimg = Gdk::Pixbuf::create_from_file(RINGFILE);
@@ -199,7 +199,7 @@ sseditor::sseditor(std::shared_ptr<Gtk::Main>&& application, char const* uifile)
     builder->get_widget("swap_segment_prev_button", pswap_segment_prev_button);
     builder->get_widget("swap_segment_next_button", pswap_segment_next_button);
     // Segment flags
-    builder->get_widget("segment_expander", psegment_expander);
+    builder->get_widget("segment_grid", psegment_grid);
     builder->get_widget("normal_segment", pnormal_segment);
     builder->get_widget("ring_message", pring_message);
     builder->get_widget("checkpoint", pcheckpoint);
@@ -212,7 +212,7 @@ sseditor::sseditor(std::shared_ptr<Gtk::Main>&& application, char const* uifile)
     builder->get_widget("segment_right", psegment_right);
     builder->get_widget("segment_left", psegment_left);
     // Object flags
-    builder->get_widget("object_expander", pobject_expander);
+    builder->get_widget("object_grid", pobject_grid);
     builder->get_widget("moveup", pmoveup);
     builder->get_widget("movedown", pmovedown);
     builder->get_widget("moveleft", pmoveleft);
@@ -223,8 +223,9 @@ sseditor::sseditor(std::shared_ptr<Gtk::Main>&& application, char const* uifile)
     pfilefilter->add_pattern("*");
 
     pspecialstageobjs->signal_configure_event().connect(
-        sigc::mem_fun(this, &sseditor::on_specialstageobjs_configure_event));
-    pspecialstageobjs->signal_expose_event().connect(
+        sigc::mem_fun(this, &sseditor::on_specialstageobjs_configure_event),
+        false);
+    pspecialstageobjs->signal_draw().connect(
         sigc::mem_fun(this, &sseditor::on_specialstageobjs_expose_event));
     pspecialstageobjs->signal_key_press_event().connect(
         sigc::mem_fun(this, &sseditor::on_specialstageobjs_key_press_event));
@@ -446,8 +447,8 @@ void sseditor::update() {
         pstage_toolbar->set_sensitive(false);
         psegment_toolbar->set_sensitive(false);
 
-        psegment_expander->set_sensitive(false);
-        pobject_expander->set_sensitive(false);
+        psegment_grid->set_sensitive(false);
+        pobject_grid->set_sensitive(false);
         pringtype->set_inconsistent(true);
         pbombtype->set_inconsistent(true);
         plabelcurrsegrings->set_label("0");
@@ -486,8 +487,8 @@ void sseditor::update() {
             ppastebutton->set_sensitive(false);
             pdeletebutton->set_sensitive(false);
             psegment_toolbar->set_sensitive(false);
-            psegment_expander->set_sensitive(false);
-            pobject_expander->set_sensitive(false);
+            psegment_grid->set_sensitive(false);
+            pobject_grid->set_sensitive(false);
             pringtype->set_inconsistent(true);
             pbombtype->set_inconsistent(true);
             pinsert_stage_before_button->set_sensitive(false);
@@ -534,8 +535,8 @@ void sseditor::update() {
                 pcopybutton->set_sensitive(false);
                 ppastebutton->set_sensitive(false);
                 pdeletebutton->set_sensitive(false);
-                psegment_expander->set_sensitive(false);
-                pobject_expander->set_sensitive(false);
+                psegment_grid->set_sensitive(false);
+                pobject_grid->set_sensitive(false);
                 pringtype->set_inconsistent(true);
                 pbombtype->set_inconsistent(true);
                 pinsert_segment_before_button->set_sensitive(false);
@@ -562,7 +563,7 @@ void sseditor::update() {
                 ppaste_segment_button->set_sensitive(copyseg != nullptr);
                 pdelete_segment_button->set_sensitive(true);
 
-                psegment_expander->set_sensitive(true);
+                psegment_grid->set_sensitive(true);
                 plabeltotalsegments->set_label(to_string(numsegments));
                 plabelcurrentsegment->set_label(to_string(currsegment + 1));
 
@@ -588,7 +589,7 @@ void sseditor::update() {
                 tie(nrings, nbombs) = count_objects(selection);
                 bool empty          = nrings == 0 && nbombs == 0;
                 bool inconsistent   = empty || (nrings > 0 && nbombs > 0);
-                pobject_expander->set_sensitive(!empty);
+                pobject_grid->set_sensitive(!empty);
                 if (!inconsistent) {
                     if (nbombs > 0) {
                         pbombtype->set_active(true);

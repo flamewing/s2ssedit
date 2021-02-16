@@ -245,14 +245,15 @@ AC_CONFIG_SUBDIRS([mdcomp])
 # ---------------------------------------------------------------------
 # Additional dependencies
 # ---------------------------------------------------------------------
-NEWCXXFLAGS=""
-PKG_CHECK_MODULES(S2SSEDIT, [gdkmm-2.4 cairomm-1.0 gtkmm-2.4 sigc++-2.0 glibmm-2.4])
+PKG_CHECK_MODULES(S2SSEDIT, [gtkmm-3.0])
 # Damn you, gtkmm!
-for cxxflag in $S2SSEDIT_CFLAGS; do
-	AS_CASE([$cxxflag],
-			[-std=c++11], [],
-			[NEWCXXFLAGS="$NEWCXXFLAGS $cxxflag"])
-done
+# for cxxflag in $S2SSEDIT_CFLAGS; do
+# 	AS_CASE([$cxxflag],
+# 			[-std=c++11], [],
+# 			[NEWCXXFLAGS="$NEWCXXFLAGS $cxxflag"])
+# done
+# S2SSEDIT_CFLAGS="$NEWCXXFLAGS"
+NEWCXXFLAGS="`AS_ECHO("$S2SSEDIT_CFLAGS") | sed 's/-I/-isystem /g'`"
 S2SSEDIT_CFLAGS="$NEWCXXFLAGS"
 
 AC_SUBST(S2SSEDIT_CFLAGS)

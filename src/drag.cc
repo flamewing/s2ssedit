@@ -51,7 +51,6 @@ bool sseditor::on_specialstageobjs_configure_event(GdkEventConfigure* event) {
         pspecialstageobjs->signal_drag_motion().connect(
             sigc::mem_fun(this, &sseditor::on_drag_motion));
     }
-    render();
     update();
     return true;
 }
@@ -94,9 +93,9 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
 
     switch (mode) {
     case eSelectMode:
-        if (event->button == GDK_BUTTON_LEFT) {
+        if (event->button == GDK_BUTTON_PRIMARY) {
             finalize_selection();
-        } else if (event->button == GDK_BUTTON_RIGHT) {
+        } else if (event->button == GDK_BUTTON_SECONDARY) {
             cycle_object_type(seg, pos, angle);
         }
         break;
@@ -111,9 +110,9 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
     }
     case eInsertBombMode:
     case eInsertRingMode: {
-        if (event->button == GDK_BUTTON_LEFT) {
+        if (event->button == GDK_BUTTON_PRIMARY) {
             insert_set();
-        } else if (event->button == GDK_BUTTON_RIGHT) {
+        } else if (event->button == GDK_BUTTON_SECONDARY) {
             delete_existing_object(seg, pos, angle);
         }
         break;
@@ -121,7 +120,6 @@ bool sseditor::on_specialstageobjs_button_release_event(GdkEventButton* event) {
     case eNumModes:
         __builtin_unreachable();
     }
-    render();
     update();
     return true;
 }
@@ -162,8 +160,8 @@ bool sseditor::on_specialstageobjs_scroll_event(GdkEventScroll* event) {
         return false;
     }
 
-    bool   ctrl  = (event->state & GDK_CONTROL_MASK) != 0;
-    double delta = ctrl ? 32 : 4;
+    const bool   ctrl  = (event->state & GDK_CONTROL_MASK) != 0;
+    const double delta = ctrl ? 32 : 4;
 
     switch (event->direction) {
     case GDK_SCROLL_UP:
@@ -181,6 +179,19 @@ bool sseditor::on_specialstageobjs_scroll_event(GdkEventScroll* event) {
     case GDK_SCROLL_RIGHT:
         increment_mode(ctrl);
         break;
+
+    case GDK_SCROLL_SMOOTH: {
+        // No way around C API here.
+        const double delta_x = event->delta_x;
+        if (delta_x >= 1.0) {
+            increment_mode(delta_x >= 8.0);
+        } else if (delta_x <= -1.0) {
+            increment_mode(delta_x <= -8.0);
+        }
+        const double delta_y = (ctrl ? 8.0 : 1.0) * event->delta_y;
+        pvscrollbar->set_value(pvscrollbar->get_value() + delta_y);
+        break;
+    }
     }
 
     return true;
@@ -585,7 +596,6 @@ bool sseditor::on_drag_motion(
 
     mouse_x = x;
     mouse_y = y;
-    render();
     update();
     return true;
 }
@@ -647,6 +657,5 @@ void sseditor::on_specialstageobjs_drag_data_received(
         context->drag_finish(false, false, time);
     }
 
-    render();
     update();
 }
