@@ -589,11 +589,12 @@ void sseditor::update() {
                 bool empty          = nrings == 0 && nbombs == 0;
                 bool inconsistent   = empty || (nrings > 0 && nbombs > 0);
                 pobject_expander->set_sensitive(!empty);
-                pobject_expander->set_sensitive(true);
-                if (nbombs > 0) {
-                    pbombtype->set_active(true);
-                } else if (nrings > 0) {
-                    pringtype->set_active(true);
+                if (!inconsistent) {
+                    if (nbombs > 0) {
+                        pbombtype->set_active(true);
+                    } else if (nrings > 0) {
+                        pringtype->set_active(true);
+                    }
                 }
                 pringtype->set_inconsistent(inconsistent);
                 pbombtype->set_inconsistent(inconsistent);

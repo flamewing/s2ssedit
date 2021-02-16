@@ -517,6 +517,7 @@ bool sseditor::on_specialstageobjs_motion_notify_event(GdkEventMotion* event) {
     mouse_y = event->y;
     drawbox = drawbox && lbutton_pressed;
 
+    motion_update_select_insert(event);
     update();
 
     bool no_dragdrop =
