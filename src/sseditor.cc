@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gdkmm/rgba.h>
 #include <iostream>
 #include <set>
 #include <vector>
@@ -151,11 +152,36 @@ bool sseditor::want_checkerboard(int row, int seg, sssegments* currseg) {
             (row - segpos[seg]) == currseg->get_length() - 1);
 }
 
-void sseditor::draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty) {
+struct RGB {
+    double red;
+    double green;
+    double blue;
+    constexpr RGB(uint8_t r, uint8_t g, uint8_t b)
+        : red(r / 255.0), green(g / 255.0), blue(b / 255.0) {}
+};
+
+void sseditor::draw_balls(
+    Cairo::RefPtr<Cairo::Context> const& cr, int ty) const {
+    // TODO: Read palettes and use colors.
+    static constexpr const std::array<RGB, 7> hilites{
+        RGB{255, 172, 52}, RGB{255, 144, 0}, RGB{255, 172, 52},
+        RGB{255, 172, 52}, RGB{0, 255, 87},  RGB{255, 172, 52},
+        RGB{172, 172, 206}};
+    static constexpr const std::array<RGB, 7> midtones{
+        RGB{206, 144, 52}, RGB{206, 116, 0}, RGB{206, 144, 52},
+        RGB{206, 144, 52}, RGB{0, 172, 52},  RGB{206, 144, 52},
+        RGB{144, 144, 172}};
+    static constexpr const std::array<RGB, 7> shadows{
+        RGB{172, 116, 52}, RGB{172, 87, 0}, RGB{172, 116, 52},
+        RGB{172, 116, 52}, RGB{0, 144, 0},  RGB{172, 116, 52},
+        RGB{116, 116, 144}};
+    const auto hilite  = hilites[currstage % hilites.size()];
+    const auto midtone = midtones[currstage % midtones.size()];
+    const auto shadow  = shadows[currstage % shadows.size()];
     for (int iangle = 0; iangle < 3; iangle++) {
         double angle  = (iangle * 64.0) / 3.0;
         int    mangle = static_cast<int>(angle);
-        cr->set_source_rgb(180.0 / 256.0, 108.0 / 256.0, 36.0 / 256.0);
+        cr->set_source_rgb(shadow.red, shadow.green, shadow.blue);
         cr->arc(
             angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
             0.0, 2.0 * G_PI);
@@ -164,7 +190,7 @@ void sseditor::draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty) {
             angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
             0.0, 2.0 * G_PI);
         cr->fill();
-        cr->set_source_rgb(216.0 / 256.0, 144.0 / 256.0, 36.0 / 256.00);
+        cr->set_source_rgb(midtone.red, midtone.green, midtone.blue);
         cr->arc(
             angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty - 1.5,
             HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
@@ -173,7 +199,7 @@ void sseditor::draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty) {
             angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty - 1.5,
             HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
         cr->fill();
-        cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
+        cr->set_source_rgb(hilite.red, hilite.green, hilite.blue);
         cr->arc(
             angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty - 3.0,
             HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
@@ -187,7 +213,18 @@ void sseditor::draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty) {
 
 bool sseditor::on_specialstageobjs_expose_event(
     const Cairo::RefPtr<Cairo::Context>& cr) {
-    cr->set_source_rgb(0.0, 180.0 / 256.0, 216.0 / 256.0);
+    // TODO: Read palettes and use colors.
+    static constexpr const std::array<RGB, 7> fgcolors{
+        RGB{0, 172, 206},   RGB{206, 0, 144}, RGB{206, 87, 0},
+        RGB{206, 206, 172}, RGB{255, 144, 0}, RGB{116, 172, 0},
+        RGB{144, 144, 144}};
+    static constexpr const std::array<RGB, 7> lanecolors{
+        RGB{255, 172, 52}, RGB{255, 144, 0}, RGB{255, 172, 52},
+        RGB{255, 172, 52}, RGB{0, 255, 87},  RGB{255, 172, 52},
+        RGB{172, 172, 206}};
+    // Base tube color
+    const auto fgcolor = fgcolors[currstage % fgcolors.size()];
+    cr->set_source_rgb(fgcolor.red, fgcolor.green, fgcolor.blue);
     cr->paint();
 
     if (!specialstages) {
@@ -198,16 +235,21 @@ bool sseditor::on_specialstageobjs_expose_event(
     int end      = start + (draw_height + SIMAGE_SIZE - 1) / SIMAGE_SIZE;
     int last_seg = -1;
 
-    cr->set_source_rgb(36.0 / 256.0, 108.0 / 256.0, 144.0 / 256.0);
+    // Draw area outside of the tube (left)
+    // const auto bgcolor = bgcolors[currstage % bgcolors.size()];
+    constexpr const auto bgcolor = RGB(0, 87, 116);
+    cr->set_source_rgb(bgcolor.red, bgcolor.green, bgcolor.blue);
     cr->rectangle(0.0, 0.0, angle_to_x(0x00), draw_height);
     cr->fill();
 
+    // Draw area outside of the tube (right)
     cr->rectangle(
         angle_to_x(0x80), 0.0, draw_width - angle_to_x(0x80), draw_height);
     cr->fill();
 
     cr->set_line_width(8.0);
-    cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
+    const auto lanecolor = lanecolors[currstage % lanecolors.size()];
+    cr->set_source_rgb(lanecolor.red, lanecolor.green, lanecolor.blue);
     cr->move_to(angle_to_x(0x00 - 2), 0.0);
     cr->line_to(angle_to_x(0x00 - 2), draw_height);
     cr->move_to(angle_to_x(0x80 + 2), 0.0);
@@ -231,7 +273,7 @@ bool sseditor::on_specialstageobjs_expose_event(
         int ty = (ii - get_scroll()) * SIMAGE_SIZE;
         if ((ii + 1) % 4 == 0) {
             cr->set_line_width(HALF_IMAGE_SIZE);
-            cr->set_source_rgb(1.0, 180.0 / 256.0, 36.0 / 256.0);
+            cr->set_source_rgb(lanecolor.red, lanecolor.green, lanecolor.blue);
             // Horizontal beams.
             cr->move_to(angle_to_x(0x00), ty);
             cr->line_to(angle_to_x(0x80), ty);

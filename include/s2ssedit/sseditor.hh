@@ -598,7 +598,7 @@ private:
         }
     }
 
-    static void draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty);
+    void draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty) const;
 
     void cleanup_render(Cairo::RefPtr<Cairo::Context> const& cr);
     void
