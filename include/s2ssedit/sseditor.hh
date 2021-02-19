@@ -19,33 +19,36 @@
 #ifndef SSEDITOR_H
 #define SSEDITOR_H
 
+#include <gtkmm.h>
+#include <s2ssedit/abstractaction.hh>
+#include <s2ssedit/object.hh>
+#include <s2ssedit/ssobjfile.hh>
+
 #include <array>
 #include <deque>
 #include <memory>
 #include <set>
 #include <tuple>
 
-#include <s2ssedit/abstractaction.hh>
-#include <s2ssedit/object.hh>
-#include <s2ssedit/ssobjfile.hh>
-
-#include <gtkmm.h>
-
-#define SIMAGE_SIZE 16
-#define IMAGE_SIZE 16U
-#define HALF_IMAGE_SIZE 8
+#define SIMAGE_SIZE        16
+#define IMAGE_SIZE         16U
+#define HALF_IMAGE_SIZE    8
 #define QUARTER_IMAGE_SIZE 4
 
 constexpr const int32_t center_x    = 0x40;
 constexpr const int32_t right_angle = 0x80;
 
-inline int32_t angle_simple(int angle) { return (angle + center_x) % 256; }
+inline int32_t angle_simple(int angle) {
+    return (angle + center_x) % 256;
+}
 
 inline int32_t angle_normal(int angle) {
     return (angle + center_x + right_angle) % 256;
 }
 
-inline int angle_to_x(int angle) { return ((angle + center_x) % 256) * 2 + 4; }
+inline int angle_to_x(int angle) {
+    return ((angle + center_x) % 256) * 2 + 4;
+}
 
 inline uint8_t x_to_angle(int32_t x, bool constrain, int32_t snapoff = 0U) {
     int32_t angle = x + (x % 2) - 4;
@@ -157,14 +160,15 @@ private:
     Gtk::Notebook*                pmodenotebook;
     // Labels
     Gtk::Label *plabelcurrentstage, *plabeltotalstages, *plabelcurrentsegment,
-        *plabeltotalsegments, *plabelcurrsegrings, *plabelcurrsegbombs,
-        *plabelcurrsegshadows, *plabelcurrsegtotal;
+            *plabeltotalsegments, *plabelcurrsegrings, *plabelcurrsegbombs,
+            *plabelcurrsegshadows, *plabelcurrsegtotal;
     Gtk::Image* pimagecurrsegwarn;
     // Scrollbar
     Gtk::Scrollbar* pvscrollbar;
     // Main toolbar
     Gtk::ToolButton *popenfilebutton, *psavefilebutton, *prevertfilebutton,
-        *pundobutton, *predobutton, *phelpbutton, *paboutbutton, *pquitbutton;
+            *pundobutton, *predobutton, *phelpbutton, *paboutbutton,
+            *pquitbutton;
     std::array<Gtk::RadioToolButton*, eNumModes> pmodebuttons;
     Gtk::ToggleToolButton*                       psnapgridbutton;
     // Selection toolbar
@@ -176,43 +180,46 @@ private:
     // Special stage toolbar
     Gtk::Toolbar*    pstage_toolbar;
     Gtk::ToolButton *pfirst_stage_button, *pprevious_stage_button,
-        *pnext_stage_button, *plast_stage_button, *pinsert_stage_before_button,
-        *pappend_stage_button, *pcut_stage_button, *pcopy_stage_button,
-        *ppaste_stage_button, *pdelete_stage_button, *pswap_stage_prev_button,
-        *pswap_stage_next_button;
+            *pnext_stage_button, *plast_stage_button,
+            *pinsert_stage_before_button, *pappend_stage_button,
+            *pcut_stage_button, *pcopy_stage_button, *ppaste_stage_button,
+            *pdelete_stage_button, *pswap_stage_prev_button,
+            *pswap_stage_next_button;
     // Segment toolbar
     Gtk::Toolbar*    psegment_toolbar;
     Gtk::ToolButton *pfirst_segment_button, *pprevious_segment_button,
-        *pnext_segment_button, *plast_segment_button,
-        *pinsert_segment_before_button, *pappend_segment_button,
-        *pcut_segment_button, *pcopy_segment_button, *ppaste_segment_button,
-        *pdelete_segment_button, *pswap_segment_prev_button,
-        *pswap_segment_next_button;
+            *pnext_segment_button, *plast_segment_button,
+            *pinsert_segment_before_button, *pappend_segment_button,
+            *pcut_segment_button, *pcopy_segment_button, *ppaste_segment_button,
+            *pdelete_segment_button, *pswap_segment_prev_button,
+            *pswap_segment_next_button;
     // Segment flags
     Gtk::Grid*        psegment_grid;
     Gtk::RadioButton *pnormal_segment, *pring_message, *pcheckpoint,
-        *pchaos_emerald, *psegment_turnthenrise, *psegment_turnthendrop,
-        *psegment_turnthenstraight, *psegment_straight,
-        *psegment_straightthenturn, *psegment_right, *psegment_left;
+            *pchaos_emerald, *psegment_turnthenrise, *psegment_turnthendrop,
+            *psegment_turnthenstraight, *psegment_straight,
+            *psegment_straightthenturn, *psegment_right, *psegment_left;
     // Object flags
     Gtk::Grid*        pobject_grid;
     Gtk::Button *     pmoveup, *pmovedown, *pmoveleft, *pmoveright;
     Gtk::RadioButton *pringtype, *pbombtype;
 
     bool move_object(int dx, int dy);
-    void render() const { pspecialstageobjs->queue_draw(); }
+    void render() const {
+        pspecialstageobjs->queue_draw();
+    }
     void show();
 
     static double get_obj_x(const object& obj) {
         return static_cast<double>(
-            angle_to_x(obj.get_angle()) - HALF_IMAGE_SIZE);
+                angle_to_x(obj.get_angle()) - HALF_IMAGE_SIZE);
     }
     double get_obj_y(const object& obj) {
-        return (get_obj_pos<double>(obj) - pvscrollbar->get_value()) *
-               SIMAGE_SIZE;
+        return (get_obj_pos<double>(obj) - pvscrollbar->get_value())
+               * SIMAGE_SIZE;
     }
     void draw_outlines(
-        std::set<object>& col, Cairo::RefPtr<Cairo::Context> const& cr) {
+            std::set<object>& col, Cairo::RefPtr<Cairo::Context> const& cr) {
         for (auto const& elem : col) {
             auto tx = get_obj_x(elem);
             auto ty = get_obj_y(elem);
@@ -221,8 +228,8 @@ private:
         }
     }
     void draw_outlines(
-        std::set<object>& col1, std::set<object>& col2,
-        Cairo::RefPtr<Cairo::Context> const& cr) {
+            std::set<object>& col1, std::set<object>& col2,
+            Cairo::RefPtr<Cairo::Context> const& cr) {
         for (auto const& elem : col1) {
             if (col2.find(elem) != col2.end()) {
                 continue;
@@ -233,8 +240,8 @@ private:
             cr->stroke();
         }
     }
-    void
-    draw_x(std::set<object>& col1, Cairo::RefPtr<Cairo::Context> const& cr) {
+    void draw_x(
+            std::set<object>& col1, Cairo::RefPtr<Cairo::Context> const& cr) {
         for (auto const& elem : col1) {
             auto tx = get_obj_x(elem);
             auto ty = get_obj_y(elem);
@@ -247,10 +254,11 @@ private:
         }
     }
     void draw_objects(
-        std::set<object>& col, Cairo::RefPtr<Cairo::Context> const& cr) {
+            std::set<object>& col, Cairo::RefPtr<Cairo::Context> const& cr) {
         for (auto const& elem : col) {
-            Glib::RefPtr<Gdk::Pixbuf> image =
-                (elem.get_type() == sssegments::eBomb) ? bombimg : ringimg;
+            Glib::RefPtr<Gdk::Pixbuf> image
+                    = (elem.get_type() == sssegments::eBomb) ? bombimg
+                                                             : ringimg;
             auto tx = get_obj_x(elem);
             auto ty = get_obj_y(elem);
             Gdk::Cairo::set_source_pixbuf(cr, image, tx, ty);
@@ -265,8 +273,8 @@ private:
         }
     }
     void object_triangle(
-        int x, int y, int dx, int dy, int h, sssegments::ObjectTypes type,
-        bool fill, std::set<object>& col);
+            int x, int y, int dx, int dy, int h, sssegments::ObjectTypes type,
+            bool fill, std::set<object>& col);
     void   update_segment_positions(bool setpos);
     size_t get_current_segment() const;
     size_t find_segment(int pos) const;
@@ -302,27 +310,27 @@ public:
 
     bool on_specialstageobjs_configure_event(GdkEventConfigure* event);
     void on_specialstageobjs_drag_data_received(
-        Glib::RefPtr<Gdk::DragContext> const& context, int x, int y,
-        Gtk::SelectionData const& selection_data, guint info, guint time);
-    bool
-    on_specialstageobjs_expose_event(const Cairo::RefPtr<Cairo::Context>& cr);
+            Glib::RefPtr<Gdk::DragContext> const& context, int x, int y,
+            Gtk::SelectionData const& selection_data, guint info, guint time);
+    bool on_specialstageobjs_expose_event(
+            const Cairo::RefPtr<Cairo::Context>& cr);
     bool on_specialstageobjs_key_press_event(GdkEventKey* event);
     bool on_specialstageobjs_button_press_event(GdkEventButton* event);
     bool on_specialstageobjs_button_release_event(GdkEventButton* event);
     bool on_specialstageobjs_scroll_event(GdkEventScroll* event);
     void on_specialstageobjs_drag_begin(
-        Glib::RefPtr<Gdk::DragContext> const& targets);
+            Glib::RefPtr<Gdk::DragContext> const& targets);
     bool on_specialstageobjs_motion_notify_event(GdkEventMotion* event);
     void on_specialstageobjs_drag_data_get(
-        Glib::RefPtr<Gdk::DragContext> const& targets,
-        Gtk::SelectionData& selection_data, guint info, guint time);
+            Glib::RefPtr<Gdk::DragContext> const& targets,
+            Gtk::SelectionData& selection_data, guint info, guint time);
     void on_specialstageobjs_drag_data_delete(
-        Glib::RefPtr<Gdk::DragContext> const& context);
-    void
-    on_specialstageobjs_drag_end(Glib::RefPtr<Gdk::DragContext> const& context);
+            Glib::RefPtr<Gdk::DragContext> const& context);
+    void on_specialstageobjs_drag_end(
+            Glib::RefPtr<Gdk::DragContext> const& context);
     bool on_drag_motion(
-        Glib::RefPtr<Gdk::DragContext> const& context, int x, int y,
-        guint time);
+            Glib::RefPtr<Gdk::DragContext> const& context, int x, int y,
+            guint time);
     // Scrollbar
     void on_vscrollbar_value_changed();
     // Main toolbar
@@ -346,8 +354,8 @@ public:
         snaptogrid = psnapgridbutton->get_active();
     }
     bool want_snap_to_grid(guint istate) const noexcept {
-        return static_cast<unsigned int>(snaptogrid) !=
-               (istate & GDK_CONTROL_MASK);
+        return static_cast<unsigned int>(snaptogrid)
+               != (istate & GDK_CONTROL_MASK);
     }
     void on_helpdialog_response(int response_id);
     void on_helpbutton_clicked();
@@ -411,8 +419,8 @@ public:
         sssegments* currseg = currlvl->get_segment(currsegment);
 
         do_action<alter_segment_action>(
-            currstage, currsegment, *currseg, currseg->get_direction(), N,
-            currseg->get_geometry());
+                currstage, currsegment, *currseg, currseg->get_direction(), N,
+                currseg->get_geometry());
     }
     template <sssegments::SegmentGeometry N, Gtk::RadioButton* sseditor::*btn>
     void on_segment_segmentgeometry_toggled() {
@@ -427,8 +435,8 @@ public:
         sssegments* currseg = currlvl->get_segment(currsegment);
 
         do_action<alter_segment_action>(
-            currstage, currsegment, *currseg, currseg->get_direction(),
-            currseg->get_type(), N);
+                currstage, currsegment, *currseg, currseg->get_direction(),
+                currseg->get_type(), N);
         update_segment_positions(false);
     }
     template <bool tf, Gtk::RadioButton* sseditor::*btn>
@@ -444,8 +452,8 @@ public:
         sssegments* currseg = currlvl->get_segment(currsegment);
 
         do_action<alter_segment_action>(
-            currstage, currsegment, *currseg, tf, currseg->get_type(),
-            currseg->get_geometry());
+                currstage, currsegment, *currseg, tf, currseg->get_type(),
+                currseg->get_geometry());
     }
     // Object flags
     template <int dx, int dy>
@@ -466,7 +474,7 @@ public:
         for (auto const& elem : selection) {
             // sssegments *currseg = currlvl->get_segment(it->get_segment());
             temp.emplace(
-                elem.get_segment(), elem.get_angle(), elem.get_pos(), N);
+                    elem.get_segment(), elem.get_angle(), elem.get_pos(), N);
         }
         selection.swap(temp);
 
@@ -601,8 +609,8 @@ private:
     void draw_balls(Cairo::RefPtr<Cairo::Context> const& cr, int ty) const;
 
     void cleanup_render(Cairo::RefPtr<Cairo::Context> const& cr);
-    void
-    draw_objects(Cairo::RefPtr<Cairo::Context> const& cr, int start, int end);
+    void draw_objects(
+            Cairo::RefPtr<Cairo::Context> const& cr, int start, int end);
     bool want_checkerboard(int row, int seg, sssegments* currseg);
     void draw_box(Cairo::RefPtr<Cairo::Context> const& cr);
     void select_hotspot();
@@ -669,7 +677,7 @@ private:
         if (!hotspot.valid()) {
             angle = x_to_angle(event->x, want_snap_to_grid(state), 4U);
             pos   = static_cast<int>(
-                event->y / SIMAGE_SIZE + pvscrollbar->get_value());
+                    event->y / SIMAGE_SIZE + pvscrollbar->get_value());
         } else {
             angle = hotspot.get_angle();
             pos   = get_obj_pos<int>(hotspot);
@@ -679,36 +687,36 @@ private:
     std::pair<ObjectTypes, InsertModes> get_obj_type() const noexcept {
         if (mode == eInsertBombMode) {
             return std::pair<ObjectTypes, InsertModes>{
-                sssegments::eBomb, bombmode};
+                    sssegments::eBomb, bombmode};
         }
         return std::pair<ObjectTypes, InsertModes>{sssegments::eRing, ringmode};
     }
 
     void motion_update_select_insert(GdkEventMotion* event);
     void motion_update_selection(
-        int dangle, int dpos, int pos0, int pos1, int angle0, int angle1);
+            int dangle, int dpos, int pos0, int pos1, int angle0, int angle1);
     void motion_update_insertion(
-        int dangle, int dpos, int pos0, int pos1, int angle0, int angle1,
-        bool grid, bool lbutton_pressed);
+            int dangle, int dpos, int pos0, int pos1, int angle0, int angle1,
+            bool grid, bool lbutton_pressed);
     void motion_update_line(
-        int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
-        int angledelta);
+            int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+            int angledelta);
     void motion_update_loop(
-        int dpos, int pos0, int angle0, ObjectTypes type, int angledelta,
-        bool grid);
+            int dpos, int pos0, int angle0, ObjectTypes type, int angledelta,
+            bool grid);
     void motion_update_zigzag(
-        int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
-        int angledelta);
+            int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+            int angledelta);
     void motion_update_diamond(
-        int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
-        int angledelta);
+            int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+            int angledelta);
     void motion_update_star_lozenge(
-        int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
-        int angledelta, bool fill);
+            int dpos, int pos0, int pos1, int angle0, ObjectTypes type,
+            int angledelta, bool fill);
     void scroll_into_view(GdkEventMotion* event);
 
     static int motion_compute_angledelta(
-        int dpos, InsertModes submode, bool grid, int angledelta);
+            int dpos, InsertModes submode, bool grid, int angledelta);
 
 protected:
     void update();
@@ -719,4 +727,4 @@ protected:
     }
 };
 
-#endif // SSEDITOR_H
+#endif    // SSEDITOR_H

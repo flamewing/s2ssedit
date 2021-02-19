@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <mdcomp/bigendian_io.hh>
+#include <s2ssedit/sssegmentobjs.hh>
+
 #include <cstring>
 #include <iostream>
-
-#include <mdcomp/bigendian_io.hh>
-
-#include <s2ssedit/sssegmentobjs.hh>
 
 using std::istream;
 using std::ostream;
@@ -36,13 +35,13 @@ void sssegments::read(istream& in, istream& lay) {
         uint8_t pos;
         uint8_t angle;
         switch (type) {
-        case eChaosEmerald:  // Emerald
-        case eCheckpoint:    // Checkpoint
-        case eRingsMessage:  // Message
-        case eNormalSegment: // End of segment
+        case eChaosEmerald:     // Emerald
+        case eCheckpoint:       // Checkpoint
+        case eRingsMessage:     // Message
+        case eNormalSegment:    // End of segment
             terminator = static_cast<SegmentTypes>(type);
             return;
-        default: // Ring, bomb
+        default:    // Ring, bomb
             pos = (type & ePositionMask);
             // Not yet:
             // pos = (type & ePositionMask) + get_length();
@@ -57,7 +56,7 @@ void sssegments::read(istream& in, istream& lay) {
 }
 
 size_t sssegments::size() const {
-    size_t sz = 0; // Terminator
+    size_t sz = 0;    // Terminator
     for (auto const& elem : objects) {
         sz += elem.second.size();
     }

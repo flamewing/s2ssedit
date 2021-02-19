@@ -19,15 +19,15 @@
 #ifndef SSOBJFILE_H
 #define SSOBJFILE_H
 
+#include <s2ssedit/sslevelobjs.hh>
+
 #include <algorithm>
 #include <istream>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include <s2ssedit/sslevelobjs.hh>
-
-#define SS_OBJECT_FILE                                                         \
+#define SS_OBJECT_FILE \
     "Special stage object location lists (Kosinski compression).bin"
 #define SS_LAYOUT_FILE "Special stage level layouts (Nemesis compression).bin"
 
@@ -48,8 +48,12 @@ public:
     void read();
     void write() const;
 
-    size_t    num_stages() const { return stages.size(); }
-    sslevels* get_stage(size_t s) { return &(stages[s]); }
+    size_t num_stages() const {
+        return stages.size();
+    }
+    sslevels* get_stage(size_t s) {
+        return &(stages[s]);
+    }
     sslevels* insert(sslevels const& lvl, size_t s) {
         return &*(stages.insert(stages.begin() + s, lvl));
     }
@@ -79,7 +83,9 @@ public:
         return &stages[s + 1];
     }
 
-    bool good() const { return !error; }
+    bool good() const {
+        return !error;
+    }
 };
 
-#endif // SSOBJFILE_H
+#endif    // SSOBJFILE_H

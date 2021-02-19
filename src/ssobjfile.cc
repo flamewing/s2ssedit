@@ -16,18 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <mdcomp/bigendian_io.hh>
+#include <mdcomp/kosinski.hh>
+#include <mdcomp/nemesis.hh>
+#include <s2ssedit/ignore_unused_variable_warning.hh>
+#include <s2ssedit/ssobjfile.hh>
+
 #include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-
-#include <mdcomp/bigendian_io.hh>
-#include <mdcomp/kosinski.hh>
-#include <mdcomp/nemesis.hh>
-
-#include <s2ssedit/ignore_unused_variable_warning.hh>
-#include <s2ssedit/ssobjfile.hh>
 
 using std::fstream;
 using std::ifstream;

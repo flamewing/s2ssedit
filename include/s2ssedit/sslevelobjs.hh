@@ -19,11 +19,11 @@
 #ifndef SSLEVELOBJS_H
 #define SSLEVELOBJS_H
 
+#include <s2ssedit/sssegmentobjs.hh>
+
 #include <istream>
 #include <ostream>
 #include <vector>
-
-#include <s2ssedit/sssegmentobjs.hh>
 
 class sslevels {
 private:
@@ -47,8 +47,12 @@ public:
         return tally;
     }
 
-    size_t      num_segments() const { return segments.size(); }
-    sssegments* get_segment(size_t s) { return &(segments[s]); }
+    size_t num_segments() const {
+        return segments.size();
+    }
+    sssegments* get_segment(size_t s) {
+        return &(segments[s]);
+    }
     sssegments* insert(sssegments const& lvl, size_t s) {
         return &*(segments.insert(segments.begin() + s, lvl));
     }
@@ -79,4 +83,4 @@ public:
     }
 };
 
-#endif // SSLEVELOBJS_H
+#endif    // SSLEVELOBJS_H

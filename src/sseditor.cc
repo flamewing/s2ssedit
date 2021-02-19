@@ -17,13 +17,12 @@
  */
 
 #include <gdkmm/rgba.h>
+#include <s2ssedit/ignore_unused_variable_warning.hh>
+#include <s2ssedit/sseditor.hh>
+
 #include <iostream>
 #include <set>
 #include <vector>
-
-#include <s2ssedit/sseditor.hh>
-
-#include <s2ssedit/ignore_unused_variable_warning.hh>
 
 using std::cout;
 using std::endl;
@@ -59,7 +58,7 @@ void sseditor::update_segment_positions(bool setpos) {
     endpos = specialstages->get_stage(currstage)->fill_position_array(segpos);
     cout << endpos << "\t" << segpos.back() << "\t" << start_pos << endl;
     pvscrollbar->set_range(
-        0.0, static_cast<double>(endpos) + range_offset - start_pos);
+            0.0, static_cast<double>(endpos) + range_offset - start_pos);
     pvscrollbar->set_increments(step_size, page_incr);
     if (setpos) {
         goto_segment(currsegment);
@@ -90,9 +89,9 @@ bool sseditor::move_object(int dx, int dy) {
         int cnt  = max_y;
 
         ObjectTypes type;
-        while (cnt > 0 && currseg->exists(newy, newx, type) &&
-               selection.find(object(oldseg, newx, newy, type)) ==
-                   selection.end()) {
+        while (cnt > 0 && currseg->exists(newy, newx, type)
+               && selection.find(object(oldseg, newx, newy, type))
+                          == selection.end()) {
             newx = static_cast<int8_t>(newx + dx);
             newy += dy;
             newy %= max_y;
@@ -123,7 +122,7 @@ void sseditor::cleanup_render(Cairo::RefPtr<Cairo::Context> const& cr) {
 }
 
 void sseditor::draw_objects(
-    Cairo::RefPtr<Cairo::Context> const& cr, int start, int end) {
+        Cairo::RefPtr<Cairo::Context> const& cr, int start, int end) {
     for (int i = start; i <= end; i++) {
         int         seg     = find_segment(i);
         sssegments* currseg = get_segment(seg);
@@ -133,8 +132,8 @@ void sseditor::draw_objects(
 
         auto const& row = currseg->get_row(i - segpos[seg]);
         for (auto const& elem : row) {
-            Glib::RefPtr<Gdk::Pixbuf> image =
-                (elem.second == sssegments::eBomb) ? bombimg : ringimg;
+            Glib::RefPtr<Gdk::Pixbuf> image
+                    = (elem.second == sssegments::eBomb) ? bombimg : ringimg;
 
             int ty = (i - get_scroll()) * SIMAGE_SIZE;
             int tx = angle_to_x(elem.first) - image->get_width() / 2;
@@ -145,11 +144,10 @@ void sseditor::draw_objects(
 }
 
 bool sseditor::want_checkerboard(int row, int seg, sssegments* currseg) {
-    return (seg == 2 &&
-            (row - segpos[seg] == (currseg->get_length() - 1) / 2)) ||
-           ((currseg->get_type() == sssegments::eCheckpoint ||
-             currseg->get_type() == sssegments::eChaosEmerald) &&
-            (row - segpos[seg]) == currseg->get_length() - 1);
+    return (seg == 2 && (row - segpos[seg] == (currseg->get_length() - 1) / 2))
+           || ((currseg->get_type() == sssegments::eCheckpoint
+                || currseg->get_type() == sssegments::eChaosEmerald)
+               && (row - segpos[seg]) == currseg->get_length() - 1);
 }
 
 struct RGB {
@@ -157,24 +155,24 @@ struct RGB {
     double green;
     double blue;
     constexpr RGB(uint8_t r, uint8_t g, uint8_t b)
-        : red(r / 255.0), green(g / 255.0), blue(b / 255.0) {}
+            : red(r / 255.0), green(g / 255.0), blue(b / 255.0) {}
 };
 
 void sseditor::draw_balls(
-    Cairo::RefPtr<Cairo::Context> const& cr, int ty) const {
+        Cairo::RefPtr<Cairo::Context> const& cr, int ty) const {
     // TODO: Read palettes and use colors.
     static constexpr const std::array<RGB, 7> hilites{
-        RGB{255, 172, 52}, RGB{255, 144, 0}, RGB{255, 172, 52},
-        RGB{255, 172, 52}, RGB{0, 255, 87},  RGB{255, 172, 52},
-        RGB{172, 172, 206}};
+            RGB{255, 172, 52}, RGB{255, 144, 0}, RGB{255, 172, 52},
+            RGB{255, 172, 52}, RGB{0, 255, 87},  RGB{255, 172, 52},
+            RGB{172, 172, 206}};
     static constexpr const std::array<RGB, 7> midtones{
-        RGB{206, 144, 52}, RGB{206, 116, 0}, RGB{206, 144, 52},
-        RGB{206, 144, 52}, RGB{0, 172, 52},  RGB{206, 144, 52},
-        RGB{144, 144, 172}};
+            RGB{206, 144, 52}, RGB{206, 116, 0}, RGB{206, 144, 52},
+            RGB{206, 144, 52}, RGB{0, 172, 52},  RGB{206, 144, 52},
+            RGB{144, 144, 172}};
     static constexpr const std::array<RGB, 7> shadows{
-        RGB{172, 116, 52}, RGB{172, 87, 0}, RGB{172, 116, 52},
-        RGB{172, 116, 52}, RGB{0, 144, 0},  RGB{172, 116, 52},
-        RGB{116, 116, 144}};
+            RGB{172, 116, 52}, RGB{172, 87, 0}, RGB{172, 116, 52},
+            RGB{172, 116, 52}, RGB{0, 144, 0},  RGB{172, 116, 52},
+            RGB{116, 116, 144}};
     const auto hilite  = hilites[currstage % hilites.size()];
     const auto midtone = midtones[currstage % midtones.size()];
     const auto shadow  = shadows[currstage % shadows.size()];
@@ -182,46 +180,40 @@ void sseditor::draw_balls(
         double angle  = (iangle * 64.0) / 3.0;
         int    mangle = static_cast<int>(angle);
         cr->set_source_rgb(shadow.red, shadow.green, shadow.blue);
-        cr->arc(
-            angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
-            0.0, 2.0 * G_PI);
+        cr->arc(angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty,
+                HALF_IMAGE_SIZE, 0.0, 2.0 * G_PI);
         cr->begin_new_sub_path();
-        cr->arc(
-            angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty, HALF_IMAGE_SIZE,
-            0.0, 2.0 * G_PI);
+        cr->arc(angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty,
+                HALF_IMAGE_SIZE, 0.0, 2.0 * G_PI);
         cr->fill();
         cr->set_source_rgb(midtone.red, midtone.green, midtone.blue);
-        cr->arc(
-            angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty - 1.5,
-            HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
+        cr->arc(angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty - 1.5,
+                HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
         cr->begin_new_sub_path();
-        cr->arc(
-            angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty - 1.5,
-            HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
+        cr->arc(angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty - 1.5,
+                HALF_IMAGE_SIZE - 2, 0.0, 2.0 * G_PI);
         cr->fill();
         cr->set_source_rgb(hilite.red, hilite.green, hilite.blue);
-        cr->arc(
-            angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty - 3.0,
-            HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
+        cr->arc(angle_to_x(mangle + 0x80) + HALF_IMAGE_SIZE, ty - 3.0,
+                HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
         cr->begin_new_sub_path();
-        cr->arc(
-            angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty - 3.0,
-            HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
+        cr->arc(angle_to_x(0x00 - mangle) - HALF_IMAGE_SIZE, ty - 3.0,
+                HALF_IMAGE_SIZE - 4, 0.0, 2.0 * G_PI);
         cr->fill();
     }
 }
 
 bool sseditor::on_specialstageobjs_expose_event(
-    const Cairo::RefPtr<Cairo::Context>& cr) {
+        const Cairo::RefPtr<Cairo::Context>& cr) {
     // TODO: Read palettes and use colors.
     static constexpr const std::array<RGB, 7> fgcolors{
-        RGB{0, 172, 206},   RGB{206, 0, 144}, RGB{206, 87, 0},
-        RGB{206, 206, 172}, RGB{255, 144, 0}, RGB{116, 172, 0},
-        RGB{144, 144, 144}};
+            RGB{0, 172, 206},   RGB{206, 0, 144}, RGB{206, 87, 0},
+            RGB{206, 206, 172}, RGB{255, 144, 0}, RGB{116, 172, 0},
+            RGB{144, 144, 144}};
     static constexpr const std::array<RGB, 7> lanecolors{
-        RGB{255, 172, 52}, RGB{255, 144, 0}, RGB{255, 172, 52},
-        RGB{255, 172, 52}, RGB{0, 255, 87},  RGB{255, 172, 52},
-        RGB{172, 172, 206}};
+            RGB{255, 172, 52}, RGB{255, 144, 0}, RGB{255, 172, 52},
+            RGB{255, 172, 52}, RGB{0, 255, 87},  RGB{255, 172, 52},
+            RGB{172, 172, 206}};
     // Base tube color
     const auto fgcolor = fgcolors[currstage % fgcolors.size()];
     cr->set_source_rgb(fgcolor.red, fgcolor.green, fgcolor.blue);
@@ -244,7 +236,7 @@ bool sseditor::on_specialstageobjs_expose_event(
 
     // Draw area outside of the tube (right)
     cr->rectangle(
-        angle_to_x(0x80), 0.0, draw_width - angle_to_x(0x80), draw_height);
+            angle_to_x(0x80), 0.0, draw_width - angle_to_x(0x80), draw_height);
     cr->fill();
 
     cr->set_line_width(8.0);
@@ -428,12 +420,12 @@ void sseditor::select_hotspot() {
         auto const& row = currseg->get_row(i - segpos[seg]);
         for (auto const& elem : row) {
             int ty = (i - get_scroll()) * SIMAGE_SIZE;
-            int tx =
-                angle_to_x(static_cast<int8_t>(elem.first)) - HALF_IMAGE_SIZE;
+            int tx = angle_to_x(static_cast<int8_t>(elem.first))
+                     - HALF_IMAGE_SIZE;
 
-            if (mouse_x >= tx && mouse_y >= ty &&
-                mouse_x < tx + static_cast<int>(IMAGE_SIZE) &&
-                mouse_y < ty + static_cast<int>(IMAGE_SIZE)) {
+            if (mouse_x >= tx && mouse_y >= ty
+                && mouse_x < tx + static_cast<int>(IMAGE_SIZE)
+                && mouse_y < ty + static_cast<int>(IMAGE_SIZE)) {
                 hotspot.set(seg, elem.first, i - segpos[seg], elem.second);
                 break;
             }
@@ -455,7 +447,9 @@ void sseditor::show() {
     render();
 }
 
-static inline int get_angle_delta(bool grid) { return grid ? 4 : 1; }
+static inline int get_angle_delta(bool grid) {
+    return grid ? 4 : 1;
+}
 
 static inline double get_scroll_delta(guint state) {
     bool fast = (state & GDK_SHIFT_MASK) != 0;
@@ -520,12 +514,14 @@ bool sseditor::on_specialstageobjs_button_press_event(GdkEventButton* event) {
     int pos = static_cast<int>(event->y) / SIMAGE_SIZE + get_scroll();
     int seg = find_segment(pos);
     lastclick.set(
-        seg, x_to_angle(event->x, true), pos - segpos[seg], sssegments::eRing);
+            seg, x_to_angle(event->x, true), pos - segpos[seg],
+            sssegments::eRing);
 
     selclear.reset();
     if (mode == eSelectMode) {
-        if ((event->state & GDK_CONTROL_MASK) == 0 &&
-            (!hotspot.valid() || selection.find(hotspot) == selection.end())) {
+        if ((event->state & GDK_CONTROL_MASK) == 0
+            && (!hotspot.valid()
+                || selection.find(hotspot) == selection.end())) {
             selection.clear();
         }
         if (hotspot.valid()) {
@@ -575,7 +571,7 @@ void sseditor::cycle_object_type(int seg, unsigned pos, unsigned angle) {
         } else {
             selection.emplace(seg, angle, pos, type);
             do_action<alter_selection_action>(
-                currstage, sssegments::eBomb, selection);
+                    currstage, sssegments::eBomb, selection);
         }
     } else {
         selection.emplace(seg, angle, pos, sssegments::eRing);
@@ -610,8 +606,8 @@ void sseditor::insert_set() {
             int         seg     = elem.get_segment();
             sssegments* currseg = get_segment(seg);
             ObjectTypes type;
-            if (currseg != nullptr &&
-                currseg->exists(elem.get_pos(), elem.get_angle(), type)) {
+            if (currseg != nullptr
+                && currseg->exists(elem.get_pos(), elem.get_angle(), type)) {
                 delstack.emplace(seg, elem.get_angle(), elem.get_pos(), type);
             }
         }

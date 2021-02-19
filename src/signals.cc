@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <s2ssedit/sseditor.hh>
+
 #include <cassert>
 #include <fstream>
-
-#include <s2ssedit/sseditor.hh>
 
 using std::ifstream;
 using std::ios;
@@ -76,7 +76,7 @@ void sseditor::on_openfilebutton_clicked() {
     if (filedlg == nullptr) {
         builder->get_widget("filechooserdialog", filedlg);
         filedlg->signal_response().connect(
-            sigc::mem_fun(this, &sseditor::on_filedialog_response));
+                sigc::mem_fun(this, &sseditor::on_filedialog_response));
     }
 
     if (filedlg != nullptr) {
@@ -146,7 +146,7 @@ void sseditor::on_helpbutton_clicked() {
     if (helpdlg == nullptr) {
         builder->get_widget("helpdialog", helpdlg);
         helpdlg->signal_response().connect(
-            sigc::mem_fun(this, &sseditor::on_helpdialog_response));
+                sigc::mem_fun(this, &sseditor::on_helpdialog_response));
     }
     if (helpdlg != nullptr) {
         helpdlg->run();
@@ -157,14 +157,16 @@ void sseditor::on_aboutbutton_clicked() {
     if (aboutdlg == nullptr) {
         builder->get_widget("aboutdialog", aboutdlg);
         aboutdlg->signal_response().connect(
-            sigc::mem_fun(this, &sseditor::on_aboutdialog_response));
+                sigc::mem_fun(this, &sseditor::on_aboutdialog_response));
     }
     if (aboutdlg != nullptr) {
         aboutdlg->run();
     }
 }
 
-void sseditor::on_quitbutton_clicked() { kit->quit(); }
+void sseditor::on_quitbutton_clicked() {
+    kit->quit();
+}
 
 void sseditor::on_cutbutton_clicked() {
     copystack = selection;
@@ -375,8 +377,8 @@ void sseditor::on_append_segment_button_clicked() {
 }
 
 void sseditor::on_cut_segment_button_clicked() {
-    sssegments* seg =
-        specialstages->get_stage(currstage)->get_segment(currsegment);
+    sssegments* seg
+            = specialstages->get_stage(currstage)->get_segment(currsegment);
     copyseg = make_shared<sssegments>(*seg);
     do_action<cut_segment_action>(currstage, currsegment, *copyseg);
     update_segment_positions(false);
@@ -387,8 +389,8 @@ void sseditor::on_cut_segment_button_clicked() {
 }
 
 void sseditor::on_copy_segment_button_clicked() {
-    sssegments* seg =
-        specialstages->get_stage(currstage)->get_segment(currsegment);
+    sssegments* seg
+            = specialstages->get_stage(currstage)->get_segment(currsegment);
     copyseg = make_shared<sssegments>(*seg);
 
     update();
@@ -404,8 +406,8 @@ void sseditor::on_paste_segment_button_clicked() {
 }
 
 void sseditor::on_delete_segment_button_clicked() {
-    sssegments const& seg =
-        *specialstages->get_stage(currstage)->get_segment(currsegment);
+    sssegments const& seg
+            = *specialstages->get_stage(currstage)->get_segment(currsegment);
     do_action<delete_segment_action>(currstage, currsegment, seg);
     update_segment_positions(false);
     if (currsegment >= segpos.size()) {

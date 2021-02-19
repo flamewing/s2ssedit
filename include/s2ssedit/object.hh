@@ -31,15 +31,25 @@ private:
 
 public:
     object(int seg, unsigned x, unsigned y, sssegments::ObjectTypes t)
-        : segment(seg), pos(y), angle(x), type(t) {}
+            : segment(seg), pos(y), angle(x), type(t) {}
     object() noexcept = default;
-    sssegments::ObjectTypes get_type() const { return type; }
+    sssegments::ObjectTypes get_type() const {
+        return type;
+    }
 
-    int32_t get_segment() const { return segment; }
-    int32_t get_pos() const { return pos; }
-    int32_t get_angle() const { return angle; }
-    bool    valid() const { return segment != -1; }
-    bool    operator<(object const& other) const {
+    int32_t get_segment() const {
+        return segment;
+    }
+    int32_t get_pos() const {
+        return pos;
+    }
+    int32_t get_angle() const {
+        return angle;
+    }
+    bool valid() const {
+        return segment != -1;
+    }
+    bool operator<(object const& other) const {
         if (segment < other.segment) {
             return true;
         }
@@ -57,20 +67,36 @@ public:
     bool operator==(object const& other) const {
         return !(*this < other) && !(other < *this);
     }
-    bool operator!=(object const& other) const { return !(*this == other); }
-    bool operator>(object const& other) const { return other < *this; }
-    bool operator<=(object const& other) const { return !(other < *this); }
-    bool operator>=(object const& other) const { return !(*this < other); }
+    bool operator!=(object const& other) const {
+        return !(*this == other);
+    }
+    bool operator>(object const& other) const {
+        return other < *this;
+    }
+    bool operator<=(object const& other) const {
+        return !(other < *this);
+    }
+    bool operator>=(object const& other) const {
+        return !(*this < other);
+    }
     void reset() {
         segment = -1;
         angle   = 0;
         pos     = 0;
         type    = sssegments::eRing;
     }
-    void set_segment(int seg) { segment = seg; }
-    void set_pos(unsigned y) { pos = y; }
-    void set_angle(unsigned x) { angle = x; }
-    void set_type(sssegments::ObjectTypes t) { type = t; }
+    void set_segment(int seg) {
+        segment = seg;
+    }
+    void set_pos(unsigned y) {
+        pos = y;
+    }
+    void set_angle(unsigned x) {
+        angle = x;
+    }
+    void set_type(sssegments::ObjectTypes t) {
+        type = t;
+    }
     void set(int seg, unsigned x, unsigned y, sssegments::ObjectTypes t) {
         segment = seg;
         angle   = x;
@@ -85,4 +111,4 @@ struct ObjectMatchFunctor {
     }
 };
 
-#endif // OBJECT_H
+#endif    // OBJECT_H

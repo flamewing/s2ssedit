@@ -19,11 +19,11 @@
 #ifndef SSSEGMENTOBJS_H
 #define SSSEGMENTOBJS_H
 
+#include <s2ssedit/ignore_unused_variable_warning.hh>
+
 #include <istream>
 #include <map>
 #include <ostream>
-
-#include <s2ssedit/ignore_unused_variable_warning.hh>
 
 class sssegments {
 public:
@@ -98,14 +98,24 @@ private:
 public:
     size_t size() const;
 
-    uint16_t get_numrings() const noexcept { return numrings; }
-    uint16_t get_numbombs() const noexcept { return numbombs; }
-    uint16_t get_numshadows() const noexcept { return numshadows; }
+    uint16_t get_numrings() const noexcept {
+        return numrings;
+    }
+    uint16_t get_numbombs() const noexcept {
+        return numbombs;
+    }
+    uint16_t get_numshadows() const noexcept {
+        return numshadows;
+    }
     uint16_t get_totalobjs() const noexcept {
         return numrings + numbombs + numshadows;
     }
-    SegmentTypes    get_type() const noexcept { return terminator; }
-    SegmentGeometry get_geometry() const noexcept { return geometry; }
+    SegmentTypes get_type() const noexcept {
+        return terminator;
+    }
+    SegmentGeometry get_geometry() const noexcept {
+        return geometry;
+    }
     static uint32_t get_length(SegmentGeometry geometry) noexcept {
         ignore_unused_variable_warning(geometry);
         // Not yet:
@@ -126,18 +136,30 @@ public:
         //*/
         return eTurnThenRiseLen;
     }
-    int32_t get_length() const noexcept { return get_length(geometry); }
-    bool    get_direction() const noexcept { return flip; }
-    uint8_t get_flip_geom() const noexcept {
-        return static_cast<uint8_t>(flip ? eFlipMask : eNoFlip) |
-               static_cast<uint8_t>(geometry);
+    int32_t get_length() const noexcept {
+        return get_length(geometry);
     }
-    void set_type(SegmentTypes t) noexcept { terminator = t; }
-    void set_geometry(SegmentGeometry g) noexcept { geometry = g; }
-    void set_direction(bool tf) noexcept { flip = tf; }
+    bool get_direction() const noexcept {
+        return flip;
+    }
+    uint8_t get_flip_geom() const noexcept {
+        return static_cast<uint8_t>(flip ? eFlipMask : eNoFlip)
+               | static_cast<uint8_t>(geometry);
+    }
+    void set_type(SegmentTypes t) noexcept {
+        terminator = t;
+    }
+    void set_geometry(SegmentGeometry g) noexcept {
+        geometry = g;
+    }
+    void set_direction(bool tf) noexcept {
+        flip = tf;
+    }
 
-    auto const& get_row(uint8_t row) noexcept { return objects[row]; }
-    bool        exists(uint8_t row, uint8_t angle) const noexcept {
+    auto const& get_row(uint8_t row) noexcept {
+        return objects[row];
+    }
+    bool exists(uint8_t row, uint8_t angle) const noexcept {
         ObjectTypes type;
         return exists(row, angle, type);
     }
@@ -198,4 +220,4 @@ public:
     void write(std::ostream& out, std::ostream& lay) const;
 };
 
-#endif // SSSEGMENTOBJS_H
+#endif    // SSSEGMENTOBJS_H
