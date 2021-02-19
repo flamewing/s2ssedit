@@ -13,6 +13,7 @@ clang-analyzer-*,
 clang-analyzer-alpha*,
 cppcoreguidelines-*,
 -cppcoreguidelines-avoid-magic-numbers,
+-cppcoreguidelines-avoid-non-const-global-variables,
 -cppcoreguidelines-init-variables,
 -cppcoreguidelines-macro-usage,
 -cppcoreguidelines-pro-bounds-constant-array-index,
@@ -37,8 +38,6 @@ readability-*,
 CheckOptions:
     - key: bugprone-argument-comment.StrictMode
       value: 1
-    - key: bugprone-exception-escape.FunctionsThatShouldNotThrow
-      value: WinMain,SDL_main
     - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
       value: 1
     - key: bugprone-signed-char-misuse.CharTypdefsToIgnore
