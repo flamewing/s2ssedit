@@ -19,7 +19,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <s2ssedit/ssobjfile.hh>
+#include "s2ssedit/ssobjfile.hh"
 
 class object {
 private:

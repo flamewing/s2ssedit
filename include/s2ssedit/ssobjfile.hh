@@ -19,7 +19,7 @@
 #ifndef SSOBJFILE_H
 #define SSOBJFILE_H
 
-#include <s2ssedit/sslevelobjs.hh>
+#include "s2ssedit/sslevelobjs.hh"
 
 #include <algorithm>
 #include <istream>

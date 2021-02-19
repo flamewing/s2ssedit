@@ -16,9 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "s2ssedit/sseditor.hh"
+
+#include "s2ssedit/ignore_unused_variable_warning.hh"
+
 #include <gdkmm/rgba.h>
-#include <s2ssedit/ignore_unused_variable_warning.hh>
-#include <s2ssedit/sseditor.hh>
 
 #include <iostream>
 #include <set>

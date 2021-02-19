@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <s2ssedit/sseditor.hh>
+#include "s2ssedit/sseditor.hh"
 
 #include <cassert>
 #include <fstream>

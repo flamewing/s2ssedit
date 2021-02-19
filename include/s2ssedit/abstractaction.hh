@@ -19,11 +19,11 @@
 #ifndef ABSTRACTACTION_H
 #define ABSTRACTACTION_H
 
-#include <s2ssedit/ignore_unused_variable_warning.hh>
-#include <s2ssedit/object.hh>
-#include <s2ssedit/sslevelobjs.hh>
-#include <s2ssedit/ssobjfile.hh>
-#include <s2ssedit/sssegmentobjs.hh>
+#include "s2ssedit/ignore_unused_variable_warning.hh"
+#include "s2ssedit/object.hh"
+#include "s2ssedit/sslevelobjs.hh"
+#include "s2ssedit/ssobjfile.hh"
+#include "s2ssedit/sssegmentobjs.hh"
 
 #include <algorithm>
 #include <memory>

@@ -19,7 +19,7 @@
 #ifndef SSLEVELOBJS_H
 #define SSLEVELOBJS_H
 
-#include <s2ssedit/sssegmentobjs.hh>
+#include "s2ssedit/sssegmentobjs.hh"
 
 #include <istream>
 #include <ostream>

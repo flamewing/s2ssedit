@@ -16,8 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "s2ssedit/sssegmentobjs.hh"
+
 #include <mdcomp/bigendian_io.hh>
-#include <s2ssedit/sssegmentobjs.hh>
 
 #include <cstring>
 #include <iostream>

@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "s2ssedit/ignore_unused_variable_warning.hh"
+#include "s2ssedit/sseditor.hh"
+
 #include <mdcomp/bigendian_io.hh>
-#include <s2ssedit/ignore_unused_variable_warning.hh>
-#include <s2ssedit/sseditor.hh>
 
 #include <set>
 #include <sstream>

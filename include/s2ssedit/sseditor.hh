@@ -19,10 +19,11 @@
 #ifndef SSEDITOR_H
 #define SSEDITOR_H
 
+#include "s2ssedit/abstractaction.hh"
+#include "s2ssedit/object.hh"
+#include "s2ssedit/ssobjfile.hh"
+
 #include <gtkmm.h>
-#include <s2ssedit/abstractaction.hh>
-#include <s2ssedit/object.hh>
-#include <s2ssedit/ssobjfile.hh>
 
 #include <array>
 #include <deque>
