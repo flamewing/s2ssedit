@@ -21,43 +21,43 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 /* For testing propose use the local (not installed) ui file */
 //#define DEBUG 1
-#ifdef WIN32
-#    define UI_FILE "./s2ssedit.ui"
-#else
-#    ifdef DEBUG
-#        define UI_FILE "src/s2ssedit.ui"
-#    else
-#        define UI_FILE PACKAGE_DATA_DIR "/s2ssedit/ui/s2ssedit.ui"
-#    endif
-#endif
-
-#ifdef WIN32
-#    define RINGFILE "./ring.png"
-#    define BOMBFILE "./bomb.png"
-#else
-#    ifdef DEBUG
-#        define RINGFILE "src/ring.png"
-#        define BOMBFILE "src/bomb.png"
-#    else
-#        define RINGFILE PACKAGE_DATA_DIR "/s2ssedit/ui/ring.png"
-#        define BOMBFILE PACKAGE_DATA_DIR "/s2ssedit/ui/bomb.png"
-#    endif
-#endif
+#define DATADIR  "./ui"
+#define UI_FILE  "/s2ssedit.ui"
+#define RINGFILE "/ring.png"
+#define BOMBFILE "/bomb.png"
 
 using std::array;
 using std::cerr;
 using std::endl;
+using std::string;
 using std::tie;
 using std::to_string;
+
+#ifdef _WIN32
+#    include <io.h>
+#    define access _access_s
+#else
+#    include <unistd.h>
+#endif
+
+bool file_exists(const string& filename) {
+    return access(filename.c_str(), 0) == 0;
+}
 
 int main(int argc, char* argv[]) {
     try {
         auto app = Gtk::Application::create(
                 argc, argv, "org.flamewing.s2ssedit");
-        sseditor Editor(app, UI_FILE);
+        const std::string uifile
+                = file_exists(PACKAGE_DATA_DIR UI_FILE)
+                          ? PACKAGE_DATA_DIR UI_FILE
+                          : (file_exists(DATADIR UI_FILE) ? DATADIR UI_FILE
+                                                          : "./" UI_FILE);
+        sseditor Editor(app, uifile.c_str());
         Editor.run();
     } catch (const Glib::FileError& ex) {
         cerr << ex.what() << endl;
@@ -108,8 +108,18 @@ sseditor::sseditor(
           psegment_left(nullptr), pobject_grid(nullptr), pmoveup(nullptr),
           pmovedown(nullptr), pmoveleft(nullptr), pmoveright(nullptr),
           pringtype(nullptr), pbombtype(nullptr) {
-    ringimg = Gdk::Pixbuf::create_from_file(RINGFILE);
-    bombimg = Gdk::Pixbuf::create_from_file(BOMBFILE);
+    const std::string ringfile
+            = file_exists(PACKAGE_DATA_DIR RINGFILE)
+                      ? PACKAGE_DATA_DIR RINGFILE
+                      : (file_exists(DATADIR RINGFILE) ? DATADIR RINGFILE
+                                                       : "." RINGFILE);
+    const std::string bombfile
+            = file_exists(PACKAGE_DATA_DIR BOMBFILE)
+                      ? PACKAGE_DATA_DIR BOMBFILE
+                      : (file_exists(DATADIR BOMBFILE) ? DATADIR BOMBFILE
+                                                       : "." BOMBFILE);
+    ringimg = Gdk::Pixbuf::create_from_file(ringfile);
+    bombimg = Gdk::Pixbuf::create_from_file(bombfile);
 
     // Load the Glade file and instiate its widgets:
     builder = Gtk::Builder::create_from_file(uifile);
