@@ -56,7 +56,7 @@ public:
     }
 };
 
-class alter_selection_action : public abstract_action {
+class alter_selection_action final : public abstract_action {
 private:
     object_set              objlist;
     int                     stage;
@@ -162,7 +162,7 @@ public:
 
 using cut_selection_action = delete_selection_action;
 
-class insert_objects_action : public delete_selection_action {
+class insert_objects_action final : public delete_selection_action {
 public:
     insert_objects_action(int s, object_set const& sel)
             : delete_selection_action(s, sel) {}
@@ -185,7 +185,7 @@ public:
     move_objects_action(int s, object_set const& del, object_set const& add)
             : from(std::make_shared<delete_selection_action>(s, del)),
               to(std::make_shared<paste_objects_action>(s, add)) {}
-    void apply(ssobj_file_shared ss, object_set* sel) override {
+    void apply(ssobj_file_shared ss, object_set* sel) final {
         from->apply(ss, sel);
         to->apply(ss, sel);
     }
@@ -223,7 +223,7 @@ public:
     }
 };
 
-class insert_objects_ex_action : public move_objects_action {
+class insert_objects_ex_action final : public move_objects_action {
 public:
     insert_objects_ex_action(
             int s, object_set const& del, object_set const& add)
@@ -234,7 +234,7 @@ public:
     }
 };
 
-class alter_segment_action : public abstract_action {
+class alter_segment_action final : public abstract_action {
 private:
     int  stage, seg;
     bool newflip, oldflip;
@@ -346,13 +346,13 @@ public:
     }
 };
 
-class cut_segment_action : public delete_segment_action {
+class cut_segment_action final : public delete_segment_action {
 public:
     cut_segment_action(int s, int sg, sssegments const& sgm)
             : delete_segment_action(s, sg, sgm) {}
 };
 
-class insert_segment_action : public delete_segment_action {
+class insert_segment_action final : public delete_segment_action {
 public:
     insert_segment_action(int s, int sg, sssegments const& sgm)
             : delete_segment_action(s, sg, sgm) {}
@@ -366,7 +366,7 @@ public:
 
 using paste_segment_action = insert_segment_action;
 
-class move_segment_action : public abstract_action {
+class move_segment_action final : public abstract_action {
 private:
     int stage, seg, dir;
 
@@ -426,7 +426,7 @@ public:
 
 using cut_stage_action = delete_stage_action;
 
-class insert_stage_action : public delete_stage_action {
+class insert_stage_action final : public delete_stage_action {
 public:
     insert_stage_action(int s, sslevels const& l) : delete_stage_action(s, l) {}
     void apply(ssobj_file_shared ss, object_set* sel) override {
@@ -439,7 +439,7 @@ public:
 
 using paste_stage_action = insert_stage_action;
 
-class move_stage_action : public abstract_action {
+class move_stage_action final : public abstract_action {
 private:
     int stage, dir;
 
