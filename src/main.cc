@@ -24,7 +24,7 @@
 #include <string>
 
 /* For testing propose use the local (not installed) ui file */
-//#define DEBUG 1
+// #define DEBUG 1
 #define DATADIR  "./ui"
 #define UI_FILE  "/s2ssedit.ui"
 #define RINGFILE "/ring.png"
@@ -48,16 +48,23 @@ bool file_exists(const string& filename) {
     return access(filename.c_str(), 0) == 0;
 }
 
+string find_data_file(char const* filename) {
+    for (char const* directory :
+         {PACKAGE_DATA_DIR, S2SSEDIT_SOURCE_DATA_DIR, DATADIR, "."}) {
+        const string path = string(directory) + filename;
+        if (file_exists(path)) {
+            return path;
+        }
+    }
+    return "." + string(filename);
+}
+
 int main(int argc, char* argv[]) {
     try {
         auto app = Gtk::Application::create(
                 argc, argv, "org.flamewing.s2ssedit");
-        const std::string uifile
-                = file_exists(PACKAGE_DATA_DIR UI_FILE)
-                          ? PACKAGE_DATA_DIR UI_FILE
-                          : (file_exists(DATADIR UI_FILE) ? DATADIR UI_FILE
-                                                          : "./" UI_FILE);
-        sseditor Editor(app, uifile.c_str());
+        const std::string uifile = find_data_file(UI_FILE);
+        sseditor          Editor(app, uifile.c_str());
         Editor.run();
     } catch (const Glib::FileError& ex) {
         cerr << ex.what() << endl;
@@ -108,18 +115,10 @@ sseditor::sseditor(
           psegment_left(nullptr), pobject_grid(nullptr), pmoveup(nullptr),
           pmovedown(nullptr), pmoveleft(nullptr), pmoveright(nullptr),
           pringtype(nullptr), pbombtype(nullptr) {
-    const std::string ringfile
-            = file_exists(PACKAGE_DATA_DIR RINGFILE)
-                      ? PACKAGE_DATA_DIR RINGFILE
-                      : (file_exists(DATADIR RINGFILE) ? DATADIR RINGFILE
-                                                       : "." RINGFILE);
-    const std::string bombfile
-            = file_exists(PACKAGE_DATA_DIR BOMBFILE)
-                      ? PACKAGE_DATA_DIR BOMBFILE
-                      : (file_exists(DATADIR BOMBFILE) ? DATADIR BOMBFILE
-                                                       : "." BOMBFILE);
-    ringimg = Gdk::Pixbuf::create_from_file(ringfile);
-    bombimg = Gdk::Pixbuf::create_from_file(bombfile);
+    const std::string ringfile = find_data_file(RINGFILE);
+    const std::string bombfile = find_data_file(BOMBFILE);
+    ringimg                    = Gdk::Pixbuf::create_from_file(ringfile);
+    bombimg                    = Gdk::Pixbuf::create_from_file(bombfile);
 
     // Load the Glade file and instiate its widgets:
     builder = Gtk::Builder::create_from_file(uifile);
@@ -240,18 +239,22 @@ sseditor::sseditor(
             false);
     pspecialstageobjs->signal_draw().connect(
             sigc::mem_fun(this, &sseditor::on_specialstageobjs_expose_event));
-    pspecialstageobjs->signal_key_press_event().connect(sigc::mem_fun(
-            this, &sseditor::on_specialstageobjs_key_press_event));
-    pspecialstageobjs->signal_button_press_event().connect(sigc::mem_fun(
-            this, &sseditor::on_specialstageobjs_button_press_event));
-    pspecialstageobjs->signal_button_release_event().connect(sigc::mem_fun(
-            this, &sseditor::on_specialstageobjs_button_release_event));
+    pspecialstageobjs->signal_key_press_event().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_specialstageobjs_key_press_event));
+    pspecialstageobjs->signal_button_press_event().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_specialstageobjs_button_press_event));
+    pspecialstageobjs->signal_button_release_event().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_specialstageobjs_button_release_event));
     pspecialstageobjs->signal_scroll_event().connect(
             sigc::mem_fun(this, &sseditor::on_specialstageobjs_scroll_event));
     pspecialstageobjs->signal_drag_begin().connect(
             sigc::mem_fun(this, &sseditor::on_specialstageobjs_drag_begin));
-    pspecialstageobjs->signal_motion_notify_event().connect(sigc::mem_fun(
-            this, &sseditor::on_specialstageobjs_motion_notify_event));
+    pspecialstageobjs->signal_motion_notify_event().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_specialstageobjs_motion_notify_event));
     pspecialstageobjs->signal_drag_data_get().connect(
             sigc::mem_fun(this, &sseditor::on_specialstageobjs_drag_data_get));
     pspecialstageobjs->signal_drag_end().connect(
@@ -272,10 +275,12 @@ sseditor::sseditor(
             sigc::mem_fun(this, &sseditor::on_redobutton_clicked));
     pmodebuttons[eSelectMode]->signal_toggled().connect(
             sigc::mem_fun(this, &sseditor::on_modebutton_toggled<eSelectMode>));
-    pmodebuttons[eInsertRingMode]->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_modebutton_toggled<eInsertRingMode>));
-    pmodebuttons[eInsertBombMode]->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_modebutton_toggled<eInsertBombMode>));
+    pmodebuttons[eInsertRingMode]->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_modebutton_toggled<eInsertRingMode>));
+    pmodebuttons[eInsertBombMode]->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_modebutton_toggled<eInsertBombMode>));
     pmodebuttons[eDeleteMode]->signal_toggled().connect(
             sigc::mem_fun(this, &sseditor::on_modebutton_toggled<eDeleteMode>));
     psnapgridbutton->signal_toggled().connect(
@@ -338,8 +343,9 @@ sseditor::sseditor(
             sigc::mem_fun(this, &sseditor::on_next_stage_button_clicked));
     plast_stage_button->signal_clicked().connect(
             sigc::mem_fun(this, &sseditor::on_last_stage_button_clicked));
-    pinsert_stage_before_button->signal_clicked().connect(sigc::mem_fun(
-            this, &sseditor::on_insert_stage_before_button_clicked));
+    pinsert_stage_before_button->signal_clicked().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_insert_stage_before_button_clicked));
     pappend_stage_button->signal_clicked().connect(
             sigc::mem_fun(this, &sseditor::on_append_stage_button_clicked));
     pcut_stage_button->signal_clicked().connect(
@@ -363,8 +369,9 @@ sseditor::sseditor(
             sigc::mem_fun(this, &sseditor::on_next_segment_button_clicked));
     plast_segment_button->signal_clicked().connect(
             sigc::mem_fun(this, &sseditor::on_last_segment_button_clicked));
-    pinsert_segment_before_button->signal_clicked().connect(sigc::mem_fun(
-            this, &sseditor::on_insert_segment_before_button_clicked));
+    pinsert_segment_before_button->signal_clicked().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_insert_segment_before_button_clicked));
     pappend_segment_button->signal_clicked().connect(
             sigc::mem_fun(this, &sseditor::on_append_segment_button_clicked));
     pcut_segment_button->signal_clicked().connect(
@@ -375,52 +382,66 @@ sseditor::sseditor(
             sigc::mem_fun(this, &sseditor::on_paste_segment_button_clicked));
     pdelete_segment_button->signal_clicked().connect(
             sigc::mem_fun(this, &sseditor::on_delete_segment_button_clicked));
-    pswap_segment_prev_button->signal_clicked().connect(sigc::mem_fun(
-            this, &sseditor::on_swap_segment_prev_button_clicked));
-    pswap_segment_next_button->signal_clicked().connect(sigc::mem_fun(
-            this, &sseditor::on_swap_segment_next_button_clicked));
+    pswap_segment_prev_button->signal_clicked().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_swap_segment_prev_button_clicked));
+    pswap_segment_next_button->signal_clicked().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_swap_segment_next_button_clicked));
     // Segment flags
-    pnormal_segment->signal_toggled().connect(sigc::mem_fun(
-            this,
-            &sseditor::on_segmenttype_toggled<
-                    sssegments::eNormalSegment, &sseditor::pnormal_segment>));
-    pring_message->signal_toggled().connect(sigc::mem_fun(
-            this,
-            &sseditor::on_segmenttype_toggled<
-                    sssegments::eRingsMessage, &sseditor::pring_message>));
-    pcheckpoint->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_segmenttype_toggled<
-                          sssegments::eCheckpoint, &sseditor::pcheckpoint>));
-    pchaos_emerald->signal_toggled().connect(sigc::mem_fun(
-            this,
-            &sseditor::on_segmenttype_toggled<
-                    sssegments::eChaosEmerald, &sseditor::pchaos_emerald>));
-    psegment_turnthenrise->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_segment_segmentgeometry_toggled<
-                          sssegments::eTurnThenRise,
-                          &sseditor::psegment_turnthenrise>));
-    psegment_turnthendrop->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_segment_segmentgeometry_toggled<
-                          sssegments::eTurnThenDrop,
-                          &sseditor::psegment_turnthendrop>));
-    psegment_turnthenstraight->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_segment_segmentgeometry_toggled<
-                          sssegments::eTurnThenStraight,
-                          &sseditor::psegment_turnthenstraight>));
-    psegment_straight->signal_toggled().connect(sigc::mem_fun(
-            this,
-            &sseditor::on_segment_segmentgeometry_toggled<
-                    sssegments::eStraight, &sseditor::psegment_straight>));
-    psegment_straightthenturn->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_segment_segmentgeometry_toggled<
-                          sssegments::eStraightThenTurn,
-                          &sseditor::psegment_straightthenturn>));
-    psegment_right->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_segmentdirection_toggled<
-                          false, &sseditor::psegment_right>));
-    psegment_left->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_segmentdirection_toggled<
-                          true, &sseditor::psegment_left>));
+    pnormal_segment->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segmenttype_toggled<
+                                  sssegments::eNormalSegment,
+                                  &sseditor::pnormal_segment>));
+    pring_message->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segmenttype_toggled<
+                                  sssegments::eRingsMessage,
+                                  &sseditor::pring_message>));
+    pcheckpoint->signal_toggled().connect(
+            sigc::mem_fun(
+                    this,
+                    &sseditor::on_segmenttype_toggled<
+                            sssegments::eCheckpoint, &sseditor::pcheckpoint>));
+    pchaos_emerald->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segmenttype_toggled<
+                                  sssegments::eChaosEmerald,
+                                  &sseditor::pchaos_emerald>));
+    psegment_turnthenrise->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segment_segmentgeometry_toggled<
+                                  sssegments::eTurnThenRise,
+                                  &sseditor::psegment_turnthenrise>));
+    psegment_turnthendrop->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segment_segmentgeometry_toggled<
+                                  sssegments::eTurnThenDrop,
+                                  &sseditor::psegment_turnthendrop>));
+    psegment_turnthenstraight->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segment_segmentgeometry_toggled<
+                                  sssegments::eTurnThenStraight,
+                                  &sseditor::psegment_turnthenstraight>));
+    psegment_straight->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segment_segmentgeometry_toggled<
+                                  sssegments::eStraight,
+                                  &sseditor::psegment_straight>));
+    psegment_straightthenturn->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segment_segmentgeometry_toggled<
+                                  sssegments::eStraightThenTurn,
+                                  &sseditor::psegment_straightthenturn>));
+    psegment_right->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segmentdirection_toggled<
+                                  false, &sseditor::psegment_right>));
+    psegment_left->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_segmentdirection_toggled<
+                                  true, &sseditor::psegment_left>));
     // Object flags
     pmoveup->signal_clicked().connect(
             sigc::mem_fun(this, &sseditor::on_movebtn_clicked<0, -1>));
@@ -430,12 +451,14 @@ sseditor::sseditor(
             sigc::mem_fun(this, &sseditor::on_movebtn_clicked<-1, 0>));
     pmoveright->signal_clicked().connect(
             sigc::mem_fun(this, &sseditor::on_movebtn_clicked<1, 0>));
-    pringtype->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_objecttype_toggled<
-                          sssegments::eRing, &sseditor::pringtype>));
-    pbombtype->signal_toggled().connect(sigc::mem_fun(
-            this, &sseditor::on_objecttype_toggled<
-                          sssegments::eBomb, &sseditor::pbombtype>));
+    pringtype->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_objecttype_toggled<
+                                  sssegments::eRing, &sseditor::pringtype>));
+    pbombtype->signal_toggled().connect(
+            sigc::mem_fun(
+                    this, &sseditor::on_objecttype_toggled<
+                                  sssegments::eBomb, &sseditor::pbombtype>));
 
     update();
 }

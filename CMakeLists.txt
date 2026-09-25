@@ -330,7 +330,8 @@ target_compile_options(s2ssedit
 )
 target_compile_definitions(s2ssedit
     PRIVATE
-        PACKAGE_DATA_DIR="${CMAKE_INSTALL_DATADIR}/s2ssedit/ui"
+    PACKAGE_DATA_DIR="${CMAKE_INSTALL_FULL_DATADIR}/s2ssedit/ui"
+        S2SSEDIT_SOURCE_DATA_DIR="${PROJECT_SOURCE_DIR}/ui"
 )
 set_target_properties(s2ssedit
     PROPERTIES
@@ -351,7 +352,7 @@ install(
 
 install(
     DIRECTORY ui
-    DESTINATION share/s2ssedit
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/s2ssedit
     PATTERN "ui/*.png"
     PATTERN "ui/*.ui"
     PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ
