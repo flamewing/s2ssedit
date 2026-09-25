@@ -17,6 +17,15 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 include(GNUInstallDirs)
 
+if(WIN32 AND DEFINED ENV{MSYSTEM_PREFIX})
+    set(MSYS2_PKG_CONFIG "$ENV{MSYSTEM_PREFIX}/bin/pkg-config.exe")
+    if(EXISTS "${MSYS2_PKG_CONFIG}" AND (NOT DEFINED PKG_CONFIG_EXECUTABLE
+                                           OR PKG_CONFIG_EXECUTABLE MATCHES "[/\\\\]usr[/\\\\]bin[/\\\\]pkg-config"))
+        set(PKG_CONFIG_EXECUTABLE "${MSYS2_PKG_CONFIG}" CACHE FILEPATH
+            "pkg-config executable" FORCE)
+    endif()
+endif()
+
 cmake_policy(SET CMP0167 NEW)
 find_package(Boost REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -330,8 +339,8 @@ target_compile_options(s2ssedit
 )
 target_compile_definitions(s2ssedit
     PRIVATE
-    PACKAGE_DATA_DIR="${CMAKE_INSTALL_FULL_DATADIR}/s2ssedit/ui"
-        S2SSEDIT_SOURCE_DATA_DIR="${PROJECT_SOURCE_DIR}/ui"
+        $<$<COMPILE_LANGUAGE:CXX>:PACKAGE_DATA_DIR="${CMAKE_INSTALL_FULL_DATADIR}/s2ssedit/ui">
+        $<$<COMPILE_LANGUAGE:CXX>:S2SSEDIT_SOURCE_DATA_DIR="${PROJECT_SOURCE_DIR}/ui">
 )
 set_target_properties(s2ssedit
     PROPERTIES
