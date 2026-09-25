@@ -1,3 +1,8 @@
+* text=auto eol=lf
+
+*.ico binary
+*.png binary
+
 *.ac		text
 *.am		text
 *.in		text
