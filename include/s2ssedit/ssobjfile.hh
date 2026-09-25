@@ -27,8 +27,7 @@
 #include <string>
 #include <vector>
 
-#define SS_OBJECT_FILE \
-    "Special stage object location lists (Kosinski compression).bin"
+#define SS_OBJECT_FILE "Special stage object location lists (Kosinski compression).bin"
 #define SS_LAYOUT_FILE "Special stage level layouts (Nemesis compression).bin"
 
 class ssobj_file {
@@ -51,16 +50,20 @@ public:
     size_t num_stages() const {
         return stages.size();
     }
+
     sslevels* get_stage(size_t s) {
         return &(stages[s]);
     }
+
     sslevels* insert(sslevels const& lvl, size_t s) {
         return &*(stages.insert(stages.begin() + s, lvl));
     }
+
     sslevels* append(sslevels const& lvl) {
         stages.push_back(lvl);
         return &stages.back();
     }
+
     sslevels* remove(size_t s) {
         auto it = stages.erase(stages.begin() + s);
         if (it == stages.end()) {
@@ -68,6 +71,7 @@ public:
         }
         return &*it;
     }
+
     sslevels* move_left(size_t s) {
         if (s == 0) {
             return &stages.front();
@@ -75,6 +79,7 @@ public:
         std::swap(stages[s - 1], stages[s]);
         return &stages[s - 1];
     }
+
     sslevels* move_right(size_t s) {
         if (s >= stages.size() - 1) {
             return &stages.back();

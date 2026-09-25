@@ -18,10 +18,9 @@
 
 #include "s2ssedit/sssegmentobjs.hh"
 
-#include <mdcomp/bigendian_io.hh>
-
 #include <cstring>
 #include <iostream>
+#include <mdcomp/bigendian_io.hh>
 
 using std::istream;
 using std::ostream;

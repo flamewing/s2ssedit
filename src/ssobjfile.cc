@@ -20,14 +20,13 @@
 
 #include "s2ssedit/ignore_unused_variable_warning.hh"
 
-#include <mdcomp/bigendian_io.hh>
-#include <mdcomp/kosinski.hh>
-#include <mdcomp/nemesis.hh>
-
 #include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <mdcomp/bigendian_io.hh>
+#include <mdcomp/kosinski.hh>
+#include <mdcomp/nemesis.hh>
 #include <sstream>
 
 using std::fstream;
@@ -40,8 +39,8 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
-//#define DEBUG_DECODER 1
-//#define DEBUG_ENCODER 1
+// #define DEBUG_DECODER 1
+// #define DEBUG_ENCODER 1
 
 ssobj_file::ssobj_file(string const& dir) {
     layoutfile = dir + SS_LAYOUT_FILE;

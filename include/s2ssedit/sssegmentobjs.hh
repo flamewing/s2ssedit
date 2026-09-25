@@ -34,6 +34,7 @@ public:
         eCheckpoint    = 0xfe,
         eChaosEmerald  = 0xfd
     };
+
     enum SegmentGeometry {
         eTurnThenRise = 0,
         eTurnThenDrop,
@@ -41,18 +42,24 @@ public:
         eStraight,
         eStraightThenTurn
     };
+
     enum ObjectTypes : uint8_t {
         ePositionMask = 0x3fU,
         eRing         = 0x00U,
         eBomb         = 0x40U,
         eItemMask     = eBomb
     };
-    enum AngleMasks : uint8_t { eOnAirMask = 0x80U };
+
+    enum AngleMasks : uint8_t {
+        eOnAirMask = 0x80U
+    };
+
     enum GeometryMasks : uint8_t {
         eNoFlip   = 0U,
         eGeomMask = 0x7fU,
         eFlipMask = 0x80U
     };
+
     enum SegmentSizes : uint32_t {
         eTurnThenRiseLen     = 24,
         eTurnThenDropLen     = 24,
@@ -60,12 +67,14 @@ public:
         eStraightLen         = 16,
         eStraightThenTurnLen = 11
     };
+
     //                       position          angle
     using segobjs = std::map<uint8_t, std::map<uint8_t, ObjectTypes>>;
 
     static bool is_aerial(uint8_t angle) noexcept {
         return (angle & eOnAirMask) != 0;
     }
+
     void add_obj(uint8_t angle, ObjectTypes type) noexcept {
         if (!is_aerial(angle)) {
             numshadows++;
@@ -76,6 +85,7 @@ public:
             numbombs++;
         }
     }
+
     void del_obj(uint8_t angle, ObjectTypes type) noexcept {
         if (!is_aerial(angle)) {
             numshadows--;
@@ -102,21 +112,27 @@ public:
     uint16_t get_numrings() const noexcept {
         return numrings;
     }
+
     uint16_t get_numbombs() const noexcept {
         return numbombs;
     }
+
     uint16_t get_numshadows() const noexcept {
         return numshadows;
     }
+
     uint16_t get_totalobjs() const noexcept {
         return numrings + numbombs + numshadows;
     }
+
     SegmentTypes get_type() const noexcept {
         return terminator;
     }
+
     SegmentGeometry get_geometry() const noexcept {
         return geometry;
     }
+
     static uint32_t get_length(SegmentGeometry geometry) noexcept {
         ignore_unused_variable_warning(geometry);
         // Not yet:
@@ -137,22 +153,28 @@ public:
         //*/
         return eTurnThenRiseLen;
     }
+
     int32_t get_length() const noexcept {
         return get_length(geometry);
     }
+
     bool get_direction() const noexcept {
         return flip;
     }
+
     uint8_t get_flip_geom() const noexcept {
         return static_cast<uint8_t>(flip ? eFlipMask : eNoFlip)
                | static_cast<uint8_t>(geometry);
     }
+
     void set_type(SegmentTypes t) noexcept {
         terminator = t;
     }
+
     void set_geometry(SegmentGeometry g) noexcept {
         geometry = g;
     }
+
     void set_direction(bool tf) noexcept {
         flip = tf;
     }
@@ -160,10 +182,12 @@ public:
     auto const& get_row(uint8_t row) noexcept {
         return objects[row];
     }
+
     bool exists(uint8_t row, uint8_t angle) const noexcept {
         ObjectTypes type;
         return exists(row, angle, type);
     }
+
     bool exists(uint8_t row, uint8_t angle, ObjectTypes& type) const noexcept {
         auto it = objects.find(row);
         if (it == objects.end()) {
@@ -177,6 +201,7 @@ public:
         type = it2->second;
         return true;
     }
+
     void update(uint8_t row, uint8_t angle, ObjectTypes type, bool insert) {
         auto it = objects.find(row);
         if (it == objects.end()) {
@@ -203,6 +228,7 @@ public:
         }
         add_obj(angle, type);
     }
+
     void remove(uint8_t row, uint8_t angle) noexcept {
         auto it = objects.find(row);
         if (it == objects.end()) {

@@ -377,9 +377,8 @@ void sseditor::on_append_segment_button_clicked() {
 }
 
 void sseditor::on_cut_segment_button_clicked() {
-    sssegments* seg
-            = specialstages->get_stage(currstage)->get_segment(currsegment);
-    copyseg = make_shared<sssegments>(*seg);
+    sssegments* seg = specialstages->get_stage(currstage)->get_segment(currsegment);
+    copyseg         = make_shared<sssegments>(*seg);
     do_action<cut_segment_action>(currstage, currsegment, *copyseg);
     update_segment_positions(false);
     if (currsegment >= segpos.size()) {
@@ -389,9 +388,8 @@ void sseditor::on_cut_segment_button_clicked() {
 }
 
 void sseditor::on_copy_segment_button_clicked() {
-    sssegments* seg
-            = specialstages->get_stage(currstage)->get_segment(currsegment);
-    copyseg = make_shared<sssegments>(*seg);
+    sssegments* seg = specialstages->get_stage(currstage)->get_segment(currsegment);
+    copyseg         = make_shared<sssegments>(*seg);
 
     update();
 }

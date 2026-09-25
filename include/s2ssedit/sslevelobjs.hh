@@ -50,16 +50,20 @@ public:
     size_t num_segments() const {
         return segments.size();
     }
+
     sssegments* get_segment(size_t s) {
         return &(segments[s]);
     }
+
     sssegments* insert(sssegments const& lvl, size_t s) {
         return &*(segments.insert(segments.begin() + s, lvl));
     }
+
     sssegments* append(sssegments const& lvl) {
         segments.push_back(lvl);
         return &segments.back();
     }
+
     sssegments* remove(size_t s) {
         auto it = segments.erase(segments.begin() + s);
         if (it == segments.end()) {
@@ -67,6 +71,7 @@ public:
         }
         return &*it;
     }
+
     sssegments* move_left(size_t s) {
         if (s == 0) {
             return &segments.front();
@@ -74,6 +79,7 @@ public:
         std::swap(segments[s - 1], segments[s]);
         return &segments[s - 1];
     }
+
     sssegments* move_right(size_t s) {
         if (s >= segments.size() - 1) {
             return &segments.back();
