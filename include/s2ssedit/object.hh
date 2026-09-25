@@ -30,7 +30,7 @@ private:
     sssegments::ObjectTypes type = sssegments::eRing;
 
 public:
-    object(int seg, unsigned x, unsigned y, sssegments::ObjectTypes t)
+    object(int seg, unsigned x, unsigned y, sssegments::ObjectTypes t) noexcept
             : segment(seg), pos(y), angle(x), type(t) {}
     object() noexcept = default;
     sssegments::ObjectTypes get_type() const {

@@ -63,7 +63,8 @@ private:
     sssegments::ObjectTypes type;
 
 public:
-    alter_selection_action(int s, sssegments::ObjectTypes t, object_set sel)
+    alter_selection_action(
+            int s, sssegments::ObjectTypes t, object_set sel) noexcept
             : objlist(std::move(sel)), stage(s), type(t) {}
     void apply(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
@@ -123,7 +124,7 @@ private:
 
 public:
     friend class move_objects_action;
-    delete_selection_action(int s, object_set sel)
+    delete_selection_action(int s, object_set sel) noexcept
             : objlist(std::move(sel)), stage(s) {}
     void apply(ssobj_file_shared ss, object_set* sel) override {
         if (sel != nullptr) {
@@ -246,7 +247,7 @@ public:
     alter_segment_action(
             int s, int sg, sssegments const& sgm, bool tf,
             sssegments::SegmentTypes    newterm,
-            sssegments::SegmentGeometry newgeom)
+            sssegments::SegmentGeometry newgeom) noexcept
             : stage(s), seg(sg) {
         newflip       = tf;
         oldflip       = sgm.get_direction();
@@ -320,7 +321,7 @@ private:
     unsigned   stage, seg;
 
 public:
-    delete_segment_action(int s, int sg, sssegments sgm)
+    delete_segment_action(int s, int sg, sssegments sgm) noexcept
             : segment(std::move(sgm)), stage(s), seg(sg) {}
     void apply(ssobj_file_shared ss, object_set* sel) override {
         sslevels* currlvl = ss->get_stage(stage);
@@ -371,7 +372,8 @@ private:
     int stage, seg, dir;
 
 public:
-    move_segment_action(int s, int sg, int d) : stage(s), seg(sg), dir(d) {}
+    move_segment_action(int s, int sg, int d) noexcept
+            : stage(s), seg(sg), dir(d) {}
     void apply(ssobj_file_shared ss, object_set* sel) override {
         if (dir > 0) {
             ss->get_stage(stage)->move_right(seg);
@@ -401,7 +403,8 @@ private:
 
 public:
     friend class move_stage_action;
-    delete_stage_action(int s, sslevels l) : level(std::move(l)), stage(s) {}
+    delete_stage_action(int s, sslevels l) noexcept
+            : level(std::move(l)), stage(s) {}
     void apply(ssobj_file_shared ss, object_set* sel) override {
         if (stage >= ss->num_stages()) {
             return;
@@ -444,7 +447,7 @@ private:
     int stage, dir;
 
 public:
-    move_stage_action(int s, int d) : stage(s), dir(d) {}
+    move_stage_action(int s, int d) noexcept : stage(s), dir(d) {}
     void apply(ssobj_file_shared ss, object_set* sel) override {
         if (dir > 0) {
             ss->move_right(stage);
