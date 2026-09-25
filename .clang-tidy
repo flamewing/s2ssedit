@@ -47,6 +47,7 @@ Checks: >
   readability-*,
   -readability-magic-numbers,
   -readability-named-parameter,
+  -readability-identifier-length,
   -readability-function-cognitive-complexity
 CheckOptions:
   - key: bugprone-argument-comment.StrictMode
