@@ -351,6 +351,51 @@ set_target_properties(s2ssedit
         OUTPUT_NAME s2ssedit
 )
 
+file(GLOB_RECURSE S2SSEDIT_FORMAT_SOURCES CONFIGURE_DEPENDS
+    "${PROJECT_SOURCE_DIR}/include/*.hh"
+    "${PROJECT_SOURCE_DIR}/src/*.cc"
+)
+
+find_program(CLANG_FORMAT_EXECUTABLE NAMES clang-format REQUIRED)
+add_custom_target(
+    s2ssedit-format
+    COMMAND ${CLANG_FORMAT_EXECUTABLE} --dry-run --Werror -style=file
+            ${S2SSEDIT_FORMAT_SOURCES}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Checking s2ssedit formatting"
+    VERBATIM
+)
+
+if(NOT MSVC)
+    cmake_path(APPEND_STRING PROJECT_SOURCE_DIR "/.clang-tidy"
+               OUTPUT_VARIABLE S2SSEDIT_TIDY_CONFIG)
+    find_program(CLANG_TIDY_EXECUTABLE NAMES clang-tidy REQUIRED)
+    set(S2SSEDIT_TIDY_SOURCES ${S2SSEDIT_SOURCES})
+    list(FILTER S2SSEDIT_TIDY_SOURCES INCLUDE REGEX "\\.cc$")
+    set(S2SSEDIT_TIDY_SOURCE_PATHS)
+    foreach(S2SSEDIT_TIDY_SOURCE IN LISTS S2SSEDIT_TIDY_SOURCES)
+        get_filename_component(
+            S2SSEDIT_TIDY_SOURCE_PATH
+            "${PROJECT_SOURCE_DIR}/${S2SSEDIT_TIDY_SOURCE}"
+            ABSOLUTE
+        )
+        list(APPEND S2SSEDIT_TIDY_SOURCE_PATHS
+             ${S2SSEDIT_TIDY_SOURCE_PATH})
+    endforeach()
+
+    add_custom_target(
+        s2ssedit-tidy
+        COMMAND ${CLANG_TIDY_EXECUTABLE}
+                -use-color -header-filter=^${PROJECT_SOURCE_DIR}/include/
+                -p ${CMAKE_BINARY_DIR} -quiet
+                -config-file ${S2SSEDIT_TIDY_CONFIG}
+                ${S2SSEDIT_TIDY_SOURCE_PATHS}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Checking s2ssedit with clang-tidy"
+        VERBATIM
+    )
+endif()
+
 install(
     TARGETS
         s2ssedit
