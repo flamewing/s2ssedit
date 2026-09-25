@@ -89,19 +89,19 @@ void ssobj_file::read_internal(istream& objfile, istream& layfile) {
     vector<int> end;
     vector<int> off2;
     vector<int> end2;
-    int         term = BigEndian::Read2(objfile);
+    int         term = big_endian::read2(objfile);
     off.push_back(term);
     while (objfile.tellg() < term) {
-        int pos = BigEndian::Read2(objfile);
+        int pos = big_endian::read2(objfile);
         off.push_back(pos);
         end.push_back(pos);
     }
     end.push_back(sz);
 
-    int term2 = BigEndian::Read2(layfile);
+    int term2 = big_endian::read2(layfile);
     off2.push_back(term2);
     while (layfile.tellg() < term2) {
-        size_t pos = BigEndian::Read2(layfile);
+        size_t pos = big_endian::read2(layfile);
         off2.push_back(pos);
         end2.push_back(pos);
     }
@@ -144,8 +144,8 @@ void ssobj_file::write_internal(ostream& objfile, ostream& layfile) const {
     size_t sz  = 2 * stages.size();
     size_t off = sz;
     for (auto const& sd : stages) {
-        BigEndian::Write2(objfile, sz);
-        BigEndian::Write2(layfile, off);
+        big_endian::write2(objfile, sz);
+        big_endian::write2(layfile, off);
         sz += sd.size();
         off += sd.num_segments();
     }

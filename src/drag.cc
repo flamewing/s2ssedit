@@ -614,10 +614,10 @@ void sseditor::on_specialstageobjs_drag_data_get(
 
     stringstream data(ios::in | ios::out | ios::binary);
     for (auto const& elem : insertstack) {
-        Write1(data, elem.get_segment());
-        Write1(data, elem.get_angle());
-        Write1(data, elem.get_pos());
-        Write1(data, uint8_t(elem.get_type()));
+        write1(data, elem.get_segment());
+        write1(data, elem.get_angle());
+        write1(data, elem.get_pos());
+        write1(data, uint8_t(elem.get_type()));
     }
     selection_data.set("SpecialStageObjects", data.str());
 }
@@ -643,10 +643,10 @@ void sseditor::on_specialstageobjs_drag_data_received(
         selection.clear();
 
         while (len > 0) {
-            int  newseg   = Read1(ptr);
-            int  newangle = Read1(ptr);
-            int  newpos   = Read1(ptr);
-            auto newtype  = ObjectTypes(Read1(ptr));
+            int  newseg   = read1(ptr);
+            int  newangle = read1(ptr);
+            int  newpos   = read1(ptr);
+            auto newtype  = ObjectTypes(read1(ptr));
             len -= 4;
             selection.emplace(newseg, newangle, newpos, newtype);
         }

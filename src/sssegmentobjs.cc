@@ -27,12 +27,12 @@ using std::istream;
 using std::ostream;
 
 void sssegments::read(istream& in, istream& lay) {
-    uint8_t geom = Read1(lay);
+    uint8_t geom = read1(lay);
     flip         = (geom & eFlipMask) != 0;
     geometry     = static_cast<SegmentGeometry>(geom & eGeomMask);
 
     while (in.good()) {
-        uint8_t type = Read1(in);
+        uint8_t type = read1(in);
         uint8_t pos;
         uint8_t angle;
         switch (type) {
@@ -47,7 +47,7 @@ void sssegments::read(istream& in, istream& lay) {
             // Not yet:
             // pos = (type & ePositionMask) + get_length();
             type &= eItemMask;
-            angle = Read1(in);
+            angle = read1(in);
             break;
         }
         auto& posobjs = objects[pos];
@@ -69,10 +69,10 @@ void sssegments::write(ostream& out, ostream& lay) const {
         auto const& posobjs = elem.second;
         uint8_t     pos     = elem.first;
         for (auto const& posobj : posobjs) {
-            Write1(out, (posobj.second) | pos);
-            Write1(out, posobj.first);
+            write1(out, (posobj.second) | pos);
+            write1(out, posobj.first);
         }
     }
-    Write1(out, terminator);
-    Write1(lay, get_flip_geom());
+    write1(out, terminator);
+    write1(lay, get_flip_geom());
 }

@@ -17,7 +17,8 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 include(GNUInstallDirs)
 
-find_package(Boost 1.54 REQUIRED)
+cmake_policy(SET CMP0167 NEW)
+find_package(Boost REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
 
@@ -262,7 +263,7 @@ target_link_libraries(dummy-s2ssedit
 )
 set_target_properties(dummy-s2ssedit
     PROPERTIES
-        CXX_STANDARD 14
+        CXX_STANDARD 20
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
         POSITION_INDEPENDENT_CODE ON
@@ -333,7 +334,7 @@ target_compile_definitions(s2ssedit
 )
 set_target_properties(s2ssedit
     PROPERTIES
-        CXX_STANDARD 14
+        CXX_STANDARD 20
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
         POSITION_INDEPENDENT_CODE ON
